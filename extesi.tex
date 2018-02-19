@@ -157,30 +157,158 @@ Suricata. I dettagli di questa scelta saranno chiari pi\`u avanti quando saranno
 introdotte le principali caratteristiche di Suricata.
 
 \subsection{Suricata, una breve introduzione}
-Suricata \`e un IDS che fa uso di pattern matching per il riconoscimento di threat
-capace di effettuare un'analisi molto approfondita. Il funzionamento del pattern matching pu\`o
-essere riassunto dalla figura 1.1.
+Suricata \`e un IDS che fa uso di pattern matching per il riconoscimento dei threat
+capace di effettuare un'analisi dei pacchetti molto approfondita. Il funzionamento del pattern matching pu\`o
+essere riassunto dalla figura 1.1. \cite{K2}
 \begin{figure}
   \begin{center}                          %centra nel mezzo della pagina
     \includegraphics[width=90mm]{images/suricata-structure.png}
-    \caption{Funzionamento del patter matching}
+    \caption{Funzionamento del pattern matching}
     \label{}
   \end{center}
 \end{figure}
-Mentre una tipica regola per il patter matching \`e fatta in questo modo:
+Ogni pacchetto viene quindi decodificato e poi analizzato parallelamente per riscontrare
+similitudini con pi\`u pattern.
+E' stato dimostrato infatti (trovare il paper) che Suricata, data la sua natura multi threaded,
+\`e di gran lunga pi\`u veloce di Snort (in ambienti multi-core), il quale invece \`e single thread.
+Mentre una tipica regola per il suddetto patter matching \`e fatta in questo modo:
 \begin{verbatim}
   rule header    alert tcp any any -> 192.168.1.0/24 111
 \end{verbatim}
+La praticit\`a dell'utilizzare questa sintassi sta nel fatto che essa \`e quasi del
+tutto identica a quella di Snort. Per cui l'utilizzo dell'uno o dell'altro software,
+almeno nel caso di studio di questa tesi, non \`e determinante.
+E` possibile definire regole personalizzate, cos\`i come scaricarne di gi\`a confezionate
+molto accurate.
 
+Infine una delle caratteristiche fondamentali di Suricata sta nel fatto che esso pu\`o funzionare in
+due modi distinti:
+\begin{itemize}
+  \item In modalit\`a online: viene monitorata una interfaccia specifica in modalita` promisqua,
+  ossia tutti i pacchetti passanti per quella determinata interfaccia vengono decodificati e analizzati.
+  \item In modalita offline: viene monitorato un file pcap contenente del traffico
+  "registrato" in precedenza e che costituisce un punto di riferimento per l'analisi
+  prestazionale delle regole o dell'istanza di Suricata da analizzare.
+\end{itemize}
 
+\section{sFlow}
 
-E' stato dimostrato infatti (trovare il paper) che data la sua natura multi threaded
-Suricata \`e di gran lunga pi\`u veloce di Snort, il quale invece \`e single thread.
-La preferenza dell'uno rispetto all'altro non \`e tuttavia fondamentale dal punto di
-vista dei risultati generati dai nostri test. Infatti Suricata utilizza lo stesso rule-set di
-Snort.
+sFlow \cite{K1} \`e una tecnologia per monitorare il traffico in reti contenenti
+switches e routers che utilizza il capionamento di pacchetti. In particolare, esso
+definisce i meccanismi di campionamento implementati
+in un \emph{sFlow Agent} e il formato dei dati campionati mandati da tale Agent.
 
+Il monitoraggio si compone di due elementi fondamentali:
+\begin{itemize}
+  \item {\bf sFlow Agent}: ovvero un qualsiasi apparato in grado di campionare
+  i pacchetti secondo le specifiche di sFlow e di inviarli ad un {\it Collector}.
+  l'Agent \`e un componente molto versatile ed estremamente performante dell'architettura
+  sFlow che pu\`o essere impersonato anche da uno switch o da un router, senza degradarne
+  le prestazioni.
+  Il campionamento e la raccolta dei dati del nodo viene fatta in hardware e non presenta
+  overhead nemmeno su reti Gigabit.
+  \item {\bf Collector}: ovvero una macchina in qualsiasi parte del mondo in grado di raccogliere
+  i dati sFlow e di elaborarli.
+\end{itemize}
 
+L'architettura e le modalit\`a di campionamento usati in sFlow offrono numerosi vantaggi
+tra cui quello di avere una visione di tutta la rete ({\it network-wide}) in tempo
+reale. Infatti, i pacchetti campionati vengono mandati al collector non appena arrivano
+all'agent. Inoltre l'architettura \`e estremamente scalabile e permette di posizionare agent in diversi punti della rete,
+o anche in reti diverse.
+
+\newpage
+
+\subsection{Campionamento}
+
+Il campionamento \`e la parte fondamentale del protocollo sFlow, ed \`e anche
+il motivo per cui esso si distacca da altre tecnologie simili come NetFlow.
+
+Avvengono due tipi di campionamento:
+\begin{itemize}
+  \item un campionamento: in cui viene salvato 1 pacchetto ogni N, con N configurabile
+  \item un troncamento: in cui il pacchetto designato per il salvataggio viene troncato,
+  solitamente ad una dimensione di 128 Byte (tuttavia configurabile)
+\end{itemize}
+
+Questi due meccanismi insieme permettono di avere una visione della rete sufficientemente
+accurata o comunque di una accuratezza configurabile.
+
+\subsubsection{sFlow vs Netflow}
+
+Un'altra tecnologia molto simile ad sFlow \`e NetFlow, sviluppato da Cisco.
+Essi si differenziano per un motivo importantissimo e che non permette di usare efficacemente
+NetFlow per monitorare la rete a fianco di un IDS; ovvero che Netflow fornisce solo
+dati aggregati e non fornisce un troncamento parametrizzabile. Esso infatti esporta solo il Layer 3 del
+pacchetto, questo fa perdere tutte le informazioni che, nel nostro particolare campo di applicazione,
+sarebbero state utili, come l'header dei livelli superiori.
+
+Qui \`e possibile vedere un esempio di un output del comando {\it nfdump}:
+\begin{figure}[h!]
+  \begin{center}                          %centra nel mezzo della pagina
+    \includegraphics[width=\linewidth]{images/netflow.png}
+    \caption{}
+    \label{}
+  \end{center}
+\end{figure}
+
+\newpage
+
+\section{Packet sampling e IDS}
+
+La sicurezza delle reti, specie di quelle molto estese, \`e un problema tutt'oggi
+presente e di un importanza vitale in qualsiasi azienda che operi nel settore ICT (Information and Communications Technologies).
+Le minacce possono avvenire in qualunque momento \cite{K3} ed essere generate sia dall'interno
+che dall'esterno. Riuscire ad identificare queste minacce in tempo \`e il primo passo verso la soluzione di
+questo difficile problema. Per fare ci\`o \`e necessario avere un'ampia e continua
+sorveglianza della rete.
+Storicamente la sorveglianza di una grande rete era (ed \`e tuttora) affidata a sonde ({\it probes}),
+posizionate in punti strategici della rete. Questo \`e stato sufficientemente accurato
+fino ad ora, quando si sta verificando un aumento dell'installazione di switched point to point network.
+Quindi implementare il monitoraggio gi\`a dall'interno di uno switch o di router sta
+diventando sempre pi\`u una necessit\`a. Tuttavia le esigenze di mercato tendono a preferire
+l'ampiezza di banda sulla sicurezza, per cui la funzione di monitoraggio deve essere relegata come
+funzione secondaria all'interno di questi apparati di rete. E` necessario quindi che questa funzione
+operi con il minimo overhead possibile, al fine di non degradare le prestazioni dell'apparato.
+E` qui che entra in gioco la tecnologia sFlow, essa permette di delegare la parte di analisi del traffico
+ad un altro componente della rete ({\it il collector}), lasciando allo switch o al router le risorse per
+effettuare le loro decisioni di smistamento dei pacchetti.
+
+Vediamo allora come sflow garantisce l'efficacia del sistema di monitoraggio richiesto:
+\begin{itemize}
+  \item Sorveglianza continua network-wide: sFlow pu\`o essere configurato su ogni apparato di rete
+  \item I dati devono essere sempre disponibili per rispondere efficacemente: sFlow manda immediatamente
+  i pacchetti campionati al Collector con UDP
+  \item I dati devono essere sufficientemente dettagliati per caratterizzare l'attacco: sFlow permette di
+  esportare pi\`u di 128 Byte (comprendendo quindi ad esempio anche header di livello 7)
+  \item Il sistema di monitoraggio non deve esporre gli apparato ad attacchi: sFlow impatta sulle
+  prestazioni degli apparati poich\`e viene effettuato in hardware inoltre il consumo di banda \`e limitato
+  poich\`e i datagram sFlow sono compressi
+\end{itemize}
+
+\newpage
+
+\section{Stack ELK}
+
+Lo stack ELK \`e uno stack formato dai tre programmi (Elasticsearch, Logstash e Kibana)
+i quali uniti insieme forniscono una metodologia di centralizzazione, esplorazione
+e visualizzazione dei log. Esso si compone di tre componenti fondamentali:
+\begin{itemize}
+  \item {\bf Logstash} : il quale si occupa di raccogliere i log, manipolarli cos\`i da renderli
+  consumabili da elasticsearch
+  \item {\bf Elasticsearch} : un database No-SQL particolarmente ottimizzato per la
+  ricerca
+  \item {\bf Kibana} : un visualizzatore dei dati contenuti in Elasticsearch che permette
+  di effettuare ricerche e aggregare i dati in modo da fornirne una visualizzazione utile
+  dei dati di log raccolti
+\end{itemize}
+
+Lo stack ELK \`e ad oggi lo standard {\it de facto} per l'esplorazione dei log,
+esso si va ad affiancare a tutti i programmi critici all'interno di una infrastruttura
+e risulta particolarmente utile nell'esplorazione dei log degli IDS. Esso permette infatti
+acquisire in pochissimi secondi conoscenza su cosa accade nella rete e su che tipo di attacchi
+sono in corso. I dati vengono fruiti all'operatore in maniera veloce e comprensibile tramite
+dashboard, fornendo una fotografia estremamente informativa dello stato attuale
 
 \newpage
 
@@ -277,9 +405,12 @@ alto.
 \addcontentsline{toc}{chapter}{Bibliografia}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%provare anche questo comando:
 %%%%%%%%%%%\addcontentsline{toc}{chapter}{\numberline{}{Bibliografia}}
-\bibitem{K1} Primo oggetto bibliografia.
-\bibitem{K2} Secondo oggetto bibliografia.
-\bibitem{K3} Terzo oggetto bibliografia.
+\bibitem{K1} RFC 3176 InMon Corporation's sFlow for monitoring traffic in Switched
+and Routed Networks
+\bibitem{K2} A survery on Network Security Monitoring System,
+Ibrahim Ghafir, Vaclav Prenosil, Jakub Svoboda, Mohammad Hammoudeh,
+ 2016 4th International Conference on Future Internet of Things and Cloud Workshops
+\bibitem{K3} Traffic Monitoring with Packet-Based Sampling for Defense against Security Threats, Joseph Reves ans Sonia Panchen
 \bibitem{K4} Quarto oggetto bibliografia.
 \end{thebibliography}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%non numera l'ultima pagina sinistra
