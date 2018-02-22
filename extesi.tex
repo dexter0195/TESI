@@ -118,19 +118,64 @@ In questo capitolo si va ad illustrare lo stato dell'Arte delle tecnologie utili
 Si illustreranno le principali qualit\`a degli Intrusion Detection Systems e le caratteristiche
 principali che hanno portato durante i test alla scelta di un software rispetto che un altro.
 Si passer\`a poi a presentare sFlow, illustrandone i benefici e le principali differenze
-con NetFlow e di come esso viene attualmente utilizzato per affiancare un IDS.
+con NetFlow e di come esso viene attualmente utilizzato per affiancare un IDS in reti
+molto estese e complesse.
 Infine si dar\`a una breve presentazione dello stack ELK, (Elasticsearch-Logstash-Kibana)
 e di come esso sia utilizzato nell'ambito della Network Security.
-\section{Intrusion Detection System}                 %crea la sezione
-Il panorama degli Intrusion Detection System (IDS) \`e al giorno d'oggi in continua evoluzione.
-Tuttavia \`e possibile classificarli secondo due criteri principali che ne determinano il funzionamento:
+\section{Intrusion Detection System}
+Un Intrusion Detection System (IDS) \cite{K4} \`e un dispositivo o un' applicazione software
+che monitora una rete o un sistema per rilevare eventuali attivit\`a dannose o violazioni
+delle policy. Qualsiasi attivit\`a o violazione rilevata viene in genere segnalata
+ad un amministratore o raccolta a livello centrale utilizzando un
+Security Information and Event Management (SIEM).
+Un SIEM combina output provenienti da pi\`u sorgenti e utilizza tecniche di filtraggio
+degli allarmi per distinguere le attivit\`a dannose dai falsi allarmi.
+
+Esiste un' ampia gamma di IDS, che varia dal software antivirus fino ai sistemi gerarchici
+che controllano il traffico di un' intera backbone. La classificazione pi\`u comune
+\`e tra:
 \begin{itemize}
-  \item Sistemi signature based
-  \item Sistemi basati su anomaly detection
+  \item {\bf Network-based Intrusion Detection Firmware (NIDS)}: ad esempio un sistema
+  che monitora il traffico di rete passante attraverso alcuni punti strategici di una
+  rete. Esempi famosi sono: Suricata \cite{K6} , Snort \cite{K7} e BRO \cite{K8} .
+  \item {\bf Host-based Intrusion Detection (HIDS)} : ad esempio un software che monitora
+  alcuni file importanti del sistema operativo su cui \`e installato. Un esempio famoso
+  di HIDS \`e OSSec \cite{K5}
 \end{itemize}
 
-Un IDS signature based analizza i pacchetti passanti su una rete utilizzando un set di regole
-appositamente scritte per rilevare un determinato tipo di attacco. Questo ci mette al riparo
+Il panorama degli Intrusion Detection System (IDS) \`e al giorno d'oggi in continua evoluzione.
+Tuttavia \`e possibile operare una seconda e importante classificazione in base a due criteri
+principali che ne determinano il funzionamento:
+\begin{itemize}
+  \item Sistemi {\it signature-based}
+  \item Sistemi basati su {\it anomaly detection}
+\end{itemize}
+
+Un IDS {\it signature-based } analizza i pacchetti passanti su una rete utilizzando il concetto di {\it signature}:
+Una signature \`e un pattern che corrisponde ad un tipo di attacco noto. \cite{K7}
+Esempi di signature possono essere:
+\begin{itemize}
+  \item un tentativo di connessione a telnet con username "root", che corrisponde
+  ad una violazione delle policy di sicurezza
+  \item un email con oggetto "Immagini gratis!" e un allegato con nome "freepics.exe",
+  che sono caratteristici di un attacco nostro
+  \item tentativi ripetuti nel tempo di connessione ssh ad intervalli sospetti,
+  che identificano un possibile attacco bruteforce su ssh.
+\end{itemize}
+
+Il rilevamento signature-based \`e molto efficace nel rilevare minacce note,
+ma in gran parte inefficace nel rilevare minacce precedentemente sconosciute,
+minacce mascherate dall'uso di tecniche di evasione e molte varianti di minacce note.
+ Per esempio, se un aggressore ha modificato il malware nell' esempio precedente per
+ usare un nome file di "freepics2.exe", una firma che cercava "freepics.exe" non lo
+ corrisponderebbe.
+Il rilevamento basato sulla firma \`e il metodo di rilevamento pi\`u semplice in
+quanto confronta il campione corrente, come un pacchetto o una voce di registro,
+con un elenco di firme utilizzando operazioni di confronto tra stringhe. 
+
+
+
+Questo ci mette al riparo
 da una grandissima quantit\`a di attacchi conosciuti e si \`e rilevato nel corso degli anni
 un sistema efficiente e ampiamente utilizzato.
 
@@ -143,8 +188,10 @@ ambito dell'informatica gli IDS signature based rappresentano tuttora un'importa
 fetta (se non la maggioranza) degli IDS in uso nei pi\`u importanti data center del mondo
 ed \`e per questo che vale la pena studiarli.
 
+In questo elaborato ci si focalizzer\`a sugli IDS signature based e se ne analizzeranno
+le loro prestazioni combinate ad altre tecnologie che verranno introdotte in seguito.
 
-Tra i maggiori esponenti degli IDS attualmente utilizzati abbiamo:
+Come anticipato sopra, tra i maggiori esponenti degli IDS attualmente utilizzati abbiamo:
 \begin{itemize}
   \item Snort: Un IDS sviluppato a partire dagli anni '90, acquisito da Cisco nel 2013 e
   che \`e tuttora il pi\`u utilizzato in ambito enterprise.
@@ -312,56 +359,6 @@ dashboard, fornendo una fotografia estremamente informativa dello stato attuale
 
 \newpage
 
-\section{Seconda Sezione}
-Ora vediamo un elenco puntato:
-\begin{itemize}                         %crea un elenco puntato
-\item primo oggetto
-\item secondo oggetto
-\end{itemize}
-
-\section{Altra Sezione}
-Vediamo un elenco descrittivo:
-\begin{description}                     %crea un elenco descrittivo
-  \item[OGGETTO1] prima descrizione;
-  \item[OGGETTO2] seconda descrizione;
-  \item[OGGETTO3] terza descrizione.
-\end{description}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%crea una sottosezione
-\subsection{Altra SottoSezione}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%crea una sottosottosezione
-\subsubsection{SottoSottoSezione}Questa sottosottosezione non viene
-numerata, ma \`e solo scritta in grassetto.
-\section{Altra Sezione}                 %crea una sottosezione
-Vediamo la creazione di una tabella; la tabella \ref{tab:uno}
-(richiamo il nome della tabella utilizzando la label che ho messo sotto):
-la facciamo di tre righe e tre colonne, la prima colonna
-``incolonnata'' a destra (r) e le altre centrate (c):\\
-\begin{table}[h]                        %ambiente tabella
-                                        %(serve per avere la legenda)
-\begin{center}                          %centra nella pagina la tabella
-\begin{tabular}{r|c|c}                  %tre colonne con righe verticali
-                                        %   prodotte con |
-\hline \hline                           %inserisce due righe orizzontali
-$(1,1)$ & $(1,2)$ & $(1,3)$\\           %& separa le colonne e con
-\hline                                  %inserisce una riga orizzontale
-$(2,1)$ & $(2,2)$ & $(2,3)$\\           %  \\ va a capo
-\hline                                  %inserisce una riga orizzontale
-$(3,1)$ & $(3,2)$ & $(3,3)$\\
-\hline \hline                           %inserisce due righe orizzontali
-\end{tabular}
-\caption[legenda elenco tabelle]{legenda tabella}\label{tab:uno}
-\end{center}
-\end{table}
-\section{Altra Sezione}\label{sec:prova}%posso mettere le label anche
-                                        %   alle section
-\subsection{Listati dei programmi}
-\subsubsection{Primo Listato}
-\begin{verbatim}
-        In questo ambiente     posso scrivere      come voglio,
-lasciare gli spazi che voglio e non % commentare quando voglio
-e ci sar� scritto tutto.
-Quando lo uso � meglio che disattivi il Wrap del WinEdt
-\end{verbatim}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%non numera l'ultima pagina sinistra
 \clearpage{\pagestyle{empty}\cleardoublepage}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%per fare le conclusioni
@@ -411,7 +408,11 @@ and Routed Networks
 Ibrahim Ghafir, Vaclav Prenosil, Jakub Svoboda, Mohammad Hammoudeh,
  2016 4th International Conference on Future Internet of Things and Cloud Workshops
 \bibitem{K3} Traffic Monitoring with Packet-Based Sampling for Defense against Security Threats, Joseph Reves ans Sonia Panchen
-\bibitem{K4} Quarto oggetto bibliografia.
+\bibitem{K4} "NIST – Guide to Intrusion Detection and Prevention Systems (IDPS)" (PDF). February 2007.
+\bibitem{K5} https://ossec.github.io/
+\bibitem{K6} https://github.com/OISF/suricata
+\bibitem{K7} https://www.snort.org/
+\bibitem{K8} https://www.bro.org
 \end{thebibliography}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%non numera l'ultima pagina sinistra
 \clearpage{\pagestyle{empty}\cleardoublepage}
