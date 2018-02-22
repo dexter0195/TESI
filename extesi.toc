@@ -4,12 +4,20 @@
 \contentsline {chapter}{\numberline {1}Lo stato dell'Arte}{1}
 \contentsline {section}{\numberline {1.1}Intrusion Detection System}{1}
 \contentsline {subsection}{\numberline {1.1.1}Suricata, una breve introduzione}{4}
-\contentsline {section}{\numberline {1.2}sFlow}{5}
-\contentsline {subsection}{\numberline {1.2.1}Campionamento}{7}
-\contentsline {subsubsection}{sFlow vs Netflow}{7}
-\contentsline {section}{\numberline {1.3}Packet sampling e IDS}{8}
-\contentsline {section}{\numberline {1.4}Stack ELK}{10}
-\contentsline {chapter}{Conclusioni}{11}
-\contentsline {chapter}{\numberline {A}Prima Appendice}{13}
-\contentsline {chapter}{\numberline {B}Seconda Appendice}{15}
-\contentsline {chapter}{Bibliografia}{17}
+\contentsline {subsubsection}{Deep Packet Inspection}{4}
+\contentsline {subsubsection}{Prestazioni}{5}
+\contentsline {subsubsection}{Pattern Matching}{5}
+\contentsline {subsubsection}{Altre caratteristiche}{6}
+\contentsline {section}{\numberline {1.2}sFlow}{8}
+\contentsline {subsection}{\numberline {1.2.1}Il campionamento}{9}
+\contentsline {subsubsection}{Sflow Datagram}{10}
+\contentsline {subsection}{\numberline {1.2.2}Tools per l'utilizzo di sFlow}{11}
+\contentsline {subsubsection}{hostsflowd}{11}
+\contentsline {subsubsection}{sflowtool}{11}
+\contentsline {subsubsection}{sFlow vs Netflow}{12}
+\contentsline {section}{\numberline {1.3}Packet sampling e IDS}{13}
+\contentsline {section}{\numberline {1.4}Stack ELK}{15}
+\contentsline {chapter}{Conclusioni}{17}
+\contentsline {chapter}{\numberline {A}Prima Appendice}{19}
+\contentsline {chapter}{\numberline {B}Seconda Appendice}{21}
+\contentsline {chapter}{Bibliografia}{23}

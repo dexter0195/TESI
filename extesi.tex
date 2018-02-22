@@ -147,22 +147,21 @@ Il panorama degli Intrusion Detection System (IDS) \`e al giorno d'oggi in conti
 Tuttavia \`e possibile operare una seconda e importante classificazione in base a due criteri
 principali che ne determinano il funzionamento:
 \begin{itemize}
-  \item Sistemi {\it signature-based}
-  \item Sistemi basati su {\it anomaly detection}
+  \item Sistemi {\it signature-based detection}
+  \item Sistemi {\it anomaly-based detection}
 \end{itemize}
 
 Un IDS {\it signature-based } analizza i pacchetti passanti su una rete utilizzando il concetto di {\it signature}:
 Una signature \`e un pattern che corrisponde ad un tipo di attacco noto. \cite{K7}
 Esempi di signature possono essere:
 \begin{itemize}
-  \item un tentativo di connessione a telnet con username "root", che corrisponde
+  \item un tentativo di connessione a TELNET con username "root", che corrisponde
   ad una violazione delle policy di sicurezza
   \item un email con oggetto "Immagini gratis!" e un allegato con nome "freepics.exe",
   che sono caratteristici di un attacco nostro
-  \item tentativi ripetuti nel tempo di connessione ssh ad intervalli sospetti,
-  che identificano un possibile attacco bruteforce su ssh.
+  \item tentativi ripetuti nel tempo di connessione SSH ad intervalli sospetti,
+  che identificano un possibile attacco bruteforce su SSH.
 \end{itemize}
-
 Il rilevamento signature-based \`e molto efficace nel rilevare minacce note,
 ma in gran parte inefficace nel rilevare minacce precedentemente sconosciute,
 minacce mascherate dall'uso di tecniche di evasione e molte varianti di minacce note.
@@ -171,17 +170,23 @@ minacce mascherate dall'uso di tecniche di evasione e molte varianti di minacce 
  corrisponderebbe.
 Il rilevamento basato sulla firma \`e il metodo di rilevamento pi\`u semplice in
 quanto confronta il campione corrente, come un pacchetto o una voce di registro,
-con un elenco di firme utilizzando operazioni di confronto tra stringhe. 
+con un elenco di firme utilizzando operazioni di confronto tra stringhe.
 
-
-
-Questo ci mette al riparo
-da una grandissima quantit\`a di attacchi conosciuti e si \`e rilevato nel corso degli anni
-un sistema efficiente e ampiamente utilizzato.
-
-I secondi invece utilizzano tecniche di intelligenza artificiale per determinare se
-un comportamento sia lecito oppure no basandosi su quello che \`e stato definito
-in fase di installazione come uno "stato normale".
+Un IDS che usa {\it anomaly-based} detection, utilizza il concetto di anomalia:
+ovvero una deviazione del comportamento della rete osservato al momento da quello
+che \`e considerato normale in base a quanto osservato in precedenza.
+Un IDS che utilizza un rilevamento anomaly-based ha profili che rappresentano
+il comportamento normale di utenti, host, connessioni di rete o applicazioni.
+I profili sono sviluppati monitorando le caratteristiche dell'attivit\`a tipica
+per un periodo di tempo.  Ad esempio, un profilo di una rete potrebbe indicare
+che l' attivit\`a Web comprende in media il 13\% della larghezza di banda della
+rete al confine Internet durante le normali ore di lavoro giornaliere.
+ L' IDS utilizza quindi metodi statistici per confrontare le caratteristiche dell'attivit\`a
+  corrente con le soglie relative al profilo, ad esempio rilevando quando l'attivit\`a
+  Web comprende una larghezza di banda significativamente maggiore del previsto
+  e avvisando un amministratore dell'anomalia.
+L' IDS inoltre potrebbe utilizzare tecniche di intelligenza artificiale per determinare
+se un comportamento della rete sia da ritenersi normale o anomalo.
 
 Sebbene nell'ultimo periodo l'intelligenza artificiale stia facendo la sua comparsa in ogni
 ambito dell'informatica gli IDS signature based rappresentano tuttora un'importante
@@ -204,8 +209,53 @@ Suricata. I dettagli di questa scelta saranno chiari pi\`u avanti quando saranno
 introdotte le principali caratteristiche di Suricata.
 
 \subsection{Suricata, una breve introduzione}
-Suricata \`e un IDS che fa uso di pattern matching per il riconoscimento dei threat
-capace di effettuare un'analisi dei pacchetti molto approfondita. Il funzionamento del pattern matching pu\`o
+
+Suricata \`e un IDS Open Source sviluppato da OISF che fa uso di pattern matching per
+il riconoscimento di {\it threat}, violazioni della policy e comportamenti malevoli.
+Esso \`e inoltre capace di rilevare numerose anomalie nel protocollo all'interno dei
+pacchetti ispezionati. Le anomalie rilevabili, tuttavia, sono diverse da
+quelle degli IDS anomaly-based citati sopra. Le prime infatti sono
+scostamenti dall'utilizzo lecito di protocolli ben definiti e standardizzati :
+{\it Ad esempio: richieste DNS che non sono destinate alla porta 53, oppure
+richieste HTTP con un header malformato}. Il secondo tipo di anomalia invece \`e
+relativo ad un deviazione dal comportamento standard della specifica rete su cui l'IDS
+\`e stato tarato, ed \`e quindi un concetto di anomalia molto pi\`u lasco.
+
+\subsubsection{Deep Packet Inspection}
+
+La rilevazione di queste anomalie in Suricata va sotto il nome di {\it Deep
+Packet Inspection} o {\it Stateful Protocol Analysis}, ovvero il processo di confronto
+di determinati comportamenti accettati dal signolo protocollo {\it }(HTTP, FTP, SSH, ecc...)}
+con il comportamento osservato al momento del campionamento.
+Se un IDS usa questa tecnica vuol dire che esso \`e in grado di comprendere e monitorare
+lo stato della rete, del trasporto e dei protocolli applicativi che possiedono una nozione di stato.
+Ad esempio, quando un utente avvia una sessione del File Transfer Protocol (FTP),
+la sessione si trova inizialmente nello stato non autenticato.  Gli utenti non autenticati
+devono eseguire solo alcuni comandi in questo stato, come la visualizzazione delle informazioni
+della guida in linea o la fornitura di nomi utente e password.  Inoltre una parte importante dello
+stato di comprensione \`e l' accoppiamento delle richieste con le risposte, quindi
+quando si verifica un tentativo di autenticazione FTP, l' IDS pu\`o determinare se il tentativo
+\`e riuscito trovando il codice di stato nella risposta corrispondente.
+Una volta che l' utente si \`e autenticato con successo, la sessione si trova nello
+stato autenticato e agli utenti \`e permesso eseguire una qualsiasi delle decine
+di comandi disponibili.
+Mentre eseguire la maggior parte di questi comandi mentre sono in stato non autenticato
+sarebbe considerato sospettoso.
+
+\subsubsection{Prestazioni}
+
+Una singola istanza di Suricata \`e capace di ispezionare traffico proveniente
+da una rete multi-gigabit, questo grazie al forte paradigma multi thread utilizzato
+nel core del programma. Inoltre esso dispone di un supporto nativo per l'accelerazione hardware,
+l'analisi di pacchetti con GPUs e supporta nativamente PF\_RING \cite{K9} e PF\_PACKET, due tipologie
+di socket altamente performanti.
+
+
+\subsubsection{Pattern Matching}
+
+Il Pattern Matching \`e il processo di confronto del pacchetto osservato sulla rete
+\`e una signature salvata all'interno di quelle che vengono definite {\it rules}.
+Il suo funzionamento pu\`o
 essere riassunto dalla figura 1.1. \cite{K2}
 \begin{figure}
   \begin{center}                          %centra nel mezzo della pagina
@@ -214,34 +264,57 @@ essere riassunto dalla figura 1.1. \cite{K2}
     \label{}
   \end{center}
 \end{figure}
-Ogni pacchetto viene quindi decodificato e poi analizzato parallelamente per riscontrare
-similitudini con pi\`u pattern.
-E' stato dimostrato infatti (trovare il paper) che Suricata, data la sua natura multi threaded,
-\`e di gran lunga pi\`u veloce di Snort (in ambienti multi-core), il quale invece \`e single thread.
-Mentre una tipica regola per il suddetto patter matching \`e fatta in questo modo:
+Ogni pacchetto passante sull'interfaccia di rete monitorata dall'IDS viene quindi
+decodificato e poi analizzato parallelamente per riscontrare similitudini con pi\`u pattern (rules).
+Una tipica regola per il suddetto patter matching \`e nella forma seguente:
 \begin{verbatim}
-  rule header    alert tcp any any -> 192.168.1.0/24 111
+  alert tcp 1.1.1.1 8909 -> 192.168.1.0/24 80
 \end{verbatim}
-La praticit\`a dell'utilizzare questa sintassi sta nel fatto che essa \`e quasi del
-tutto identica a quella di Snort. Per cui l'utilizzo dell'uno o dell'altro software,
-almeno nel caso di studio di questa tesi, non \`e determinante.
-E` possibile definire regole personalizzate, cos\`i come scaricarne di gi\`a confezionate
-molto accurate.
+Viene quindi indicata l'azione da intraprendere (in questo caso 'alert'), il protocollo
+, indirizzo/i di sorgente, porta/e sorgente, indirizzo/i di destinazione e porta/e di destinazione
+del pacchetto con cui fare match.
+Queste regole possono essere personalizzate oppure \`e possibile scaricarne di gi\`a confezionate
+da molteplici siti che offrono questo servizio.
+La praticit\`a dell'utilizzare questa specifica sintassi sta nel fatto che essa \`e quasi del
+tutto identica a quella di Snort. Per cui le regole per l'uno o per l'altro software sono
+intercambiabili.
+
+\subsubsection{Altre caratteristiche}
 
 Infine una delle caratteristiche fondamentali di Suricata sta nel fatto che esso pu\`o funzionare in
 due modi distinti:
 \begin{itemize}
-  \item In modalit\`a online: viene monitorata una interfaccia specifica in modalita` promisqua,
+  \item In modalit\`a online: viene monitorata una interfaccia specifica in modalit\`a {\it promisqua},
   ossia tutti i pacchetti passanti per quella determinata interfaccia vengono decodificati e analizzati.
   \item In modalita offline: viene monitorato un file pcap contenente del traffico
   "registrato" in precedenza e che costituisce un punto di riferimento per l'analisi
   prestazionale delle regole o dell'istanza di Suricata da analizzare.
 \end{itemize}
 
+(FORSE QUESTA PARTE PUOI METTERLA NEL CONTESTO DI SPERIMENTAZIONE)
+Concludiamo quindi elencando i motivi che hanno portato durante le fasi di sperimentazione
+alla scelta di Suricata rispetto ad altri software:
+\begin{itemize}
+  \item Velocit\`a (Multi-threading)
+  \item Capacit\`a di analizzare pcap in modalit\`a offline
+  \item Open Source
+  \item Possibili\`a di analizzare facilmente i log grazie al formato in json
+  \item Il fatto che si tratti di un software "giovane", pensato fin da
+  subito per rispondere alle attuali esigenze di monitoraggio
+\end{itemize}
+
+\newpage
+
+
 \section{sFlow}
 
-sFlow \cite{K1} \`e una tecnologia per monitorare il traffico in reti contenenti
-switches e routers che utilizza il capionamento di pacchetti. In particolare, esso
+L' esplosione del traffico internet sta portando a larghezze di banda superiori
+e una maggiore necessit\`a di reti ad alta velocit\`a. Per analizzare e ottimizzare
+le reti \`e necessario un sistema di monitoraggio efficiente. \cite{S1}
+
+sFlow \cite{K1} \`e una tecnologia sviluppata dalla InMon Corporation per monitorare il traffico all'interno
+di grandi reti contenenti
+switches e routers che utilizza il campionamento di pacchetti. In particolare, esso
 definisce i meccanismi di campionamento implementati
 in un \emph{sFlow Agent} e il formato dei dati campionati mandati da tale Agent.
 
@@ -254,32 +327,116 @@ Il monitoraggio si compone di due elementi fondamentali:
   le prestazioni.
   Il campionamento e la raccolta dei dati del nodo viene fatta in hardware e non presenta
   overhead nemmeno su reti Gigabit.
-  \item {\bf Collector}: ovvero una macchina in qualsiasi parte del mondo in grado di raccogliere
+  \item {\bf sFlow Collector}: ovvero una macchina in qualsiasi parte del mondo in grado di raccogliere
   i dati sFlow e di elaborarli.
 \end{itemize}
 
 L'architettura e le modalit\`a di campionamento usati in sFlow offrono numerosi vantaggi
 tra cui quello di avere una visione di tutta la rete ({\it network-wide}) in tempo
-reale. Infatti, i pacchetti campionati vengono mandati al collector non appena arrivano
+reale. Infatti, i pacchetti campionati vengono mandati al collector non appena essi arrivano
 all'agent. Inoltre l'architettura \`e estremamente scalabile e permette di posizionare agent in diversi punti della rete,
 o anche in reti diverse.
 
 \newpage
 
-\subsection{Campionamento}
+\subsection{Il campionamento}
 
 Il campionamento \`e la parte fondamentale del protocollo sFlow, ed \`e anche
 il motivo per cui esso si distacca da altre tecnologie simili come NetFlow.
 
-Avvengono due tipi di campionamento:
+sFlow usa due modalit\`a operative:
 \begin{itemize}
-  \item un campionamento: in cui viene salvato 1 pacchetto ogni N, con N configurabile
-  \item un troncamento: in cui il pacchetto designato per il salvataggio viene troncato,
-  solitamente ad una dimensione di 128 Byte (tuttavia configurabile)
+  \item {\bf Counter Sampling} : un campione dei contatori delle interfacce dell'apparato, che viene
+  schedulato internamente dall' Agent su base temporale ({\it polling}).
+  \item {\bf Packet Based Sampling}: il campionamento di uno ogni N pacchetti
+  sulla base di un opportuno parametro N ({\it sampling rate}). Questo tipo di campionamento non
+  permette risultati accurati al 100\% ma quantomeno permette di avere risultati
+  di un'accuratezza accettabile e comunque parametrizzabile
 \end{itemize}
 
-Questi due meccanismi insieme permettono di avere una visione della rete sufficientemente
-accurata o comunque di una accuratezza configurabile.
+Il pacchetto campionato viene esportato verso l'sFlow Collector tramite UDP \cite{B1}.
+La mancanza di affidabilità nel meccanismo di trasporto UDP non influisce in modo
+significativo sulla precisione delle misurazioni ottenute dall' Agent sFlow. Se
+i Counter Sampling vengono persi, al superamento dell' intervallo di polling
+successivo verranno inviati nuovi valori.  La perdita dei Packet Flow Sample si riflette in
+una leggera riduzione della frequenza di campionamento effettiva.  L' uso di UDP
+inoltre riduce la quantit\`a di memoria necessaria per il buffer dei dati. UDP \`u pi\`u
+robusto di un meccanismo di trasporto  affidabile (es. TCP) perch\`e sotto sovraccarico
+l' unico effetto sulle prestazioni complessive del sistema \`e un leggero aumento
+del ritardo di trasmissione e un maggior numero di pacchetti persi, nessuno dei
+quali ha un effetto significativo su un sistema di monitoraggio.
+
+\newpage
+
+\subsubsection{Sflow Datagram}
+
+\begin{figure}[t!]
+  \begin{center}                          %centra nel mezzo della pagina
+    \includegraphics[width=90mm]{images/sflow-datagram.png}
+    \caption{Datagram sFlow}
+    \label{Datagram sFlow}
+  \end{center}
+\end{figure}
+
+Il payload del pacchetto UDP inviato al Collector contiene l' sFlow Datagram, il quale
+\`e composto da: versione di sFlow, ip dell'Agent, sequence-number, il numero di campioni
+contenuti e fino a 10 campioni tra flow samples e counter samples (figura 1.2).
+
+Un {\it flow sample} consiste di due parti:
+\begin{itemize}
+  \item un {\it packet data}: che contiene l'header del pacchetto campionato (il
+  quale consiste nel pacchetto originale troncato fino ad una lunghezza parametrizzabile)
+  \item un {\it extended data}: che contiene informazioni aggiuntive, ad esempio in
+  caso di uno switch con VLANs abilitate fornisce la VLAN sorgente e di destinazione.
+\end{itemize}
+
+Come possiamo notare quindi avvengono due tipi di campionamento diversi: un campionamento
+di un pacchetto ogni N e un troncamento del pacchetto designato fino ad una dimensione massima
+T (solitamente fissata ad un massimo di 256 Bytes).
+Occorre notare che il troncamento del pacchetto effettuato ci permette di avere
+una visibili\`a dal Layer 2 al Layer 7 dello stack OSI \cite{B1}
+
+E` necessario puntualizzare che il datagram contenente il {\it Packet Sample} a differenza del {\it Counter Sample}
+viene inviato al collector appena il pacchetto viene campionato o comunque non oltre
+un secondo pi\`u tardi dal campionamento, anche se non si \`e riempito il buffer di
+10 campioni raccolti.
+
+\subsection{Tools per l'utilizzo di sFlow}
+
+La InMon Corporation mette a disposizione due tool fondamentali per l'utilizzo dello
+standard sFlow, che impersonificano l'Agent e il Collector.
+
+\subsubsection{hostsflowd}
+Hostsflowd \`e un tool per sistemi UNIX \footnote{Ne esiste una versione anche per Windows}
+che svolge la funzione di Agent, ovvero osserva
+i pacchetti passanti per una determinata interfaccia e applica ad essi i meccanismi di
+campionamento discussi sopra. Esso permette di specificare tramite il suo file di configurazione:
+la frequenza di campionamento ({\it Sampling Rate}), l'indirizzo del collector e la
+sua porta, l'intervallo per il polling del {\it Counter Sample} e la grandezza dell'header
+del pacchetto campionato.
+
+Si tratta di un tool molto versatile e dai requisiti molto bassi, tuttavia durante
+i test \`e emersa una limitazione importante, ossia che non \`e possibile
+troncare pacchetti ad una dimensione pi\`u grande di 256 Byte, inoltre non \`e possibile
+impostare un sampling rate di 1/1 (ovvero campionare tutto). Questo potrebbe non essere
+una limitazione determinante in produzione ma in fase di testing si \`e stati costretti
+a prendere strade alternative, che hanno portato allo sviluppo del simulatore {\it pcap2sflow}.
+Ulteriori motivazioni di questa scelta saranno fornite nel capitolo 2.
+
+\subsubsection{sflowtool}
+
+Sflowtool \`e un toolkit per decodificare
+dati sFlow. Esso svolge quindi la funzione di Collector, ed \`e in grado di stampare
+in STDOUT i dati decodificati o, cosa molto pi\`u importante nel contesto di applicazione
+di questa tesi, spacchettare i campioni e
+riscriverli in formato pcap.
+
+{\it Ad esempio con il comando seguente \`e possibile esportare i pacchetti campionati
+in un file pcap che conterr\`a i campioni raccolti dall'Agent, troncati secondo i
+parametri specificati nell'Agent:}
+\begin{verbatim}
+  sflowtool -t > capture.pcap
+\end{verbatim}
 
 \subsubsection{sFlow vs Netflow}
 
@@ -413,6 +570,11 @@ Ibrahim Ghafir, Vaclav Prenosil, Jakub Svoboda, Mohammad Hammoudeh,
 \bibitem{K6} https://github.com/OISF/suricata
 \bibitem{K7} https://www.snort.org/
 \bibitem{K8} https://www.bro.org
+\bibitem{K9} https://www.ntop.org/products/packet-capture/pf\_ring/
+\bibitem{S1} sFlow, I Can Feel Your Traffic, Elisa Jasinska, Amsterdam Internet Exchange
+
+
+\bibitem{B1} Reti di Calcolatori, Larry Peterson, Bruce Davie, Apogeo, 2012
 \end{thebibliography}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%non numera l'ultima pagina sinistra
 \clearpage{\pagestyle{empty}\cleardoublepage}
