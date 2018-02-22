@@ -438,16 +438,31 @@ parametri specificati nell'Agent:}
   sflowtool -t > capture.pcap
 \end{verbatim}
 
-\subsubsection{sFlow vs Netflow}
+\subsubsection{Alternative a sFlow}
 
-Un'altra tecnologia molto simile ad sFlow \`e NetFlow, sviluppato da Cisco.
-Essi si differenziano per un motivo importantissimo e che non permette di usare efficacemente
-NetFlow per monitorare la rete a fianco di un IDS; ovvero che Netflow fornisce solo
-dati aggregati e non fornisce un troncamento parametrizzabile. Esso infatti esporta solo il Layer 3 del
-pacchetto, questo fa perdere tutte le informazioni che, nel nostro particolare campo di applicazione,
-sarebbero state utili, come l'header dei livelli superiori.
+Ci sono molte tecnologie che a prima vista potrebbero sembrare simili ad sFlow,
+probabilmente per la presenza della parola "flow", tipo NetFlow, OpenFlow o IPFIX,
+tuttavia essi si differenziano da sFlow per alcuni motivi fondamentali:
+NetFlow e IPFIX sono protocolli di esportazione del flusso che mirano ad aggregare i pacchetti in flussi.
+Successivamente, i record di flusso vengono inviati a un punto di raccolta per la
+conservazione e l' analisi. \cite{S1} sFlow, tuttavia, non ha alcuna nozione di flussi o
+aggregazione di pacchetti.
+Inoltre, mentre l' esportazione del flusso pu\`o essere eseguita con campionamento 1:1
+(cio\`e considerando ogni pacchetto), questo non \`e tipicamente possibile con sFlow,
+in quanto non \`e stato progettato per farlo. Il campionamento \`e parte integrante di
+sFlow, con l' obiettivo di fornire scalabilit\`a per il monitoraggio in tutta la rete. \cite{S2}
 
-Qui \`e possibile vedere un esempio di un output del comando {\it nfdump}:
+La caratteristica fondamentale necessaria per la riuscita del progetto portato avanti in questa tesi
+st\`a proprio nel fatto che i dati non siano dati aggregati, come avviene
+in NetFlow o IPFIX. Un aggregazione dei dati non permette infatti un'analisi degli header
+dei pacchetti invalidando quindi la funzionalit\`a di monitoraggio contro gli
+attacchi informatici.
+
+Come ulteriore prova si fornisce un esempio di dati provenienti da un sistema
+di monitoraggio che utilizza NetFlow (con un ragionamento analogo \`e possibile
+fornire la stessa prova per IPFIX).
+
+Output del comando {\it nfdump}:
 \begin{figure}[h!]
   \begin{center}                          %centra nel mezzo della pagina
     \includegraphics[width=\linewidth]{images/netflow.png}
@@ -458,18 +473,19 @@ Qui \`e possibile vedere un esempio di un output del comando {\it nfdump}:
 
 \newpage
 
-\section{Packet sampling e IDS}
+\section{Packet sampling e Intrusion Detection}
 
 La sicurezza delle reti, specie di quelle molto estese, \`e un problema tutt'oggi
 presente e di un importanza vitale in qualsiasi azienda che operi nel settore ICT (Information and Communications Technologies).
-Le minacce possono avvenire in qualunque momento \cite{K3} ed essere generate sia dall'interno
+Le minacce possono presentarsi in qualunque momento \cite{K3} e provenire sia dall'interno
 che dall'esterno. Riuscire ad identificare queste minacce in tempo \`e il primo passo verso la soluzione di
 questo difficile problema. Per fare ci\`o \`e necessario avere un'ampia e continua
 sorveglianza della rete.
 Storicamente la sorveglianza di una grande rete era (ed \`e tuttora) affidata a sonde ({\it probes}),
 posizionate in punti strategici della rete. Questo \`e stato sufficientemente accurato
-fino ad ora, quando si sta verificando un aumento dell'installazione di switched point to point network.
-Quindi implementare il monitoraggio gi\`a dall'interno di uno switch o di router sta
+fino ad ora, ma ora, visto l' aumento dell'installazione di switched point to point network, non
+\`e pi\`u sufficiente.
+Implementare il monitoraggio gi\`a dall'interno di uno switch o di router sta
 diventando sempre pi\`u una necessit\`a. Tuttavia le esigenze di mercato tendono a preferire
 l'ampiezza di banda sulla sicurezza, per cui la funzione di monitoraggio deve essere relegata come
 funzione secondaria all'interno di questi apparati di rete. E` necessario quindi che questa funzione
@@ -485,7 +501,7 @@ Vediamo allora come sflow garantisce l'efficacia del sistema di monitoraggio ric
   i pacchetti campionati al Collector con UDP
   \item I dati devono essere sufficientemente dettagliati per caratterizzare l'attacco: sFlow permette di
   esportare pi\`u di 128 Byte (comprendendo quindi ad esempio anche header di livello 7)
-  \item Il sistema di monitoraggio non deve esporre gli apparato ad attacchi: sFlow impatta sulle
+  \item Il sistema di monitoraggio non deve esporre gli apparato ad attacchi: sFlow non impatta sulle
   prestazioni degli apparati poich\`e viene effettuato in hardware inoltre il consumo di banda \`e limitato
   poich\`e i datagram sFlow sono compressi
 \end{itemize}
@@ -575,6 +591,9 @@ Ibrahim Ghafir, Vaclav Prenosil, Jakub Svoboda, Mohammad Hammoudeh,
 
 
 \bibitem{B1} Reti di Calcolatori, Larry Peterson, Bruce Davie, Apogeo, 2012
+
+\bibitem{S1} Hofstede, Rick; Celeda, Pavel; Trammell, Brian; Drago, Idilio; Sadre, Ramin; Sperotto, Anna; Pras, Aiko. "Flow Monitoring Explained: From Packet Capture to Data Analysis with NetFlow and IPFIX". IEEE Communications Surveys & Tutorials. IEEE Communications Society
+\bibitem{S2} http://blog.sflow.com/2009/05/scalability-and-accuracy-of-packet.html
 \end{thebibliography}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%non numera l'ultima pagina sinistra
 \clearpage{\pagestyle{empty}\cleardoublepage}

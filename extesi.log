@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Arch Linux) (preloaded format=pdflatex 2017.11.30)  22 FEB 2018 20:57
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Arch Linux) (preloaded format=pdflatex 2017.11.30)  22 FEB 2018 22:11
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -214,6 +214,9 @@ Package: amsthm 2015/03/04 v2.20.2
 
 LaTeX Warning: Label `' multiply defined.
 
+
+LaTeX Warning: Label `S1' multiply defined.
+
 )
 \openout1 = `extesi.aux'.
 
@@ -390,12 +393,13 @@ Package pdftex.def Info: Requested size: 256.0748pt x 134.40959pt on input line 
 <images/netflow.png, id=82, 975.645pt x 71.26625pt>
 File: images/netflow.png Graphic file (type png)
 <use images/netflow.png>
-Package pdftex.def Info: images/netflow.png  used on input line 454. on input line 454.
-Package pdftex.def Info: Requested size: 390.0pt x 28.48749pt on input line 454.
- [12 <./images/netflow.png (PNG copy)>]
-Underfull \vbox (badness 2707) has occurred while \output is active []
+Package pdftex.def Info: images/netflow.png  used on input line 469. on input line 469.
+Package pdftex.def Info: Requested size: 390.0pt x 28.48749pt on input line 469.
 
- [13] [14] [15] [16
+
+LaTeX Warning: `!h' float specifier changed to `!ht'.
+
+[12] [13 <./images/netflow.png (PNG copy)>] [14] [15] [16
 
 
 ] [17
@@ -405,7 +409,7 @@ Underfull \vbox (badness 2707) has occurred while \output is active []
 ]
 Appendice A.
 
-Overfull \hbox (1.39201pt too wide) in paragraph at lines 540--551
+Overfull \hbox (1.39201pt too wide) in paragraph at lines 556--567
 [][]\OT1/cmtt/m/n/12 \clearpage{\pagestyle{empty}\cleardoublepage}[]\OT1/cmr/m/n/12 , ed in-fat-ti l'ul-ti-ma pa-
  []
 
@@ -417,35 +421,44 @@ Appendice B.
 
 ]
 
-./extesi.tex:569: Package inputenc Error: Keyboard character used is undefined
+./extesi.tex:585: Package inputenc Error: Keyboard character used is undefined
 (inputenc)                in inputencoding `latin1'.
 
 See the inputenc package documentation for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.569 \bibitem{K4} "NIST â€
+l.585 \bibitem{K4} "NIST â€
                            “ Guide to Intrusion Detection and Prevention Sys...
 You need to provide a definition with \DeclareInputText 
 or \DeclareInputMath before using this key.
 
 
-./extesi.tex:569: Package inputenc Error: Keyboard character used is undefined
+./extesi.tex:585: Package inputenc Error: Keyboard character used is undefined
 (inputenc)                in inputencoding `latin1'.
 
 See the inputenc package documentation for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.569 \bibitem{K4} "NIST â€“
+l.585 \bibitem{K4} "NIST â€“
                              Guide to Intrusion Detection and Prevention Sys...
 You need to provide a definition with \DeclareInputText 
 or \DeclareInputMath before using this key.
 
-[23] [24
+./extesi.tex:596: Misplaced alignment tab character &.
+l.596 ...and IPFIX". IEEE Communications Surveys &
+                                                   Tutorials. IEEE Communica...
+I can't figure out why you would want to use a tab mark
+here. If you just want an ampersand, the remedy is
+simple: Just type `I\&' now. But if some right brace
+up above has ended a previous alignment prematurely,
+you're probably due for more error messages, and you
+might try typing `S' now just to see what is salvageable.
+
+[23] [24] [25
 
 
-] [25
 
 ] (./extesi.aux)
 
@@ -453,15 +466,15 @@ LaTeX Warning: There were multiply-defined labels.
 
  ) 
 Here is how much of TeX's memory you used:
- 4903 strings out of 492985
- 64664 string characters out of 6138637
- 138614 words of memory out of 5000000
- 8351 multiletter control sequences out of 15000+600000
+ 4904 strings out of 492985
+ 64668 string characters out of 6138637
+ 138619 words of memory out of 5000000
+ 8352 multiletter control sequences out of 15000+600000
  13959 words of font info for 57 fonts, out of 8000000 for 9000
  1143 hyphenation exceptions out of 8191
  41i,11n,43p,792b,330s stack positions out of 5000i,500n,10000p,200000b,80000s
 </usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmti12.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt12.pfb>
-Output written on extesi.pdf (36 pages, 197065 bytes).
+Output written on extesi.pdf (36 pages, 198550 bytes).
 PDF statistics:
  155 PDF objects out of 1000 (max. 8388607)
  104 compressed objects within 2 object streams
