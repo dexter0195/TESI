@@ -134,10 +134,10 @@ Esiste un' ampia gamma di IDS, che varia dal software antivirus fino ai sistemi 
 che controllano il traffico di un' intera backbone. La classificazione pi\`u comune
 \`e tra:
 \begin{itemize}
-  \item {\bf Network-based Intrusion Detection Firmware (NIDS)}: ad esempio un sistema
+  \item {\bf Network-based Intrusion Detection Firmware (NIDS)}: un sistema
   che monitora il traffico di rete passante attraverso alcuni punti strategici di una
   rete. Esempi famosi sono: Suricata \cite{K6} , Snort \cite{K7} e BRO \cite{K8} .
-  \item {\bf Host-based Intrusion Detection (HIDS)} : ad esempio un software che monitora
+  \item {\bf Host-based Intrusion Detection (HIDS)} : un software che monitora
   alcuni file importanti del sistema operativo su cui \`e installato. Un esempio famoso
   di HIDS \`e OSSec \cite{K5}
 \end{itemize}
@@ -146,18 +146,18 @@ Il panorama degli Intrusion Detection System (IDS) \`e al giorno d'oggi in conti
 Tuttavia \`e possibile operare una seconda e importante classificazione in base a due criteri
 principali che ne determinano il funzionamento:
 \begin{itemize}
-  \item Sistemi {\it signature-based detection}
-  \item Sistemi {\it anomaly-based detection}
+  \item Sistemi con {\it Signature-based detection}
+  \item Sistemi con {\it Anomaly-based detection}
 \end{itemize}
 
-Un IDS {\it signature-based } analizza i pacchetti passanti su una rete utilizzando il concetto di {\it signature}:
+Un IDS {\it Signature-based } analizza i pacchetti passanti su una rete utilizzando il concetto di {\it signature}:
 Una signature \`e un pattern che corrisponde ad un tipo di attacco noto. \cite{K7}
 Esempi di signature possono essere:
 \begin{itemize}
   \item un tentativo di connessione a TELNET con username "root", che corrisponde
   ad una violazione delle policy di sicurezza
   \item un email con oggetto "Immagini gratis!" e un allegato con nome "freepics.exe",
-  che sono caratteristici di un attacco nostro
+  che sono caratteristici di un attacco noto
   \item tentativi ripetuti nel tempo di connessione SSH ad intervalli sospetti,
   che identificano un possibile attacco bruteforce su SSH.
 \end{itemize}
@@ -165,16 +165,16 @@ Il rilevamento signature-based \`e molto efficace nel rilevare minacce note,
 ma in gran parte inefficace nel rilevare minacce precedentemente sconosciute,
 minacce mascherate dall'uso di tecniche di evasione e molte varianti di minacce note.
  Per esempio, se un aggressore ha modificato il malware nell' esempio precedente per
- usare un nome file di "freepics2.exe", una firma che cercava "freepics.exe" non lo
+ usare un nome file di "freepics2.exe", una firma che cercava "freepics.exe" non
  corrisponderebbe.
 Il rilevamento basato sulla firma \`e il metodo di rilevamento pi\`u semplice in
 quanto confronta il campione corrente, come un pacchetto o una voce di registro,
 con un elenco di firme utilizzando operazioni di confronto tra stringhe.
 
-Un IDS che usa {\it anomaly-based} detection, utilizza il concetto di anomalia:
-ovvero una deviazione del comportamento della rete osservato al momento da quello
+Un IDS che usa {\it Anomaly-based} detection, utilizza il concetto di anomalia:
+ovvero una deviazione del comportamento della rete osservato al momento attuale da quello
 che \`e considerato normale in base a quanto osservato in precedenza.
-Un IDS che utilizza un rilevamento anomaly-based ha profili che rappresentano
+Un IDS che utilizza un rilevamento Anomaly-based ha profili che rappresentano
 il comportamento normale di utenti, host, connessioni di rete o applicazioni.
 I profili sono sviluppati monitorando le caratteristiche dell'attivit\`a tipica
 per un periodo di tempo.  Ad esempio, un profilo di una rete potrebbe indicare
@@ -246,7 +246,7 @@ sarebbe considerato sospettoso.
 Una singola istanza di Suricata \`e capace di ispezionare traffico proveniente
 da una rete multi-gigabit, questo grazie al forte paradigma multi thread utilizzato
 nel core del programma. Inoltre esso dispone di un supporto nativo per l'accelerazione hardware,
-l'analisi di pacchetti con GPUs e supporta nativamente PF\_RING \cite{K9} e PF\_PACKET, due tipologie
+l'analisi di pacchetti con GPUs e supporta nativamente PF\_RING \cite{K9} e AF\_PACKET, due tipologie
 di socket altamente performanti.
 
 
@@ -290,7 +290,6 @@ due modi distinti:
   prestazionale delle regole o dell'istanza di Suricata da analizzare.
 \end{itemize}
 
-(FORSE QUESTA PARTE PUOI METTERLA NEL CONTESTO DI SPERIMENTAZIONE)
 Concludiamo quindi elencando i motivi che hanno portato durante le fasi di sperimentazione
 alla scelta di Suricata rispetto ad altri software:
 \begin{itemize}
@@ -334,9 +333,9 @@ L'architettura e le modalit\`a di campionamento usati in sFlow offrono numerosi 
 tra cui quello di avere una visione di tutta la rete ({\it network-wide}) in tempo
 reale. La visione {\it network-wide} \`e possibile poich\`e sempre pi\`u produttori
 stanno equipaggiando i loro apparati di rete con un modulo sFlow; inoltre recentemente
-\`e stato aggiunto il supporto a sFlow anche all'interno di {\it OpenvSwitch}, un
+\`e stato aggiunto il supporto a sFlow anche all'interno di {\it OpenVSwitch}, un
 famoso software usato nel campo della {\it Software Designed Networking}.
- La visione in tempo reale invece \`e dovuta al fatto che i pacchetti campionati
+ La visione in tempo reale invece \`e permessa dal fatto che i pacchetti campionati
  vengono mandati al collector non appena essi passano per
 l'agent.
 Un ulteriore punto a favore sta nel fatto che si tratta di un' architettura
@@ -361,15 +360,15 @@ sFlow usa due modalit\`a operative:
 
 Il pacchetto campionato viene esportato verso l'sFlow Collector tramite UDP \cite{B1}.
 La mancanza di affidabilit\`a nel meccanismo di trasporto UDP non influisce in modo
-significativo sulla precisione delle misurazioni ottenute dall' Agent sFlow. Se
+significativo sulla precisione delle misurazioni ottenute dall' Agent sFlow, poich\'e se
 i Counter Sampling vengono persi, al superamento dell' intervallo di polling
-successivo verranno inviati nuovi valori.  La perdita dei Packet Flow Sample si riflette in
+successivo verranno inviati nuovi valori. Se invece vengono persi i Packet Flow Sample, questo si riflette in
 una leggera riduzione della frequenza di campionamento effettiva.  L' uso di UDP
-inoltre riduce la quantit\`a di memoria necessaria per il buffer dei dati. UDP \`u pi\`u
+inoltre riduce la quantit\`a di memoria necessaria per il buffer dei dati. UDP \`e pi\`u
 robusto di un meccanismo di trasporto  affidabile (es. TCP) perch\`e sotto sovraccarico
 l' unico effetto sulle prestazioni complessive del sistema \`e un leggero aumento
 del ritardo di trasmissione e un maggior numero di pacchetti persi, nessuno dei
-quali ha un effetto significativo su un sistema di monitoraggio.
+quali ha un effetto significativo sul sistema di monitoraggio.
 
 \newpage
 
@@ -409,7 +408,7 @@ un secondo pi\`u tardi dal campionamento, anche se non si \`e riempito il buffer
 \subsection{Tools per l'utilizzo di sFlow}
 
 La InMon Corporation mette a disposizione due tool fondamentali per l'utilizzo dello
-standard sFlow, che impersonificano l'Agent e il Collector.
+standard sFlow, che svolgono i ruoli dell'Agent e del Collector.
 
 \subsubsection{hostsflowd}
 Hostsflowd \`e un tool per sistemi UNIX \footnote{Ne esiste una versione anche per Windows}
@@ -446,8 +445,8 @@ parametri specificati nell'Agent:}
 \subsubsection{Alternative a sFlow}
 
 Ci sono molte tecnologie che a prima vista potrebbero sembrare simili ad sFlow,
-probabilmente per la presenza della parola "flow", tipo NetFlow, OpenFlow o IPFIX,
-tuttavia essi si differenziano da sFlow per alcuni motivi fondamentali:
+probabilmente per la presenza della parola "flow", tipo NetFlow, OpenFlow o IPFIX.
+Tuttavia essi si differenziano da sFlow per alcuni motivi fondamentali:
 NetFlow e IPFIX sono protocolli di esportazione del flusso che mirano ad aggregare i pacchetti in flussi.
 Successivamente, i record di flusso vengono inviati a un punto di raccolta per la
 conservazione e l' analisi. \cite{S1} sFlow, tuttavia, non ha alcuna nozione di flussi o
@@ -493,9 +492,9 @@ fino ad ora, ma visto l' aumento delle switched point to point network, il monit
 Implementare il monitoraggio gi\`a dall'interno di uno switch o di router sta
 diventando sempre pi\`u una necessit\`a. Tuttavia le esigenze di mercato tendono a preferire
 l'ampiezza di banda sulla sicurezza, per cui la funzione di monitoraggio deve essere relegata come
-funzione secondaria all'interno di questi apparati di rete. E` necessario quindi che questa funzione
+funzione secondaria all'interno di questi apparati di rete. \`E necessario quindi che questa funzione
 operi con il minimo overhead possibile, al fine di non degradare le prestazioni dell'apparato.
-E` qui che entra in gioco la tecnologia sFlow, essa permette di delegare la parte di analisi del traffico
+\`E qui che entra in gioco la tecnologia sFlow, essa permette di delegare la parte di analisi del traffico
 ad un altro componente della rete ({\it il collector}), lasciando allo switch o al router le risorse per
 effettuare le normali decisioni di smistamento dei pacchetti.
 
@@ -534,14 +533,14 @@ detection moderna:
 \end{itemize}
 
 
-I metodi statistici {\it Statistical Analysis} costruiscono un profilo del traffico
+I metodi statistici ({\it Statistical Analysis}) costruiscono un profilo del traffico
 di rete normale utilizzando una funzione statistica dei parametri del traffico di rete;
 questo profilo del traffico normale viene utilizzato per controllare il traffico in
 arrivo al momento attuale; la somiglianza tra il traffico di rete e il profilo del
-traffico di rete normale viene calcolata utilizzando metodi statistici. Se la misura
+traffico di rete normale viene calcolata utilizzando appunto metodi statistici. Se la misura
 di somiglianza \`e al di sopra della soglia predefinita, il flusso \`e marcato come
-dannoso o normale. \cite{S4} I metodi statistici non necessitano di conoscenza pregressa
-di un determinato attacco per determinare se esso \`e effettivamente un attacco, e questo si
+dannoso, altrimenti come flusso normale. \cite{S4} I metodi statistici non necessitano di conoscenza pregressa
+di un determinato attacco per determinare se un campione contiene effettivamente un attacco, e questo si
 \`e dimostrato particolarmente efficace nel rilevare attacchi di tipo DoS ({\it Denaial of
 Service}). Essi tuttavia possono essere aggirati mantenendo l'impatto dell'attacco al di
 sotto della soglia predefinita. Inoltre l'efficacia di questi metodi in reti reali
@@ -553,9 +552,9 @@ Essi presentano numerosi vantaggi rispetto ai metodi statistici quali l'adattame
 del comportamento in base ad una finestra temporale. Inoltre i risultati degli esperimenti
 condotti con Machine Learning hanno evidenziato un'ottimo tasso di riconoscimento degli
 attacchi in un processo di "apprendimento" relativamente breve. Tuttavia anche questo metodo
-ha degli svantaggi importanti quali quelli la difficolt\`a di generare dati campioni per
+ha degli svantaggi importanti come la difficolt\`a di generare dati campioni per
 l'apprendimento, inoltre quest'ultimo si \`e rivelato computazionalmente molto costoso.
-Infine essi hanno un alto tasso di falsi positivi (ovvero allarmi generati da un pacchetto
+Infine essi hanno un alto tasso di falsi positivi (ovvero allarmi che vengono generati da un pacchetto che inveve era
 benevolo).
 
 In ultimo abbiamo la {\it Signature-based Analysis}, tema principale di questo elaborato,
@@ -575,24 +574,24 @@ da cui ci si accorge che sFlow rappresenta l'unica alternativa di applicazione.
 
 L'analisi dei dati, specie se di grosse dimensioni, come i dati generati dai test o
 dai log, \`e un problema che va affrontato con sistematicit\`a al fine di poter
-trarre delle conclusioni efficaci dal lavoro svolto. \`E stato necessario quindi
+trarre delle conclusioni descrittive sul lavoro svolto. \`E stato necessario quindi
 utilizzare tool appositamente studiati per la {\it Data Analysys} come lo stack ELK, ed
 in particolare Kibana.
 
-Elasticsearch \cite{E1} \`e un motore di ricerca basato su Lucene. Esso fornisce un
-motore capace di ricerca full-text, distribuito e con capacit\`a multitenant.
+Elasticsearch \cite{E1} \`e un motore di ricerca basato su Lucene.
+\`E un software con capacit\`a di ricerca full-text, multitenant e distribuito.
 Possiede un' interfaccia web HTTP e una strutura schema-free di documenti con la sitassi JSON.
-Elasticsearch \`e sviluppato in Java ed \`e rilasciato con licenza Open Source Apache.
-I client ufficiali sono disponibili in Java,. NET (C#), PHP, Python, Apache Groovy e molti altri
-linguaggi.
 A differenza di un {\it Database Management System} relazionale, esso \`e {\it schema-free}
 anche se non {\it schema-less} (come MongoDB per esempio) il che significa che non \`e
 necessario definire i tipi (string, integer, ecc.) dei dati prima di inserirli,
 ma comunque possibile. \cite{E4}
+Elasticsearch \`e sviluppato in Java ed \`e rilasciato con licenza Open Source Apache.
+I client ufficiali sono disponibili in Java,. NET (C#), PHP, Python, Apache Groovy e molti altri
+linguaggi.
 Secondo DB-Engines, \cite{E2} Elasticsearch \`e il motore di ricerca pi\`u popolare in ambito enterprise e
 rappresenta un tool fondamentale nell'analisi e nella centralizzazione dei log.
 
-Elasticsearch infatti \`e sviluppato dallo stesso team di pari passo con Logstash
+Elasticsearch infatti \`e sviluppato, dallo stesso team, di pari passo con Logstash
 e Kibana e i tre programmi insieme formano quello che viene chiamato lo stack ELK.
 
 Esso si compone di tre componenti fondamentali:
@@ -603,7 +602,7 @@ Esso si compone di tre componenti fondamentali:
   ricerca
   \item {\bf Kibana} : \`e uno strumento di visualizzazione web-based che si integra
   con Elasticsearch atto a fornire un modo efficace per navigare e visualizzare i dati,
-  utilizzando una varietà di grafici, grafici e tabelle.
+  utilizzando una variet\`a di grafici, grafici e tabelle.
 \end{itemize}
 
 
@@ -640,23 +639,12 @@ CONCLUSIONI}]{\fancyplain{}{\bfseries\thepage}}
 CONCLUSIONI}}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%aggiunge la voce Conclusioni
                                         %   nell'indice
-\addcontentsline{toc}{chapter}{Conclusioni} Queste sono le
-conclusioni.\\
-In queste conclusioni voglio fare un riferimento alla
-bibliografia: questo \`e il mio riferimento \cite{K3,K4}.
+\addcontentsline{toc}{chapter}{Conclusioni}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%imposta l'intestazione di pagina
 \renewcommand{\chaptermark}[1]{\markright{\thechapter \ #1}{}}
 \lhead[\fancyplain{}{\bfseries\thepage}]{\fancyplain{}{\bfseries\rightmark}}
 \appendix                               %imposta le appendici
 \chapter{Prima Appendice}               %crea l'appendice
-In questa Appendice non si \`e utilizzato il comando:\\
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\verb"" � equivalente all'
-                                        %   ambiente verbatim,
-                                        %   ma si utilizza all'interno
-                                        %   di un discorso.
-\verb"\clearpage{\pagestyle{empty}\cleardoublepage}", ed infatti
-l'ultima pagina 8 ha l'intestazione con il numero di pagina in
-alto.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%imposta l'intestazione di pagina
 \rhead[\fancyplain{}{\bfseries \thechapter \:Prima Appendice}]
 {\fancyplain{}{\bfseries\thepage}}
@@ -702,6 +690,4 @@ Ibrahim Ghafir, Vaclav Prenosil, Jakub Svoboda, Mohammad Hammoudeh,
 \clearpage{\pagestyle{empty}\cleardoublepage}
 \chapter*{Ringraziamenti}
 \thispagestyle{empty}
-Qui possiamo ringraziare il mondo intero!!!!!!!!!!\\
-Ovviamente solo se uno vuole, non \`e obbligatorio.
 \end{document}
