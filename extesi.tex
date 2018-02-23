@@ -31,7 +31,6 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%libreria per inserire grafici
 \usepackage{graphicx}
-\graphixpath{ ./images/ }
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%libreria per utilizzare font
                                         %   particolari ad esempio
@@ -333,11 +332,17 @@ Il monitoraggio si compone di due elementi fondamentali:
 
 L'architettura e le modalit\`a di campionamento usati in sFlow offrono numerosi vantaggi
 tra cui quello di avere una visione di tutta la rete ({\it network-wide}) in tempo
-reale. Infatti, i pacchetti campionati vengono mandati al collector non appena essi arrivano
-all'agent. Inoltre l'architettura \`e estremamente scalabile e permette di posizionare agent in diversi punti della rete,
-o anche in reti diverse.
-
-\newpage
+reale. La visione {\it network-wide} \`e possibile poich\`e sempre pi\`u produttori
+stanno equipaggiando i loro apparati di rete con un modulo sFlow; inoltre recentemente
+\`e stato aggiunto il supporto a sFlow anche all'interno di {\it OpenvSwitch}, un
+famoso software usato nel campo della {\it Software Designed Networking}.
+ La visione in tempo reale invece \`e dovuta al fatto che i pacchetti campionati
+ vengono mandati al collector non appena essi passano per
+l'agent.
+Un ulteriore punto a favore sta nel fatto che si tratta di un' architettura
+estremamente scalabile che permette di posizionare gli agent in diversi punti della rete,
+o anche in reti diverse, garantendo una visione totale della rete anche in contesti
+{\it Multi-homed}.
 
 \subsection{Il campionamento}
 
@@ -355,7 +360,7 @@ sFlow usa due modalit\`a operative:
 \end{itemize}
 
 Il pacchetto campionato viene esportato verso l'sFlow Collector tramite UDP \cite{B1}.
-La mancanza di affidabilità nel meccanismo di trasporto UDP non influisce in modo
+La mancanza di affidabilit\`a nel meccanismo di trasporto UDP non influisce in modo
 significativo sulla precisione delle misurazioni ottenute dall' Agent sFlow. Se
 i Counter Sampling vengono persi, al superamento dell' intervallo di polling
 successivo verranno inviati nuovi valori.  La perdita dei Packet Flow Sample si riflette in
@@ -476,14 +481,14 @@ Output del comando {\it nfdump}:
 \section{Packet sampling e Intrusion Detection}
 
 La sicurezza delle reti, specie di quelle molto estese, \`e un problema tutt'oggi
-presente e di un importanza vitale in qualsiasi azienda che operi nel settore ICT (Information and Communications Technologies).
+presente e di un importanza vitale per qualsiasi azienda che operi nel settore ICT (Information and Communications Technologies).
 Le minacce possono presentarsi in qualunque momento \cite{K3} e provenire sia dall'interno
 che dall'esterno. Riuscire ad identificare queste minacce in tempo \`e il primo passo verso la soluzione di
 questo difficile problema. Per fare ci\`o \`e necessario avere un'ampia e continua
 sorveglianza della rete.
 Storicamente la sorveglianza di una grande rete era (ed \`e tuttora) affidata a sonde ({\it probes}),
 posizionate in punti strategici della rete. Questo \`e stato sufficientemente accurato
-fino ad ora, ma ora, visto l' aumento dell'installazione di switched point to point network, non
+fino ad ora, ma visto l' aumento delle switched point to point network, il monitoraggio {\it probe-based} non
 \`e pi\`u sufficiente.
 Implementare il monitoraggio gi\`a dall'interno di uno switch o di router sta
 diventando sempre pi\`u una necessit\`a. Tuttavia le esigenze di mercato tendono a preferire
@@ -492,43 +497,135 @@ funzione secondaria all'interno di questi apparati di rete. E` necessario quindi
 operi con il minimo overhead possibile, al fine di non degradare le prestazioni dell'apparato.
 E` qui che entra in gioco la tecnologia sFlow, essa permette di delegare la parte di analisi del traffico
 ad un altro componente della rete ({\it il collector}), lasciando allo switch o al router le risorse per
-effettuare le loro decisioni di smistamento dei pacchetti.
+effettuare le normali decisioni di smistamento dei pacchetti.
 
-Vediamo allora come sflow garantisce l'efficacia del sistema di monitoraggio richiesto:
+Il rilevamento delle intrusioni basato sui flow \`e un modo innovativo di rilevare
+le intrusioni nelle reti ad alta velocit\`a. Il rilevamento delle intrusioni basato
+sui flow controlla solo l' header del pacchetto e non ne analizza il {\it payload}.
+Analizzare il {\it payload} del pacchetto infatti sarebbe computazionalmente inaccettabile
+su reti di grandi dimensioni e con un elevato flusso di dati. Questa limitazione per\`o
+nel caso di sFlow si presuppone che non invalidi la qualit\`a del sistema di monitoraggio
+poich\`e la stragrande maggioranza degli attacchi \`e riconoscibile tramite un'analisi
+degli header al di sopra del livello di Livello 3.
+
+Vediamo ora pi\`u nel dettaglio come \`e possibile costruire con sFlow un sistema di monitoraggio efficace
+e che rispetta le richieste di mercato:
 \begin{itemize}
-  \item Sorveglianza continua network-wide: sFlow pu\`o essere configurato su ogni apparato di rete
+  \item Il sistema deve avere una sorveglianza continua network-wide: sFlow pu\`o essere configurato su ogni apparato di rete
   \item I dati devono essere sempre disponibili per rispondere efficacemente: sFlow manda immediatamente
   i pacchetti campionati al Collector con UDP
   \item I dati devono essere sufficientemente dettagliati per caratterizzare l'attacco: sFlow permette di
   esportare pi\`u di 128 Byte (comprendendo quindi ad esempio anche header di livello 7)
   \item Il sistema di monitoraggio non deve esporre gli apparato ad attacchi: sFlow non impatta sulle
   prestazioni degli apparati poich\`e viene effettuato in hardware inoltre il consumo di banda \`e limitato
-  poich\`e i datagram sFlow sono compressi
+  poich\`e i datagram sFlow sono ottimizzati
 \end{itemize}
+
+\subsection{Metodi di rilevazione flow-based}
+
+L'analisi dei dati provenienti dai {\it flow generators} al fine di garantire una
+rilevazione efficace della maggior parte degli attacchi ha portato nel corso degli anni
+all'utilizzo di molteplici approcci, che utilizzano tre macroaree dell'intrusion
+detection moderna:
+\begin{itemize}
+  \item {\it Statistical Analysis}
+  \item {\it Machine Learning Analysis}
+  \item {\it Signature-based Analysis}
+\end{itemize}
+
+
+I metodi statistici {\it Statistical Analysis} costruiscono un profilo del traffico
+di rete normale utilizzando una funzione statistica dei parametri del traffico di rete;
+questo profilo del traffico normale viene utilizzato per controllare il traffico in
+arrivo al momento attuale; la somiglianza tra il traffico di rete e il profilo del
+traffico di rete normale viene calcolata utilizzando metodi statistici. Se la misura
+di somiglianza \`e al di sopra della soglia predefinita, il flusso \`e marcato come
+dannoso o normale. \cite{S4} I metodi statistici non necessitano di conoscenza pregressa
+di un determinato attacco per determinare se esso \`e effettivamente un attacco, e questo si
+\`e dimostrato particolarmente efficace nel rilevare attacchi di tipo DoS ({\it Denaial of
+Service}). Essi tuttavia possono essere aggirati mantenendo l'impatto dell'attacco al di
+sotto della soglia predefinita. Inoltre l'efficacia di questi metodi in reti reali
+\`e minata dalla difficolt\`a intrinseca che sta nel calcolare le statistiche sul traffico.
+
+I metodi che utilizzano tecniche di {\it Machine Learning} si basano principalmente,
+su reti neurali, {\it Support Vector Matrix } (SVM), {\it Decision Tree} e {\it Clustering}.
+Essi presentano numerosi vantaggi rispetto ai metodi statistici quali l'adattamento
+del comportamento in base ad una finestra temporale. Inoltre i risultati degli esperimenti
+condotti con Machine Learning hanno evidenziato un'ottimo tasso di riconoscimento degli
+attacchi in un processo di "apprendimento" relativamente breve. Tuttavia anche questo metodo
+ha degli svantaggi importanti quali quelli la difficolt\`a di generare dati campioni per
+l'apprendimento, inoltre quest'ultimo si \`e rivelato computazionalmente molto costoso.
+Infine essi hanno un alto tasso di falsi positivi (ovvero allarmi generati da un pacchetto
+benevolo).
+
+In ultimo abbiamo la {\it Signature-based Analysis}, tema principale di questo elaborato,
+che utilizza l'header dei pacchetti campionati per fare pattern matching con un dataset
+di regole statiche. Questo approccio porta con se tutti i vantaggi e gli svantaggi
+degli IDS Signature-based discussi nei paragrafi precedenti, con il solo svantaggio aggiunto di
+non poter ricorrere all'utilizzo della Stateful Analysis poich\`e il campionamento
+non garantisce che tutti i pacchetti di una determinata sessione siano catturati.
+Inoltre occorre ribadire che tale metodo \`e utilizzabile solo nel caso in cui si abbiano a disposizione
+almeno gli header di Livello 3, per quanto detto nella sezione "Alternative a sFlow",
+da cui ci si accorge che sFlow rappresenta l'unica alternativa di applicazione.
+
 
 \newpage
 
-\section{Stack ELK}
+\section{Elasticsearch e lo stack ELK}
 
-Lo stack ELK \`e uno stack formato dai tre programmi (Elasticsearch, Logstash e Kibana)
-i quali uniti insieme forniscono una metodologia di centralizzazione, esplorazione
-e visualizzazione dei log. Esso si compone di tre componenti fondamentali:
+L'analisi dei dati, specie se di grosse dimensioni, come i dati generati dai test o
+dai log, \`e un problema che va affrontato con sistematicit\`a al fine di poter
+trarre delle conclusioni efficaci dal lavoro svolto. \`E stato necessario quindi
+utilizzare tool appositamente studiati per la {\it Data Analysys} come lo stack ELK, ed
+in particolare Kibana.
+
+Elasticsearch \cite{E1} \`e un motore di ricerca basato su Lucene. Esso fornisce un
+motore capace di ricerca full-text, distribuito e con capacit\`a multitenant.
+Possiede un' interfaccia web HTTP e una strutura schema-free di documenti con la sitassi JSON.
+Elasticsearch \`e sviluppato in Java ed \`e rilasciato con licenza Open Source Apache.
+I client ufficiali sono disponibili in Java,. NET (C#), PHP, Python, Apache Groovy e molti altri
+linguaggi.
+A differenza di un {\it Database Management System} relazionale, esso \`e {\it schema-free}
+anche se non {\it schema-less} (come MongoDB per esempio) il che significa che non \`e
+necessario definire i tipi (string, integer, ecc.) dei dati prima di inserirli,
+ma comunque possibile. \cite{E4}
+Secondo DB-Engines, \cite{E2} Elasticsearch \`e il motore di ricerca pi\`u popolare in ambito enterprise e
+rappresenta un tool fondamentale nell'analisi e nella centralizzazione dei log.
+
+Elasticsearch infatti \`e sviluppato dallo stesso team di pari passo con Logstash
+e Kibana e i tre programmi insieme formano quello che viene chiamato lo stack ELK.
+
+Esso si compone di tre componenti fondamentali:
 \begin{itemize}
-  \item {\bf Logstash} : il quale si occupa di raccogliere i log, manipolarli cos\`i da renderli
-  consumabili da elasticsearch
-  \item {\bf Elasticsearch} : un database No-SQL particolarmente ottimizzato per la
+  \item {\bf Logstash} : \`e una "pipeline di elaborazione dati" che pu\`o raccogliere
+  dati da varie fonti, trasformarli e inviarli a vari consumatori, tra cui Elasticsearch
+  \item {\bf Elasticsearch} : come descritto prima, un database No-SQL particolarmente ottimizzato per la
   ricerca
-  \item {\bf Kibana} : un visualizzatore dei dati contenuti in Elasticsearch che permette
-  di effettuare ricerche e aggregare i dati in modo da fornirne una visualizzazione utile
-  dei dati di log raccolti
+  \item {\bf Kibana} : \`e uno strumento di visualizzazione web-based che si integra
+  con Elasticsearch atto a fornire un modo efficace per navigare e visualizzare i dati,
+  utilizzando una varietà di grafici, grafici e tabelle.
 \end{itemize}
+
 
 Lo stack ELK \`e ad oggi lo standard {\it de facto} per l'esplorazione dei log,
 esso si va ad affiancare a tutti i programmi critici all'interno di una infrastruttura
-e risulta particolarmente utile nell'esplorazione dei log degli IDS. Esso permette infatti
+e risulta particolarmente utile nell'esplorazione dei log degli IDS. Collegato ai log di
+un IDS permette infatti
 acquisire in pochissimi secondi conoscenza su cosa accade nella rete e su che tipo di attacchi
 sono in corso. I dati vengono fruiti all'operatore in maniera veloce e comprensibile tramite
-dashboard, fornendo una fotografia estremamente informativa dello stato attuale
+dashboard, fornendo una fotografia estremamente informativa dello stato attuale.
+
+In figura \`e illustrato il funzionamento della pipeline di analisi usando lo stack
+ELK.
+
+\begin{figure}
+  \begin{center}                          %centra nel mezzo della pagina
+    \includegraphics[width=90mm]{images/ELK-stack.png}
+    \caption{Lo stack ELK}
+    \label{}
+  \end{center}
+\end{figure}
+
 
 \newpage
 
@@ -594,6 +691,12 @@ Ibrahim Ghafir, Vaclav Prenosil, Jakub Svoboda, Mohammad Hammoudeh,
 
 \bibitem{S1} Hofstede, Rick; Celeda, Pavel; Trammell, Brian; Drago, Idilio; Sadre, Ramin; Sperotto, Anna; Pras, Aiko. "Flow Monitoring Explained: From Packet Capture to Data Analysis with NetFlow and IPFIX". IEEE Communications Surveys & Tutorials. IEEE Communications Society
 \bibitem{S2} http://blog.sflow.com/2009/05/scalability-and-accuracy-of-packet.html
+\bibitem{S3} Flow-based intrusion detection: Techniquesand challenges, Muhammad Fahad Umer, Muhammad Sher, Yaxin Bi. Computers \& Security 70 (2017) 238-254
+\bibitem{S4} Intrusion detection system: A comprehensive review, Hung-JenLiao, Chun-HungRichard Lin,Ying-ChihLin, Kuang-YuanTung
+
+\bibitem{E1} https://www.elastic.co/
+\bibitem{E2} https://db-engines.com/en/ranking/search+engine
+\bibitem{E4} SCADA STATISTICS MONITORING USING THE Elastic Stack(Elasticsearch, Logstash, Kibana), James Hamilton, Brad Schofield, Manuel Gonzalez Berges, Jean-Charles TournierCERN, Geneva, Switzerland
 \end{thebibliography}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%non numera l'ultima pagina sinistra
 \clearpage{\pagestyle{empty}\cleardoublepage}
