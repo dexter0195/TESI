@@ -1239,6 +1239,41 @@ PUT /ictf2010/_settings
 POST /twitter/_forcemerge?max_num_segments=5
 \end{verbatim}
 
+PARLARE DELL'INVERTED INDEX e di come ha ridotto le quantit\`a dei log
+
+\subsubsection{Analisi dei falsi positivi}
+
+Di fondamentale importanza nell'analisi prestazionale di un IDS \`e il conteggio
+dei falsi positivi, ovvero di quegli alert sollevati dall'IDS a partire da un traffico
+che era invece benevolo.
+
+La valutazione dei falsi positivi \`e stata effettuata mediante un altro programma
+Python, scritto appositamente sempre utilizzando le API di Elasticsearch.
+Non \`e stato possibile infatti conteggiare i falsi positivi gi\`a dall'interno di
+Kibana a partire dai dati originali poich\`e Elasticsearch non permette, a
+differenza dei database relazionali, di effettuare delle subqueries.
+
+Il programma Python, che va sotto il nome di false\_positives.py, confronta le signature
+rilevate con i vari parametri di sampling rate e troncamento testati con le signature
+del setup On-Wire. Il numero di falsi positivi per ogni signature ricavati dalla sottrazione dei
+due valori \`e stata aggiunta in un ulteriore index, appositamente creato per il conteggio
+dei falsi positivi.
+
+false\_positives.py effettua una query con aggregazione sul valore "signature.keyword" nei
+documenti con sampling rate = 1 e truncate = 600 ne salva i valori e poi per ogni combinazione
+di parametri effettua una seconda query con aggregazione sullo stesso valore, infine la differenza
+tra i due valori ottenuta viene usata per creare tanti documenti quanti sono i falsi positivi.
+Occorre notare che sebbene si creino molti documenti, data la struttura di Elasticsearch
+e del suo Inverted Index, questo non occupa molto spazio e se ne guadagna in comodit\`a una volta che
+si proceder\`a col creare le visualizzazioni.
+
+\section{Campionamento adattivo}
+
+
+
+
+
+
 
 
 
