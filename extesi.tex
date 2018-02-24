@@ -794,35 +794,151 @@ condizioni, a differenza dei precedenti.
 
 \section{Metodologie di test}
 
-truncate e sampling rate
-struttura delle dir
-struttura del file json e di elasticserch
+Andiamo adesso ad elencare le metodologie dei test effettuati, l'organizzazione delle
+directory e lo schema del database di Elasticsearch.
 
-\section{Una soluzione di testing alternativa}
+\subsection{Terminologia}
 
-(spiegare anche il problema del replay del traffico)
+\begin{itemize}
+  \item {\it Sampling Rate} : \`e la frequenza di campionamento operata dall'Agent sFlow,
+  ad esempio un Sampling Rate uguale a 4 vuol dire che ogni 4 pacchetti uno viene
+  campionato
+  \item {\it Troncamento} : \`e la dimensione massima del pacchetto scelto per il campionamento
+  , tale pacchetto viene troncato fino a {\it t} Bytes e inviato al collector.
+  \item {\it Setup On-Wire} : \`e il setup per cui il traffico viene inoltrato interamente
+  a Suricata per l'analisi. Esso corrisponde al normale utilizzo del software in questione.
+  \item {\it Alert} : \`e un messaggio di allarme dell' IDS che notifica l'amministratore
+  di una violazione delle policy di sicurezza.
+\end{itemize}
 
-Sebbene il setup descritto nella sezione precedentemente sia quello che pi\`u si avvicina
-all'utilizzo nella vita reale di sFlow e Suricata, l'utilizzo al fine di testarne la sua
-validit\`a si \`e dimostrato poco agevole.
 
-Il problema principale si \`e avuto dal fatto che il programma Agent, hostsflow,
-non \`e sufficientemente parametrizzabile, in particolare la dimensione massima del
+L'obbiettivo dei test effettuati  \`e verificare se gli alert sollevati da Suricata
+in modalit\`a On-Wire sono paragonabili a quelli che si ottengono fornendo ad esso solo
+i dati parziali derivanti da sFlow.
+Inoltre si vuole verificare l'incisivit\`a dei parametri di sampling rate e troncamento e
+se essi siano indipendenti l'uno dall'altro.
+
+\subsection{Struttura delle directory}
+
+Con l'obiettivo di tenere organizzati i risultati dei numerosi test effettuati si
+\`e scelto di seguire una rigorosa struttura delle directory e dei file.
+
+Partendo dalla directory {\it root} del progetto troviamo le sottodirectory
+dei dataset analizzati, all'interno di esse vi sono i test numerati da 1 a {\it n} e all'interno
+di ogni directory di test troviamo i files: {\verb alert-debug.log }, {\verb eve.json },
+{\verb fast.log }, {\verb pcap_size.txt }, {\verb stats.log }, {\verb test_info.txt }. Dove:
+\begin{itemize}
+  \item {\verb alert-debug.log }, {\verb eve.json }, {\verb fast.log }, {\verb stats.log }
+  rappresentano i log di Suricata relativi al test in esame
+  \item {\verb pcap_size.txt }, {\verb test_info.txt } rappresentano rispettivamente la quantit\`a di
+  traffico generato dal tipo di campionamento scelto e i parametri di campionamento.
+\end{itemize}
+\begin{verbatim}
+  /root
+    /dataset-name
+      /number of test
+        alert.debug
+        eve.json
+        fast.log
+        pcap_size.txt
+        stats.log
+        test_ingo.txt
+      .
+      .
+    .
+
+
+\end{verbatim}
+
+\subsection{Il cuore degli esperimenti}
+
+Inizialmente, soprattutto nelle prime fasi di analisi di fattibilit\`a dell'applicazione oggetto
+di studio i test sono stati effettuati a mano, utilizando come solo supporto una checklist, che
+assicurava la coerenza della struttura delle directory cos\`i come del contenuto dei
+risultati dei test stessi.
+
+Sulla macchina Generator \`e stato configurato hostsflowd tramite il suo file di
+configurazione {\verb /etc/hsflowd.conf } includendo i seguenti campi:
+\begin{verbatim}
+  # hsflowd configuration file
+  # http://sflow.net/host-sflow-linux-config.php
+
+sflow {
+     agent = enp0s8
+     polling = 30
+     sampling = 2
+     collector { ip=10.0.0.3 udpport=6343 }
+     pcap { dev =  enp0s8 }
+     headerBytes = 128
+}
+\end{verbatim}
+
+e si avvia hsflowd con il comando :
+\begin{verbatim}
+  hsflowd -d
+\end{verbatim}
+
+In questo modo l'Agent hsflowd analizza il traffico passante per l'interfaccia di
+rete enp0s8 e invia i datagram sFlow alla macchina Collector, sul quale \`e in esecuzione
+il programma sflowtool
+\begin{verbatim}
+sflowtool -p 6343 -t | suricata -c /etc/suricata/suricata.yaml -r -
+
+\end{verbatim}
+
+Nella seconda parte del comando di sopra, il traffico viene passato a Suricata
+che effettua un analisi offline trattando l'input come se fosse un normale file pcap.
+
+A questo punto tutto \`e pronto e il traffico dei dataset puo\`o essere iniettato
+nella rete all'interfaccia monitorata da hsflowd. Quindi, posizionandosi sul collector si esegue il
+comando:
+\begin{verbatim}
+  tcpreplay -i enp0s8 <file pcap da analizzare>
+\end{verbatim}
+
+\`E tuttavia emerso un problema da questa metodologia, tcpreplay cerca di iniettare
+il traffico nell'interfaccia rispettando, come e giusto che sia, il timing di arrivo
+dei pacchetti registrati nel file pcap. Questo sebbene assicuri una precisione certamente
+desiderabile oltre a garantisce la riproducibilit\`a dei test, non \`e una strada percorribile
+(almeno per gli obiettivi di questa tesi) poich\`e i test richiederebbero troppo tempo per
+essere portati a termine.
+\`E altres\'i vero che \`e possibile istruire tcpreplay di non rispettare il timing,
+ma questo andrebbe a invalidare quei regole di Suricata che fanno affidamento sul timing di arrivo dei
+pacchetti, come ad esempio il rilevamento del famoso attacco {\it Slow HTTP}.
+
+Inoltre, riguardo al voler determinare la l'incisivit\`a dei parametri sampling rate e
+troncamento, \`e emerso che il programma utilizzato come Agent, hsflowd, non \`e sufficientemente
+parametrizzabile.
+In particolare la dimensione massima del
 pacchetto che pu\`o essere esportato, ovvero quello che viene chiamto {\it header size} e che abbiamo
-identificato come troncamento, \`e {\it hard-coded} a 256 Bytes.
-Sebbene sia stato spiegato da InMon Corp. che tale dimensione massima \`e dovuta all'architettura
+identificato come troncamento, \`e {\it hard-coded} a massimo 256 Bytes.
+Sebbene sia stato spiegato dalla InMon Corp. che tale dimensione massima \`e dovuta all'architettura
 di sFlow e che \`e necessaria per garantire una scalabilit\`a del prodotto, alle
 finalit\`a di testing questa si \`e rivelata una grossa limitazione, soprattuto quando i
 risultati ottenuti si sono posti in contraddizione con quanto ci si aspettava.
 
+In definitiva, sebbene questo primo approccio \`e stato determinante per verificare
+la fattibilit\`a di affiancare sFlow a Suricata esso non \`e per nulla soddisfacente
+ai fini della valutazione di efficienza.
+
+
+
+\section{Una soluzione di testing alternativa}
+
+
+Per quanto descritto nella sezione precedente, si \`e resa necessaria
+una nuova modalit\`a di test, che sia meno dipendente dall'implementazione
+di tutta la tecnologia \`e che lasci sufficienti margini di sperimentazione,
+anche se questo vuol dire uscire dai paradigmi della tecnologia sFlow.
+
+
 \subsection{Pcap2sFlow}
 
-Per sopperire alle mancanze di hostflow e testare a pieno le capacit\`a di un IDS abbinato
-a sFlow si \`e sviluppato un emulatore di sFlow che converte un file pcap in input,
-in un altro file pcap contenente pacchetti campionati secondo le tecniche sFlow.
+Si \`e sviluppato quindi un emulatore di sFlow che converte un file pcap in input,
+in un altro file pcap contenente pacchetti campionati ricalcando le tecniche sFlow.
 
 Si tratta di un programma scritto in C che utilizza la {\it libpcap } \cite{EXP7},
-una libreria scritta in C per analizzare il traffico {\it live} o {\it captured}.
+una libreria C per analizzare il traffico {\it live} o {\it captured}.
 
 In particolare si sono utilizzate le seguenti funzioni di libreria:
 \begin{verbatim}
@@ -902,8 +1018,8 @@ bool to_sample ( cap_stat *sampler_info ) {
 }
 \end{verbatim}
 
-Come descritto anche nell'RFC 3176 il seed della funzione {\verb select_random } non
-dovrebbe essere alimentato con il tempo poich\`e esso potrebbe non essere abbastanza
+Nel testo dell'RFC 3176 viene detto che il seed della funzione {\verb select_random } non
+dovrebbe essere alimentato con il tempo, come invece \`e stato fatto in pcap2sflow, poich\`e esso potrebbe non essere abbastanza
 casuale in reti con un elevato {\it throughput}. Infatti in quel contesto la velocit\`a di aggiornamento delle windows
 potrebbe essere pi\`u veloce della velocit\`a di aggiornamento del tempo. Tuttavia si \`e
 ritenuto che nel contesto applicativo dell'esperimento questo non possa accadere.
@@ -953,7 +1069,175 @@ options:
 
 \section{Metodologia di test 2}
 
+Data l'enormit\`a dei dataset da testare ed il numero di parametri che si intendevano
+testare, il lavoro di testing e catalogazione \`e stato interamente svolto mediante l'uso di
+script in Bash e Python.
 
+Solitamente (tranne nel caso del dataset di DARPA) il {\it dump} del traffico era
+diviso in segmenti della dimensione di 400 Megabyte circa. Lo script sviluppato si
+occupa quindi di prendere ogni singolo file, campionarlo con pcap2sflow e far analizzare
+a Suricata il file cos\`i generato. Infine si occupa di salvarne i risultati, ovvero i log e la
+dimensione del file pcap dopo il campionamento.
+
+In questo modo \`e stato possibile semplificare l'architettura illustrata precedentemente
+in figura 2.2 con quella della figura 2.3, in cui si pu\`o notare che il software
+pcap2sflow ha sostituito sia hostsflow che sflowtools, impersonando quindi sia
+l'agent che il collector.
+
+\begin{figure}
+  \begin{center}                          %centra nel mezzo della pagina
+    \includegraphics[width=90mm]{images/arch-2.png}
+    \caption{Architettura II}
+    \label{}
+  \end{center}
+\end{figure}
+
+Si \`e prestata particolare attenzione durante le fasi di test alle performance e
+al tempo di generazione dei risultati. Ad esempio, sebbene si possa campionare un file
+pcap e subito darlo ad analizzare a Suricata, con il comando:
+\begin{verbatim}
+./pcap2sflow -i <pcap file> -s 100 -t 128 -o - | \
+      suricata -c /etc/suricata/suricata.yaml -r -
+\end{verbatim}
+per ogni test che si sarebbe andato ad effettuare Suricata avrebbe dovuto ricaricare
+tutto il core e tutte le regole. Questo si traduceva in uno spreco considerevole di tempo
+che avrebbero allungato il tempo di esecuzione dei test. Allora si \`e optato per una
+soluzione pi\`u moderna della classica PIPE di Linux che utilizza l'interfaccia
+a {\it socket unix} di Suricata. Tramite questa interfaccia \`e possibile caricare una
+volta sola il core e le regole e aggiungere in una coda i file pcap da analizzare.
+Si \`e utilizzato per questo motivo il comando
+\begin{verbatim}
+suricatasc --command "pcap-file <file_pcap> <directory di log>"
+\end{verbatim}
+
+\section{Analisi dei risultati con Kibana e Elasticsearch}
+
+Passiamo adesso alla descrizione di come i log e i dati in generale derivati dai
+test effettuati siano stati organizzati per fornirne una rappresentazione informativa.
+Si \`e utilizzato, come anticipato in precedenza Kibana e Elasticsearch, ma non si
+\`e utilizzato, come avviene di solito, il terzo componente dello stack, ovvero Logstash.
+Questo perch\`e la tipologia di dati raccolti necessitava di una manipolazione pi\`u approfondita di
+quella che poteva fornirci Logstash. \`E stato necessario infatti scrivere un piccolo programma
+Python, {\it elasticsearch\_feeder }, che attraversa tutte le directory dei risultati dei test e arricchisce i dati degli
+alert con quelli dei parametri di campionamento e troncamento.
+
+Un tipico alert di Suricata che \`e possibile trovare dentro il file eve.json \`e il
+seguente:
+\begin{verbatim}
+{"timestamp":"1999-03-08T15:48:07.793208-0600","flow_id":3806400292,
+"pcap_cnt":516386,"event_type":"alert","src_ip":"172.16.112.149",
+"src_port":23, "dest_ip":"135.13.216.191","dest_port":20945,
+"proto":"TCP",
+  "alert":{"action":"allowed","gid":1,"signature_id":2019284,"rev":3,
+  "signature":"ET ATTACK_RESPONSE Output of id command from HTTP server",
+  "category":"Potentially Bad Traffic","severity":2}}
+\end{verbatim}
+
+Ognuno di questi alert rappresenta all'interno del database Elasticsearch un
+documento.
+Per ogni dataset \`e stato definito lo schema dell'index di Elasticsearch come
+nell'esempio seguente sul dataset di ICtF2010:
+\begin{verbatim}
+  {
+    "ictf2010": {
+      "aliases": {},
+      "mappings": {
+        "alerts": {
+          "properties": { "adaptive_sampling": { "type": "boolean" },
+            "alert": {
+              "properties": {
+                "category": {
+                  "type": "text",
+                  "fields": {
+                    "keyword": {
+                      "type": "keyword",
+                      "ignore_above": 256 } } },
+                "signature": {
+                  "type": "text",
+                  "fields": {
+                    "keyword": {
+                      "type": "keyword",
+                      "ignore_above": 256 } } } } },
+            "category": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256 } } },
+            "dest_ip": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256 } } },
+            "dest_port": { "type": "long" },
+            "filename": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256 } } },
+            "proto": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256 } } },
+            "sampling": { "type": "long" },
+            "signature": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256 } } },
+            "src_ip": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256 } } },
+            "timestamp": {
+              "type": "date",
+              "format": "yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'SSSSSSZ" },
+            "traffic": { "type": "long" },
+            "truncate": {
+              "type": "long" } } } },
+      "settings": {
+        "index": {
+          "refresh_interval": "10s",
+          "number_of_shards": "5",
+          "provided_name": "ictf2010",
+          "number_of_replicas": "1", } } } }
+\end{verbatim}
+
+Una volta creato l'index si \`e passati alla popolazione del database con
+il programma Python elasticsearch\_feeder.py
+Vista la grande quantit\`a di log \footnote{Si sono raggiunti 12 GB di log solo per il
+testing del dataset ICtF2010}, si \`e ottimizzato l'inserimento utilizzando la
+funzione di Elasticsearch {\it bulk index}.
+
+Si \`e quindi disabilitato il refresh degli index \cite{EXP8} \cite{EXP9}
+\begin{verbatim}
+PUT /ictf2010/_settings
+{
+    "index" : {
+        "refresh_interval" : "-1"
+    }
+}
+\end{verbatim}
+
+Alla fine di ogni bulk index il valore \`e stato ripristinato ed \`e stato forzato
+il merging dei segmenti:
+\begin{verbatim}
+PUT /ictf2010/_settings
+{
+    "index" : {
+        "refresh_interval" : "10s"
+    }
+}
+
+POST /twitter/_forcemerge?max_num_segments=5
+\end{verbatim}
 
 
 
@@ -1025,6 +1309,8 @@ Ibrahim Ghafir, Vaclav Prenosil, Jakub Svoboda, Mohammad Hammoudeh,
 \bibitem{EXP5} https://mcfp.weebly.com/the-ctu-13-dataset-a-labeled-dataset-with-botnet-normal-and-background-traffic.html
 \bibitem{EXP6} https://ictf.cs.ucsb.edu/pages/the-2010-ictf.html
 \bibitem{EXP7} http://www.tcpdump.org/
+\bibitem{EXP8} https://www.elastic.co/guide/en/elasticsearch/reference/current/tune-for-indexing-speed.html
+\bibitem{EXP9} https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-update-settings.html
 \end{thebibliography}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%non numera l'ultima pagina sinistra
 \clearpage{\pagestyle{empty}\cleardoublepage}

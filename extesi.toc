@@ -25,11 +25,15 @@
 \contentsline {paragraph}{Collector}{21}
 \contentsline {section}{\numberline {2.2}Datasets}{23}
 \contentsline {section}{\numberline {2.3}Metodologie di test}{24}
-\contentsline {section}{\numberline {2.4}Una soluzione di testing alternativa}{24}
-\contentsline {subsection}{\numberline {2.4.1}Pcap2sFlow}{25}
-\contentsline {subsubsection}{Meccanismi di campionamento}{25}
-\contentsline {section}{\numberline {2.5}Metodologia di test 2}{28}
-\contentsline {chapter}{Conclusioni}{29}
-\contentsline {chapter}{\numberline {A}Prima Appendice}{31}
-\contentsline {chapter}{\numberline {B}Seconda Appendice}{33}
-\contentsline {chapter}{Bibliografia}{35}
+\contentsline {subsection}{\numberline {2.3.1}Terminologia}{24}
+\contentsline {subsection}{\numberline {2.3.2}Struttura delle directory}{25}
+\contentsline {subsection}{\numberline {2.3.3}Il cuore degli esperimenti}{26}
+\contentsline {section}{\numberline {2.4}Una soluzione di testing alternativa}{28}
+\contentsline {subsection}{\numberline {2.4.1}Pcap2sFlow}{28}
+\contentsline {subsubsection}{Meccanismi di campionamento}{28}
+\contentsline {section}{\numberline {2.5}Metodologia di test 2}{32}
+\contentsline {section}{\numberline {2.6}Analisi dei risultati con Kibana e Elasticsearch}{33}
+\contentsline {chapter}{Conclusioni}{39}
+\contentsline {chapter}{\numberline {A}Prima Appendice}{41}
+\contentsline {chapter}{\numberline {B}Seconda Appendice}{43}
+\contentsline {chapter}{Bibliografia}{45}
