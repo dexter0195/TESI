@@ -738,8 +738,8 @@ in figura 2.1.
 Si sono quindi installati i due programmi hostsflow e sflowtools su Collector e su
 Generator rispettivamente.
 Poi si \`e installato Suricata su Collector e si sono scaricate le regole base dal
-sito di {\it Emerging Threats}, e si sono abilitati i log nel formato json. \cite{EXP2}
-Infine si \`e proceduto all'installazione dello stack ELK per l'analisi dei log.
+sito di {\it Emerging Threats}. Inoltre si sono abilitati i log nel formato json. \cite{EXP2}
+Per concludere si \`e proceduto all'installazione dello stack ELK per l'analisi dei log.
 
 L'architettura finale del setup creato per le sperimentazioni aveva la struttura
 mostrata in figura 2.2 .
@@ -747,14 +747,14 @@ mostrata in figura 2.2 .
 \begin{figure}
   \begin{center}                          %centra nel mezzo della pagina
     \includegraphics[width=90mm]{images/arch.png}
-    \caption{Architettura}
+    \caption{Architettura I}
     \label{}
   \end{center}
 \end{figure}
 
-Hostsflow monitora l'interfaccia di rete {\verb enp0s8} e invia i campioni incapsulati in
+Si ha quindi che, hostsflow monitora l'interfaccia di rete {\verb enp0s8 } e invia i campioni incapsulati in
 datagrams sFlow a sflowtools sulla porta standard 6344, quest'ultimo spacchetta i campioni e
-li riscrive come se fossero dei normali pacchetti. Successivamente questi pacchetti trascritti
+li riscrive. Successivamente i pacchetti trascritti
 da sflowtool vengono dati da analizzare a Suricata, il quale opera una {\it offline analysis}.
 Infine i log generati da Suricata vengono trascritti all'interno di Elasticsearch utilizzando
 lo script {\it Elasticsearch feeder}. Ora che i dati sono indicizzati in Elasticsearch \`e
@@ -800,6 +800,8 @@ struttura del file json e di elasticserch
 
 \section{Una soluzione di testing alternativa}
 
+(spiegare anche il problema del replay del traffico)
+
 Sebbene il setup descritto nella sezione precedentemente sia quello che pi\`u si avvicina
 all'utilizzo nella vita reale di sFlow e Suricata, l'utilizzo al fine di testarne la sua
 validit\`a si \`e dimostrato poco agevole.
@@ -817,19 +819,139 @@ risultati ottenuti si sono posti in contraddizione con quanto ci si aspettava.
 
 Per sopperire alle mancanze di hostflow e testare a pieno le capacit\`a di un IDS abbinato
 a sFlow si \`e sviluppato un emulatore di sFlow che converte un file pcap in input,
-in un file pcap di pacchetti campionati secondo le tecniche sFlow.
+in un altro file pcap contenente pacchetti campionati secondo le tecniche sFlow.
 
-Si tratta di un programma scritto in C che utilizza la {\it libpcap } \cite{EXP7} 
+Si tratta di un programma scritto in C che utilizza la {\it libpcap } \cite{EXP7},
+una libreria scritta in C per analizzare il traffico {\it live} o {\it captured}.
 
+In particolare si sono utilizzate le seguenti funzioni di libreria:
+\begin{verbatim}
+pcap_dumper_t *pcap_dump_open(pcap_t *p, const char *fname);
+\end{verbatim}
 
+che apre il livecapture o il file pcap da cui leggere i pacchetti,
 
+\begin{verbatim}
+int pcap_loop(pcap_t *p, int cnt, pcap_handler callback, u_char *user);
+\end{verbatim}
 
+che processa i pacchetti da un livecapture o, come nel nostro caso da un {\it "savefile"},
+ovvero un file in formato pcap, e ovviamente infine
 
+\begin{verbatim}
+void pcap_close(pcap_t *p);
+\end{verbatim}
 
+per chiudere il "savefile".
 
+\subsubsection{Meccanismi di campionamento}
 
+Per emulare il comportamento di sFlow occorre applicare lo stesso metodo di campionamento
+utilizzato da quest'ultimo per scegliere quale pacchetto campionare e come troncare il
+pacchetto in questione.
 
+Si \`e scelto di prendere in considerazione solo il {\it Packet Sample} e di
+tralasciare il {\it Counter Sample} poich\`e quest'ultimo non gioca alcun ruolo nel
+IDS studiato.
 
+Il Pachet Sampling all'interno di sFlow utilizza un meccanismo di randomizzazione
+per determinare il pacchetto designato al campionamento. Pcap2sFlow allo stesso modo
+divide il file da campionare in {\it windows} (finestre) della dimensione del parametro
+{\it sampling rate}. All'interno di ogni finestra esso sceglie in modo random il pacchetto
+da campionare. Di seguito sono riportati i listati dell'implementazione di tali
+funzioni.
+
+\begin{verbatim}
+void select_random (cap_stat *stat) {
+  //seleziona il prossimo pacchetto in modo random partendo
+  //dall'ultima finestra considerata
+  srand ( time(NULL) ) ;
+  int x = rand();
+  stat->s = stat->start + ( x % stat->n ) ;
+}
+void next_window (cap_stat *stat){
+    //analizza la successiva finestra di pacchetti
+    stat->start = stat->stop + 1;
+    stat->stop = stat->stop + 1 + stat->n;
+    select_random(stat);
+}
+
+bool to_sample ( cap_stat *sampler_info ) {
+    //se n == 1 allora disattiva il campionamento e salva tutti
+    //i pacchetti
+    if (sampler_info->n == 1) return true;
+
+    //controlla se il pacchetto corrente deve essere campionato o meno
+    if (sampler_info->curr_sample < sampler_info->start) {
+        //se sono andato avanti con la window ma il cursore e` ancora
+        //indietro questo pacchetto sara` sicuramente da scartare
+        sampler_info->curr_sample++;
+        return false;
+    }
+    if (sampler_info->curr_sample == sampler_info->s) {
+        //se il pacchetto corrente e` quello designato per essere
+        //campionato avanza e rispondi true
+        sampler_info->curr_sample++;
+        next_window(sampler_info);
+        return true;
+    }
+    else {
+        sampler_info->curr_sample++;
+        return false;
+    }
+}
+\end{verbatim}
+
+Come descritto anche nell'RFC 3176 il seed della funzione {\verb select_random } non
+dovrebbe essere alimentato con il tempo poich\`e esso potrebbe non essere abbastanza
+casuale in reti con un elevato {\it throughput}. Infatti in quel contesto la velocit\`a di aggiornamento delle windows
+potrebbe essere pi\`u veloce della velocit\`a di aggiornamento del tempo. Tuttavia si \`e
+ritenuto che nel contesto applicativo dell'esperimento questo non possa accadere.
+
+Infine occorre troncare il pacchetto secondo una dimensione parametrizzabile,
+e questo viene effettuato dalla seguente funzione:
+
+\begin{verbatim}
+void save_packet (cap_stat *s, const struct pcap_pkthdr *header,
+                  const u_char *packet){
+    if (s->truncate_b == 0) {
+        //0 viene considerato come valore di default per
+        //"salva tutto il pacchetto"
+        pcap_dump((u_char *)s->pdumper, header, packet);
+        return;
+    }
+    if (header->caplen > s->truncate_b) {
+        u_char *new_packet = malloc(s->truncate_b);
+        memcpy(new_packet,packet,s->truncate_b);
+        pcap_dump((u_char *)s->pdumper, header, new_packet);
+        free(new_packet);
+    }
+    else {
+        pcap_dump((u_char *)s->pdumper, header, packet); } }
+\end{verbatim}
+
+Si \`e inoltre utilizzata la funzione di libreria {\it getopt} per rendere
+il programma altamente parametrizzabile e {\it "script-friendly"}.
+Con il comando {\verb --help } \`e possibile visualizzare tutte le opzioni disponibili:
+
+\begin{verbatim}
+
+root@collector:# ./pcap2sflow --help
+usage: ./pcap2sflow --infile <input_file.pcap> --outfile
+        <output_file.pcap>
+
+options:
+-t      --trunkate-pkts <bytes>    truncate packet size to (bytes)
+                                   size
+-n      --no-truncate-pkts         do not truncate packets
+-s      --sample-n <N>             sample 1 every N packets seen
+-N      --no-sample                do not sample every N packets,
+                                   take them all!
+-h      --help                     show this help
+
+\end{verbatim}
+
+\section{Metodologia di test 2}
 
 
 

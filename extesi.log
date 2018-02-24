@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Arch Linux) (preloaded format=pdflatex 2017.11.30)  24 FEB 2018 16:10
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Arch Linux) (preloaded format=pdflatex 2017.11.30)  24 FEB 2018 17:34
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -420,50 +420,102 @@ Package pdftex.def Info: Requested size: 256.0748pt x 170.02518pt on input line 
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
- [22 <./images/rete.png>] [23 <./images/arch.png (PNG copy)>] [24] [25] [26
+ [22 <./images/rete.png>] [23 <./images/arch.png (PNG copy)>] [24]
+Overfull \hbox (48.42522pt too wide) in paragraph at lines 837--837
+[]\OT1/cmtt/m/n/12 int pcap_loop(pcap_t *p, int cnt, pcap_handler callback, u_char *user);[] 
+ []
 
 
-] [27
+Overfull \hbox (24.85358pt too wide) in paragraph at lines 858--864
+\OT1/cmr/m/n/12 miz-za-zio-ne per de-ter-mi-na-re il pac-chet-to de-si-gna-to al cam-pio-na-men-to. Pcap2sFlow
+ []
 
-] [28
+[25]
+Overfull \hbox (42.25021pt too wide) in paragraph at lines 904--904
+[]    \OT1/cmtt/m/n/12 //controlla se il pacchetto corrente deve essere campionato o meno[] 
+ []
+
+
+Overfull \hbox (36.07521pt too wide) in paragraph at lines 904--904
+[]        \OT1/cmtt/m/n/12 //se sono andato avanti con la window ma il cursore e` ancora[] 
+ []
+
+
+Overfull \hbox (11.3752pt too wide) in paragraph at lines 904--904
+[]        \OT1/cmtt/m/n/12 //indietro questo pacchetto sara` sicuramente da scartare[] 
+ []
+
+
+Overfull \hbox (11.3752pt too wide) in paragraph at lines 904--904
+[]        \OT1/cmtt/m/n/12 //se il pacchetto corrente e` quello designato per essere[] 
+ []
+
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+ [26]
+Overfull \hbox (5.2002pt too wide) in paragraph at lines 932--932
+[]\OT1/cmtt/m/n/12 void save_packet (cap_stat *s, const struct pcap_pkthdr *header,[] 
+ []
+
+[27]
+Overfull \hbox (17.5502pt too wide) in paragraph at lines 953--953
+[]\OT1/cmtt/m/n/12 -t      --trunkate-pkts <bytes>    truncate packet size to (bytes)[] 
+ []
+
+
+Overfull \hbox (5.2002pt too wide) in paragraph at lines 953--953
+[]\OT1/cmtt/m/n/12 -s      --sample-n <N>             sample 1 every N packets seen[] 
+ []
+
+
+Overfull \hbox (11.3752pt too wide) in paragraph at lines 953--953
+[]\OT1/cmtt/m/n/12 -N      --no-sample                do not sample every N packets,[] 
+ []
+
+[28] [29
+
+
+
+] [30
 
 ]
 Appendice A.
-[29] [30
-
-]
-Appendice B.
 [31] [32
 
 ]
+Appendice B.
+[33] [34
 
-./extesi.tex:880: Package inputenc Error: Keyboard character used is undefined
+]
+
+./extesi.tex:1002: Package inputenc Error: Keyboard character used is undefined
 (inputenc)                in inputencoding `latin1'.
 
 See the inputenc package documentation for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.880 \bibitem{K4} "NIST â€
-                           “ Guide to Intrusion Detection and Prevention Sys...
+l.1002 \bibitem{K4} "NIST â€
+                            “ Guide to Intrusion Detection and Prevention Sy...
 You need to provide a definition with \DeclareInputText 
 or \DeclareInputMath before using this key.
 
 
-./extesi.tex:880: Package inputenc Error: Keyboard character used is undefined
+./extesi.tex:1002: Package inputenc Error: Keyboard character used is undefined
 (inputenc)                in inputencoding `latin1'.
 
 See the inputenc package documentation for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.880 \bibitem{K4} "NIST â€“
-                             Guide to Intrusion Detection and Prevention Sys...
+l.1002 \bibitem{K4} "NIST â€“
+                              Guide to Intrusion Detection and Prevention Sy...
 You need to provide a definition with \DeclareInputText 
 or \DeclareInputMath before using this key.
 
-./extesi.tex:891: Misplaced alignment tab character &.
-l.891 ...and IPFIX". IEEE Communications Surveys &
+./extesi.tex:1013: Misplaced alignment tab character &.
+l.1013 ...nd IPFIX". IEEE Communications Surveys &
                                                    Tutorials. IEEE Communica...
 I can't figure out why you would want to use a tab mark
 here. If you just want an ampersand, the remedy is
@@ -472,39 +524,38 @@ up above has ended a previous alignment prematurely,
 you're probably due for more error messages, and you
 might try typing `S' now just to see what is salvageable.
 
-[33]
-Underfull \hbox (badness 10000) in paragraph at lines 898--899
+[35]
+Underfull \hbox (badness 10000) in paragraph at lines 1020--1021
 []\OT1/cmr/m/n/12 SCADA STA-TI-STICS MO-NI-TO-RING USING THE Ela-stic
  []
 
 
-Underfull \hbox (badness 4582) in paragraph at lines 898--899
+Underfull \hbox (badness 4582) in paragraph at lines 1020--1021
 \OT1/cmr/m/n/12 Stack(Elasticsearch, Log-stash, Ki-ba-na), Ja-mes Ha-mil-ton, Brad
  []
 
 
-Underfull \hbox (badness 1910) in paragraph at lines 898--899
+Underfull \hbox (badness 1910) in paragraph at lines 1020--1021
 \OT1/cmr/m/n/12 Scho-field, Ma-nuel Gon-za-lez Ber-ges, Jean-Charles Tour-nier-CERN,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 904--905
+Underfull \hbox (badness 10000) in paragraph at lines 1026--1027
 []\OT1/cmr/m/n/12 https://mcfp.weebly.com/the-ctu-13-dataset-a-labeled-dataset-with-
  []
 
-[34] [35] [36
+[36] [37] [38
 
 
-] [37
+] [39
 
 ] (./extesi.aux)
 
 LaTeX Warning: There were multiply-defined labels.
 
  )
-(\end occurred inside a group at level 2)
+(\end occurred inside a group at level 1)
 
-### simple group (level 2) entered at line 756 ({)
 ### simple group (level 1) entered at line 687 ({)
 ### bottom level 
 Here is how much of TeX's memory you used:
@@ -514,12 +565,12 @@ Here is how much of TeX's memory you used:
  8375 multiletter control sequences out of 15000+600000
  13607 words of font info for 56 fonts, out of 8000000 for 9000
  1143 hyphenation exceptions out of 8191
- 41i,10n,43p,792b,424s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 41i,10n,43p,792b,438s stack positions out of 5000i,500n,10000p,200000b,80000s
 </usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmti12.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt12.pfb>
-Output written on extesi.pdf (47 pages, 296107 bytes).
+Output written on extesi.pdf (49 pages, 303146 bytes).
 PDF statistics:
- 197 PDF objects out of 1000 (max. 8388607)
- 131 compressed objects within 2 object streams
+ 204 PDF objects out of 1000 (max. 8388607)
+ 136 compressed objects within 2 object streams
  0 named destinations out of 1000 (max. 500000)
  31 words of extra memory for PDF output out of 10000 (max. 10000000)
 
