@@ -18,7 +18,16 @@
 \contentsline {section}{\numberline {1.3}Packet sampling e Intrusion Detection}{13}
 \contentsline {subsection}{\numberline {1.3.1}Metodi di rilevazione flow-based}{14}
 \contentsline {section}{\numberline {1.4}Elasticsearch e lo stack ELK}{17}
-\contentsline {chapter}{Conclusioni}{19}
-\contentsline {chapter}{\numberline {A}Prima Appendice}{21}
-\contentsline {chapter}{\numberline {B}Seconda Appendice}{23}
-\contentsline {chapter}{Bibliografia}{25}
+\contentsline {chapter}{\numberline {2}Proposta}{19}
+\contentsline {section}{\numberline {2.1}sFlow + Suricata}{19}
+\contentsline {subsection}{\numberline {2.1.1}L'architettura}{20}
+\contentsline {paragraph}{Generator}{20}
+\contentsline {paragraph}{Collector}{21}
+\contentsline {section}{\numberline {2.2}Datasets}{23}
+\contentsline {section}{\numberline {2.3}Metodologie di test}{24}
+\contentsline {section}{\numberline {2.4}Una soluzione di testing alternativa}{24}
+\contentsline {subsection}{\numberline {2.4.1}Pcap2sFlow}{25}
+\contentsline {chapter}{Conclusioni}{27}
+\contentsline {chapter}{\numberline {A}Prima Appendice}{29}
+\contentsline {chapter}{\numberline {B}Seconda Appendice}{31}
+\contentsline {chapter}{Bibliografia}{33}
