@@ -638,13 +638,12 @@ proposta di soluzione al problema del monitoraggio basato su packet sampling. Si
 a descrivere i vari contesti di sperimentazione, i tool utilizzati e le modalit\`a di
 utilizzo di questi ultimi. Si andr\`a poi ad introdurre il software {\it pcap2sflow}, sviluppato per
 simulare il comportamento di sFlow e garantire una riproducibilit\`a dei test effettuati.
-Infine si descriveranno le modalit\`a di analisi dei dati raccolti e si fornir\`a un
-approccio alternativo al campionamento statico, ovvero un campionamento adattivo.
+Infine si descriveranno le modalit\`a di analisi dei dati raccolti.
 
 \section{sFlow + Suricata}
 
 Data la natura del protocollo sFlow, ovvero quella di poter esportare l'header di
-un numero parametrizzabile di pacchetti passanti attraverso un interfaccia verso
+un numero parametrizzabile di pacchetti passanti attraverso un interfaccia di rete verso
 un altro componente della rete, la conclusione pi\`u immediata a cui si \`e giunti
 e stata quella di analizzare questi header campionati con l'IDS Suricata.
 Come visto nel capitolo precedente, Suricata permette identificare possibili {\it threat}
@@ -669,21 +668,24 @@ con le caratteristiche elencate in tabella.
 \begin{center}
   \begin{tabular}{| l | r |}
     \hline
-    CPU count & 2 \\ \hline
-    Architettura processore & x86\_64 \\ \hline
-    RAM size & 3GB \\ \hline
-    Num interfacce di rete & 2 \\ \hline
+    Numero di CPU & 2 \\ \hline
+    Architettura del processore & x86\_64 \\ \hline
+    RAM & 3GB \\ \hline
+    Numero delle interfacce di rete & 2 \\ \hline
     Sistema operativo & Linux \\ \hline
     Distribuzione & Debian 8 \\ \hline
-    Versione Kernel & 4.9.0-4-amd64 \\ \hline
+    Versione del Kernel & 4.9.0-4-amd64 \\ \hline
   \end{tabular}
 \end{center}
 
-Sono state quindi create tali macchine virtuali usando il programma VirtualBox \cite{EXP1} e vi \`e stato
-installato Debian 8.
+\subsubsection{Installazione e configurazione}
 
-Si \`e passato poi alla configurazione delle interfacce di rete tramite il file \linebreak
-{\verb /etc/network/interfaces}  come segue:
+Una volta create le macchine virtuali usando il programma VirtualBox \cite{EXP1} e vi \`e stato
+installato Debian 8 \footnote{Si tralasciano i dettagli sulla creazione delle macchine e sull'installazione
+di Debian, ma \`e comunque presente in bibliografia un riferimento rigurardo alla procedura seguita \cite{EXP10} \cite{EXP11} }.
+
+Si \`e passato poi alla configurazione delle interfacce di rete, su entrambe le macchine, tramite il file \linebreak
+{\verb /etc/network/interfaces }  come segue:
 
 \paragraph{Generator}
 \begin{verbatim}
@@ -753,11 +755,11 @@ mostrata in figura 2.2 .
 \end{figure}
 
 Si ha quindi che, hostsflow monitora l'interfaccia di rete {\verb enp0s8 } e invia i campioni incapsulati in
-datagrams sFlow a sflowtools sulla porta standard 6344, quest'ultimo spacchetta i campioni e
+datagrams sFlow a sflowtools sulla porta standard 6343, quest'ultimo spacchetta i campioni e
 li riscrive. Successivamente i pacchetti trascritti
 da sflowtool vengono dati da analizzare a Suricata, il quale opera una {\it offline analysis}.
 Infine i log generati da Suricata vengono trascritti all'interno di Elasticsearch utilizzando
-lo script {\it Elasticsearch feeder}. Ora che i dati sono indicizzati in Elasticsearch \`e
+lo script {\it elasticsearch\_feeder.py}. Ora che i dati sono indicizzati in Elasticsearch \`e
 possibile esplorarli e creare delle visualizzazioni all'interno dell'interfaccia web di Kibana.
 
 \section{Datasets}
@@ -773,12 +775,12 @@ I dataset scelti per il testing sono stati:
   \item ICtF 2010 {\it (International Capture the Flag, ed. 2010)} \cite{EXP6}
 \end{itemize}
 
-Il {\it DARPA Intrusion Detection Data Set (1999)} \`e un dataset composto da traffico misto.
-Esso \`e stato acquisito in tre settimane di training di un IDS. Nella prima e la terza settimana non
+Il {\it DARPA Intrusion Detection Data Set (1999)} \`e un dataset composto da traffico misto,
+ acquisito in tre settimane di training di un IDS. Nella prima e la terza settimana non
 sono presenti attacchi mentre nella seconda settimana sono stati eseguiti degli attacchi
 principalmente mirati a far scattare le regole degli IDS oggetto di test.
 
-Il {\it CTU-13} \`e un dataset sul traffico {\it botnet} che \`e stato acquisito nell' Università CTU,
+Il {\it CTU-13} \`e un dataset sul traffico {\it botnet} che \`e stato acquisito nell' Universit\'a CTU,
 Repubblica Ceca, nel 2011. L' obiettivo del dataset era quello di ottenere un' ampia cattura
 del traffico delle botnet reali mescolato al traffico normale e al traffico di sottofondo.
 Il set di dati CTU-13 consiste in tredici acquisizioni (chiamate scenari) di diversi campioni
@@ -788,26 +790,27 @@ diversi protocolli e ha eseguito diverse azioni
 Infine {\it ICtF 2010} \`e un dataset ricavato dal traffico generato durante l'edizione del
 2010 dell'International Capture the Flag di Santa Barbara. Si tratta quindi di un dataset
 derivante da una competizione in cui si mettono alla prova le capacit\`a di {\it penetration
-testing} dei partecipanti. Esso costituisce per questo motivo un ottimo dataset di testing poich\`e non \`e stato
+testing} dei partecipanti. Esso costituisce per questo motivo un ottimo dataset di testing poich\`e
+, a differenza dei precedenti, non \`e stato
 costruito appositamente per studiare determinati comportamenti di un IDS in specifiche
-condizioni, a differenza dei precedenti.
+condizioni.
 
 \section{Metodologie di test}
 
-Andiamo adesso ad elencare le metodologie dei test effettuati, l'organizzazione delle
+Si vanno adesso ad elencare le metodologie dei test effettuati, la terminologia, l'organizzazione delle
 directory e lo schema del database di Elasticsearch.
 
 \subsection{Terminologia}
 
 \begin{itemize}
-  \item {\it Sampling Rate} : \`e la frequenza di campionamento operata dall'Agent sFlow,
+  \item {\it \bf Sampling Rate} : \`e la frequenza di campionamento operata dall'Agent sFlow,
   ad esempio un Sampling Rate uguale a 4 vuol dire che ogni 4 pacchetti uno viene
   campionato
-  \item {\it Troncamento} : \`e la dimensione massima del pacchetto scelto per il campionamento
+  \item {\it \bf Troncamento} : \`e la dimensione massima del pacchetto scelto per il campionamento
   , tale pacchetto viene troncato fino a {\it t} Bytes e inviato al collector.
-  \item {\it Setup On-Wire} : \`e il setup per cui il traffico viene inoltrato interamente
+  \item {\it \bf Setup On-Wire} : \`e il setup per cui il traffico viene inoltrato interamente
   a Suricata per l'analisi. Esso corrisponde al normale utilizzo del software in questione.
-  \item {\it Alert} : \`e un messaggio di allarme dell' IDS che notifica l'amministratore
+  \item {\it \bf Alert} : \`e un messaggio di allarme dell' IDS che notifica l'amministratore
   di una violazione delle policy di sicurezza.
 \end{itemize}
 
@@ -823,7 +826,7 @@ se essi siano indipendenti l'uno dall'altro.
 Con l'obiettivo di tenere organizzati i risultati dei numerosi test effettuati si
 \`e scelto di seguire una rigorosa struttura delle directory e dei file.
 
-Partendo dalla directory {\it root} del progetto troviamo le sottodirectory
+Partendo dalla directory {\it root} del progetto si trovano le sottodirectory
 dei dataset analizzati, all'interno di esse vi sono i test numerati da 1 a {\it n} e all'interno
 di ogni directory di test troviamo i files: {\verb alert-debug.log }, {\verb eve.json },
 {\verb fast.log }, {\verb pcap_size.txt }, {\verb stats.log }, {\verb test_info.txt }. Dove:
@@ -843,11 +846,6 @@ di ogni directory di test troviamo i files: {\verb alert-debug.log }, {\verb eve
         pcap_size.txt
         stats.log
         test_ingo.txt
-      .
-      .
-    .
-
-
 \end{verbatim}
 
 \subsection{Il cuore degli esperimenti}
@@ -889,29 +887,31 @@ sflowtool -p 6343 -t | suricata -c /etc/suricata/suricata.yaml -r -
 Nella seconda parte del comando di sopra, il traffico viene passato a Suricata
 che effettua un analisi offline trattando l'input come se fosse un normale file pcap.
 
-A questo punto tutto \`e pronto e il traffico dei dataset puo\`o essere iniettato
-nella rete all'interfaccia monitorata da hsflowd. Quindi, posizionandosi sul collector si esegue il
+A questo punto tutto \`e pronto e il traffico dei dataset pu\`o essere iniettato
+nella rete all'interfaccia monitorata da hsflowd. Quindi, posizionandosi sul Generator stesso si esegue il
 comando:
 \begin{verbatim}
   tcpreplay -i enp0s8 <file pcap da analizzare>
 \end{verbatim}
 
+\paragraph{Problemi}
+
 \`E tuttavia emerso un problema da questa metodologia, tcpreplay cerca di iniettare
 il traffico nell'interfaccia rispettando, come e giusto che sia, il timing di arrivo
 dei pacchetti registrati nel file pcap. Questo sebbene assicuri una precisione certamente
-desiderabile oltre a garantisce la riproducibilit\`a dei test, non \`e una strada percorribile
+desiderabile oltre a garantire la riproducibilit\`a dei test, non \`e una strada percorribile
 (almeno per gli obiettivi di questa tesi) poich\`e i test richiederebbero troppo tempo per
 essere portati a termine.
 \`E altres\'i vero che \`e possibile istruire tcpreplay di non rispettare il timing,
-ma questo andrebbe a invalidare quei regole di Suricata che fanno affidamento sul timing di arrivo dei
-pacchetti, come ad esempio il rilevamento del famoso attacco {\it Slow HTTP}.
+ma questo andrebbe a invalidare quei regole di Suricata che fanno affidamento su di esso,
+come ad esempio il rilevamento del famoso attacco {\it Slow HTTP}.
 
 Inoltre, riguardo al voler determinare la l'incisivit\`a dei parametri sampling rate e
 troncamento, \`e emerso che il programma utilizzato come Agent, hsflowd, non \`e sufficientemente
 parametrizzabile.
 In particolare la dimensione massima del
 pacchetto che pu\`o essere esportato, ovvero quello che viene chiamto {\it header size} e che abbiamo
-identificato come troncamento, \`e {\it hard-coded} a massimo 256 Bytes.
+identificato come troncamento, \`e {\it hard-coded} ad un massimo di 256 Bytes.
 Sebbene sia stato spiegato dalla InMon Corp. che tale dimensione massima \`e dovuta all'architettura
 di sFlow e che \`e necessaria per garantire una scalabilit\`a del prodotto, alle
 finalit\`a di testing questa si \`e rivelata una grossa limitazione, soprattuto quando i
@@ -968,7 +968,7 @@ pacchetto in questione.
 
 Si \`e scelto di prendere in considerazione solo il {\it Packet Sample} e di
 tralasciare il {\it Counter Sample} poich\`e quest'ultimo non gioca alcun ruolo nel
-IDS studiato.
+IDS studiato (si veda la sezione 1.2.1).
 
 Il Pachet Sampling all'interno di sFlow utilizza un meccanismo di randomizzazione
 per determinare il pacchetto designato al campionamento. Pcap2sFlow allo stesso modo
@@ -997,10 +997,11 @@ bool to_sample ( cap_stat *sampler_info ) {
     //i pacchetti
     if (sampler_info->n == 1) return true;
 
-    //controlla se il pacchetto corrente deve essere campionato o meno
+    //controlla se il pacchetto corrente deve essere campionato
     if (sampler_info->curr_sample < sampler_info->start) {
-        //se sono andato avanti con la window ma il cursore e` ancora
-        //indietro questo pacchetto sara` sicuramente da scartare
+        //se sono andato avanti con la window ma il cursore e`
+        //ancora indietro questo pacchetto sara` sicuramente
+        //da scartare
         sampler_info->curr_sample++;
         return false;
     }
@@ -1048,7 +1049,7 @@ void save_packet (cap_stat *s, const struct pcap_pkthdr *header,
 
 Si \`e inoltre utilizzata la funzione di libreria {\it getopt} per rendere
 il programma altamente parametrizzabile e {\it "script-friendly"}.
-Con il comando {\verb --help } \`e possibile visualizzare tutte le opzioni disponibili:
+Con il parametro {\verb --help } \`e possibile visualizzare tutte le opzioni disponibili:
 
 \begin{verbatim}
 
@@ -1071,7 +1072,10 @@ options:
 
 Data l'enormit\`a dei dataset da testare ed il numero di parametri che si intendevano
 testare, il lavoro di testing e catalogazione \`e stato interamente svolto mediante l'uso di
-script in Bash e Python.
+script in Bash e Python. Quando ci si \`e chiesti se sviluppare un programma unico
+per il test o una {\it suite} di tools si \`e scelto di abbracciare la filosofia Linux
+del {\it "Do One Thing And Do It Well"} \cite{EXP12}, infatti un programma unico, date le
+molte sfaccettature del progetto, sarebbe stato poco pratico.
 
 Solitamente (tranne nel caso del dataset di DARPA) il {\it dump} del traffico era
 diviso in segmenti della dimensione di 400 Megabyte circa. Lo script sviluppato si
@@ -1082,7 +1086,7 @@ dimensione del file pcap dopo il campionamento.
 In questo modo \`e stato possibile semplificare l'architettura illustrata precedentemente
 in figura 2.2 con quella della figura 2.3, in cui si pu\`o notare che il software
 pcap2sflow ha sostituito sia hostsflow che sflowtools, impersonando quindi sia
-l'agent che il collector.
+l'Agent che il Collector.
 
 \begin{figure}
   \begin{center}                          %centra nel mezzo della pagina
@@ -1101,7 +1105,7 @@ pcap e subito darlo ad analizzare a Suricata, con il comando:
 \end{verbatim}
 per ogni test che si sarebbe andato ad effettuare Suricata avrebbe dovuto ricaricare
 tutto il core e tutte le regole. Questo si traduceva in uno spreco considerevole di tempo
-che avrebbero allungato il tempo di esecuzione dei test. Allora si \`e optato per una
+che avrebbe allungato il tempo di esecuzione dei test. Allora si \`e optato per una
 soluzione pi\`u moderna della classica PIPE di Linux che utilizza l'interfaccia
 a {\it socket unix} di Suricata. Tramite questa interfaccia \`e possibile caricare una
 volta sola il core e le regole e aggiungere in una coda i file pcap da analizzare.
@@ -1114,8 +1118,8 @@ suricatasc --command "pcap-file <file_pcap> <directory di log>"
 
 Passiamo adesso alla descrizione di come i log e i dati in generale derivati dai
 test effettuati siano stati organizzati per fornirne una rappresentazione informativa.
-Si \`e utilizzato, come anticipato in precedenza Kibana e Elasticsearch, ma non si
-\`e utilizzato, come avviene di solito, il terzo componente dello stack, ovvero Logstash.
+Si \`e utilizzato, come anticipato in precedenza Kibana ed Elasticsearch, ma non si
+\`e utilizzato come avviene di solito, il terzo componente dello stack, ovvero Logstash.
 Questo perch\`e la tipologia di dati raccolti necessitava di una manipolazione pi\`u approfondita di
 quella che poteva fornirci Logstash. \`E stato necessario infatti scrivere un piccolo programma
 Python, {\it elasticsearch\_feeder }, che attraversa tutte le directory dei risultati dei test e arricchisce i dati degli
@@ -1135,7 +1139,7 @@ seguente:
 
 Ognuno di questi alert rappresenta all'interno del database Elasticsearch un
 documento.
-Per ogni dataset \`e stato definito lo schema dell'index di Elasticsearch come
+Per ogni dataset \`e stato definito lo schema dell'index di Elasticsearch, come
 nell'esempio seguente sul dataset di ICtF2010:
 \begin{verbatim}
   {
@@ -1216,7 +1220,7 @@ Vista la grande quantit\`a di log \footnote{Si sono raggiunti 12 GB di log solo 
 testing del dataset ICtF2010}, si \`e ottimizzato l'inserimento utilizzando la
 funzione di Elasticsearch {\it bulk index}.
 
-Si \`e quindi disabilitato il refresh degli index \cite{EXP8} \cite{EXP9}
+Si \`e allora disabilitato temporaneamente il refresh degli index \cite{EXP8} \cite{EXP9}
 \begin{verbatim}
 PUT /ictf2010/_settings
 {
@@ -1226,7 +1230,7 @@ PUT /ictf2010/_settings
 }
 \end{verbatim}
 
-Alla fine di ogni bulk index il valore \`e stato ripristinato ed \`e stato forzato
+E alla fine di ogni bulk index il valore \`e stato ripristinato ed \`e stato forzato
 il merging dei segmenti:
 \begin{verbatim}
 PUT /ictf2010/_settings
@@ -1250,7 +1254,7 @@ che era invece benevolo.
 La valutazione dei falsi positivi \`e stata effettuata mediante un altro programma
 Python, scritto appositamente sempre utilizzando le API di Elasticsearch.
 Non \`e stato possibile infatti conteggiare i falsi positivi gi\`a dall'interno di
-Kibana a partire dai dati originali poich\`e Elasticsearch non permette, a
+Kibana a partire dai dati gi\`a presenti poich\`e Elasticsearch non permette, a
 differenza dei database relazionali, di effettuare delle subqueries.
 
 Il programma Python, che va sotto il nome di false\_positives.py, confronta le signature
@@ -1260,18 +1264,41 @@ due valori \`e stata aggiunta in un ulteriore index, appositamente creato per il
 dei falsi positivi.
 
 false\_positives.py effettua una query con aggregazione sul valore "signature.keyword" nei
-documenti con sampling rate = 1 e truncate = 600 ne salva i valori e poi per ogni combinazione
-di parametri effettua una seconda query con aggregazione sullo stesso valore, infine la differenza
+documenti con sampling rate = 1 e truncate = 600 (presi come riferimento per il setup On-Wire)
+ne salva i valori e poi per ogni combinazione
+di parametri effettua una seconda query con aggregazione sullo stesso valore; infine la differenza
 tra i due valori ottenuta viene usata per creare tanti documenti quanti sono i falsi positivi.
 Occorre notare che sebbene si creino molti documenti, data la struttura di Elasticsearch
 e del suo Inverted Index, questo non occupa molto spazio e se ne guadagna in comodit\`a una volta che
 si proceder\`a col creare le visualizzazioni.
 
-\section{Campionamento adattivo}
 
 
+\chapter{Discussione dei risultati}                %crea il capitolo
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%imposta l'intestazione di pagina
+\lhead[\fancyplain{}{\bfseries\thepage}]{\fancyplain{}{\bfseries\rightmark}}
 
+In questo capitolo si vanno ad elencare i criteri di valutazione dei risultati
+ottenuti dai test e se ne illustreranno e discuteranno i contenuti degli stessi.
 
+Infine si proporr\`a un approccio alternativo al campionamento statico, ovvero
+il campionamento adattivo.
+
+\section{Criteri di valutazione}
+In ogni contesto di sperimentazione, ovvero al variare di parametri dei test e di
+dataset si sono osservati i comportamenti dei seguenti indicatori:
+\begin{itemize}
+  \item {\bf Alert} : la quantit\`a totale di alert sollevati da suricata
+  \item {\bf Falsi positivi} : la quantit\`a di alert che nel setup On-Wire
+  non \`e stata rilevata, e che per questo motivo costituisce sicuramente un false positivo
+  \item {\bf Signature} : la tipologia di signature rilevata e la loro quantit\`a
+  \item {\bf Traffico}: la quantit\`a in Bytes di traffico inviata per l'analisi
+  a Suricata
+  \item{\bf Capacit\`a a posteriori di identificare la sorgente e la destinazione di un
+  attacco} : Questo indicatore risulta particolarmente utile nel campo dell'analisi forense,
+  ovvero consente di identificare una volta scoperto l'attacco quali sono stati gli
+  host coinvolti e da dove provenivano gli attaccanti.
+\end{itemize}
 
 
 
@@ -1346,6 +1373,9 @@ Ibrahim Ghafir, Vaclav Prenosil, Jakub Svoboda, Mohammad Hammoudeh,
 \bibitem{EXP7} http://www.tcpdump.org/
 \bibitem{EXP8} https://www.elastic.co/guide/en/elasticsearch/reference/current/tune-for-indexing-speed.html
 \bibitem{EXP9} https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-update-settings.html
+\bibitem{EXP10} https://docs.oracle.com/cd/E26217_01/E26796/html/qs-create-vm.html
+\bibitem{EXP11} https://www.debian.org/releases/jessie/amd64/
+\bibitem{EXP12} Raymond, Eric S. (2003-09-23). "Basics of the Unix Philosophy". The Art of Unix Programming. Addison-Wesley Professional
 \end{thebibliography}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%non numera l'ultima pagina sinistra
 \clearpage{\pagestyle{empty}\cleardoublepage}

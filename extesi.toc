@@ -21,6 +21,7 @@
 \contentsline {chapter}{\numberline {2}Proposta}{19}
 \contentsline {section}{\numberline {2.1}sFlow + Suricata}{19}
 \contentsline {subsection}{\numberline {2.1.1}L'architettura}{20}
+\contentsline {subsubsection}{Installazione e configurazione}{20}
 \contentsline {paragraph}{Generator}{20}
 \contentsline {paragraph}{Collector}{21}
 \contentsline {section}{\numberline {2.2}Datasets}{23}
@@ -28,14 +29,16 @@
 \contentsline {subsection}{\numberline {2.3.1}Terminologia}{24}
 \contentsline {subsection}{\numberline {2.3.2}Struttura delle directory}{25}
 \contentsline {subsection}{\numberline {2.3.3}Il cuore degli esperimenti}{26}
+\contentsline {paragraph}{Problemi}{27}
 \contentsline {section}{\numberline {2.4}Una soluzione di testing alternativa}{28}
 \contentsline {subsection}{\numberline {2.4.1}Pcap2sFlow}{28}
 \contentsline {subsubsection}{Meccanismi di campionamento}{28}
 \contentsline {section}{\numberline {2.5}Metodologia di test 2}{32}
 \contentsline {section}{\numberline {2.6}Analisi dei risultati con Kibana e Elasticsearch}{33}
 \contentsline {subsubsection}{Analisi dei falsi positivi}{37}
-\contentsline {section}{\numberline {2.7}Campionamento adattivo}{38}
-\contentsline {chapter}{Conclusioni}{39}
-\contentsline {chapter}{\numberline {A}Prima Appendice}{41}
-\contentsline {chapter}{\numberline {B}Seconda Appendice}{43}
-\contentsline {chapter}{Bibliografia}{45}
+\contentsline {chapter}{\numberline {3}Discussione dei risultati}{39}
+\contentsline {section}{\numberline {3.1}Criteri di valutazione}{39}
+\contentsline {chapter}{Conclusioni}{41}
+\contentsline {chapter}{\numberline {A}Prima Appendice}{43}
+\contentsline {chapter}{\numberline {B}Seconda Appendice}{45}
+\contentsline {chapter}{Bibliografia}{47}
