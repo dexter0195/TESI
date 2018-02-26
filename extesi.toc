@@ -38,7 +38,11 @@
 \contentsline {subsubsection}{Analisi dei falsi positivi}{37}
 \contentsline {chapter}{\numberline {3}Discussione dei risultati}{39}
 \contentsline {section}{\numberline {3.1}Criteri di valutazione}{39}
-\contentsline {chapter}{Conclusioni}{41}
-\contentsline {chapter}{\numberline {A}Prima Appendice}{43}
-\contentsline {chapter}{\numberline {B}Seconda Appendice}{45}
-\contentsline {chapter}{Bibliografia}{47}
+\contentsline {section}{\numberline {3.2}Risultati}{40}
+\contentsline {subsection}{\numberline {3.2.1}ICtF2010}{40}
+\contentsline {subsection}{\numberline {3.2.2}DARPA Dataset}{42}
+\contentsline {subsubsection}{Risultati con regole di default}{42}
+\contentsline {chapter}{Conclusioni}{45}
+\contentsline {chapter}{\numberline {A}Prima Appendice}{47}
+\contentsline {chapter}{\numberline {B}Seconda Appendice}{49}
+\contentsline {chapter}{Bibliografia}{51}

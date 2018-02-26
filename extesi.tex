@@ -638,7 +638,7 @@ proposta di soluzione al problema del monitoraggio basato su packet sampling. Si
 a descrivere i vari contesti di sperimentazione, i tool utilizzati e le modalit\`a di
 utilizzo di questi ultimi. Si andr\`a poi ad introdurre il software {\it pcap2sflow}, sviluppato per
 simulare il comportamento di sFlow e garantire una riproducibilit\`a dei test effettuati.
-Infine si descriveranno le modalit\`a di analisi dei dati raccolti.
+Infine si descriveranno le modalit\`a di catalogazione dei dati raccolti.
 
 \section{sFlow + Suricata}
 
@@ -1243,8 +1243,6 @@ PUT /ictf2010/_settings
 POST /twitter/_forcemerge?max_num_segments=5
 \end{verbatim}
 
-PARLARE DELL'INVERTED INDEX e di come ha ridotto le quantit\`a dei log
-
 \subsubsection{Analisi dei falsi positivi}
 
 Di fondamentale importanza nell'analisi prestazionale di un IDS \`e il conteggio
@@ -1269,9 +1267,8 @@ ne salva i valori e poi per ogni combinazione
 di parametri effettua una seconda query con aggregazione sullo stesso valore; infine la differenza
 tra i due valori ottenuta viene usata per creare tanti documenti quanti sono i falsi positivi.
 Occorre notare che sebbene si creino molti documenti, data la struttura di Elasticsearch
-e del suo Inverted Index, questo non occupa molto spazio e se ne guadagna in comodit\`a una volta che
+e del suo Inverted Index \cite{EXP13}, questo non occupa molto spazio e se ne guadagna in comodit\`a una volta che
 si proceder\`a col creare le visualizzazioni.
-
 
 
 \chapter{Discussione dei risultati}                %crea il capitolo
@@ -1279,10 +1276,12 @@ si proceder\`a col creare le visualizzazioni.
 \lhead[\fancyplain{}{\bfseries\thepage}]{\fancyplain{}{\bfseries\rightmark}}
 
 In questo capitolo si vanno ad elencare i criteri di valutazione dei risultati
-ottenuti dai test e se ne illustreranno e discuteranno i contenuti degli stessi.
+ottenuti dai test e se ne discuteranno i contenuti degli stessi.
 
 Infine si proporr\`a un approccio alternativo al campionamento statico, ovvero
 il campionamento adattivo.
+
+(ACCENNI SU INVERTED INDEX)
 
 \section{Criteri di valutazione}
 In ogni contesto di sperimentazione, ovvero al variare di parametri dei test e di
@@ -1297,13 +1296,149 @@ dataset si sono osservati i comportamenti dei seguenti indicatori:
   \item{\bf Capacit\`a a posteriori di identificare la sorgente e la destinazione di un
   attacco} : Questo indicatore risulta particolarmente utile nel campo dell'analisi forense,
   ovvero consente di identificare una volta scoperto l'attacco quali sono stati gli
-  host coinvolti e da dove provenivano gli attaccanti.
+  host coinvolti e da dove provenivano gli attaccanti
+  \item {\bf Tempo di reazione} : la differenza di tempo per la rilevazione di
+  un attacco in corso
 \end{itemize}
 
+\section{Risultati}
+
+Per ogni test sono state provate tutte le combinazioni tra sampling rate uguale a
+2, 4, 100 e troncamento uguale a 128, 256, 512 bytes.
+Poi esse sono state messe in relazione agli stessi test effettuati in modalit\`a On-Wire,
+con sampling rate uguale a 1 e senza troncamento (nei test indicato con il valore 600 per comodit\`a di rappresentazione).
+\subsection{ICtF2010}
+
+Per il dataset ICtF2010 non \`e stato possibile identificare un rule-set specifico
+contro cui testarne il tasso di rilevamento; si \`e quindi proceduto ad effettuare i
+test con il rule-set standard di Emerging-Threats.
+
+In questa prima fase si voleva osservare l'impatto che hanno campionamento e troncamento
+e se l'esclusione dell'uno o dell'altro portasse a miglioramenti apprezzabili.
+
+In figura 3.1 mettiamo in relazione il numero degli alert al variare del campionamento
+con molteplici valori di troncamento.
 
 
+\begin{figure}[h!]
+\begin{center}                          %centra nel mezzo della pagina
+  \includegraphics[width=\textwidth]{images/ICTF-samp-vs-trunc.png}
+  \caption{Numero di Alert al variare del sampling rate}
+  \label{}
+\end{center}
+\end{figure}
+
+\begin{figure}[h!]
+\begin{center}                          %centra nel mezzo della pagina
+  \includegraphics[width=\textwidth]{images/ICTF--tunc-vs-samp.png}
+  \caption{Numero di Alert al variare del troncamento}
+  \label{}
+\end{center}
+\end{figure}
+
+Come \`e possibile notare, a parte i risultati ottenuti con il campionamento 1/1 e il
+troncamento a 128 bytes, la reale differenza tra il numero degli alert viene data dal
+valore del sampling rate. Per cui 128 nel tipo di traffico del dataset ICtF2010
+rappresenta un valore limite per garantire l'efficacia del sistema di rilevamento.
+
+\newpage
+\subsection{DARPA Dataset}
+
+Si \`e osservato il comportamento dell'IDS Suricata in due scenari diversi,
+uno in cui sono state utilizzate solo le regole di default e uno in cui si
+sono utilizzate solo le regole appositamente sviluppate per quel dataset \cite{EXP15}.
+
+\subsubsection{Risultati con regole di default}
+
+Nella figura 3.1 \`e possible osservare il numero di alert scattati al variare dei
+parametri sul {\it sampling rate} per qualunque tipo di troncamento. Il numero degli
+alert con sampling rate \footnote{D'ora in avanti abbreviato con "sampling"}: 1 (On-Wire)
+\`e significativamente pi\`u alto di quello degli altri e
+si attesta intorno a 52459 mentre quelli per sampling : 2 e 4 si attestano intorno a
+2800 (circa il 5\%) e 2200(circa il 4\%) rispettivamente. Quello con sampling : 100 si \`e rivelato invece altamente
+inefficace sollevando solo 640 attacchi
+
+\begin{figure}[h!]
+\begin{center}                          %centra nel mezzo della pagina
+  \includegraphics[width=\textwidth]{images/DARPA-sampling-rate.png}
+  \caption{Numero di Alert al variare del sampling rate}
+  \label{}
+\end{center}
+\end{figure}
+\begin{center}
+  \begin{tabular}{| l | c | r |}
+    \hline
+    {\bf Campionamento 1 / N }& {\bf Numero di alert } & {\bf \% }\\ \hline
+    1 (On-Wire) & 52459 & - \\ \hline
+    2 & 2891 & 5,5\% \\ \hline
+    4 & 2233 & 4,2\% \\ \hline
+    100 & 640 & 1,2\% \\ \hline
+  \end{tabular}
+\end{center}
 
 
+\begin{figure}[h!]
+\begin{center}                          %centra nel mezzo della pagina
+  \includegraphics[width=\textwidth]{images/DARPA-troncamento.png}
+  \caption{Numero di Alert al variare del troncamento}
+  \label{}
+\end{center}
+\end{figure}
+Nella figura 3.2 osserviamo lo stesso il numero di alert, al variare del
+troncamento. Qui notiamo un comportamento insolito, ad un troncamento effettuato
+a 128 byte corrisponde un notevole aumento del numero di alert, andando addirittura a
+superare quello On-Wire. Questo ci anticipa che quel particolare tipo di troncamento,
+per le regole di default installate potrebbe essere un punto critico. Negli altri casi
+invece ( 256 e 512 ) vi \`e una differenza del solo 15\%, compatibile con il fatto che
+la dimensione del pacchetto nel caso di 512 permetterebbe di rilevare un maggior numero
+di attacchi.
+\begin{center}
+  \begin{tabular}{| l | c | r |}
+    \hline
+    {\bf Troncamento (Bytes) & {\bf Numero di alert} & {\bf \%} \\ \hline
+    128 & 39194 & 400\% \\ \hline
+    256 & 4473 & 50\% \\ \hline
+    512 & 5735 & 65 \% \\ \hline
+    600 (On-Wire) & 8821 & - \\ \hline
+  \end{tabular}
+\end{center}
+
+Come \`e possibile notare nella figura 3.3 il comportamento anomalo del troncamento
+a 128 byte \`e dovuto al fatto che si generano un altissimo numero di falsi positivi.
+Andando ad indagare si \`e scoperto che questi corrispondono nella maggior parte dei
+casi alle signatures {\it "SURICATA SMTP no server welcome message"} e {\it "SURICATA DNS malformed request data"}
+,ovvero due signature che operano Stateful Analysis e che come si era detto nel capitolo
+precedente non sarebbero state utilizzabili in questo sistema di monitoraggio.
+
+
+\begin{figure}[h!]
+\begin{center}                          %centra nel mezzo della pagina
+  \includegraphics[width=\textwidth]{images/DARPA-falsipositivi.png}
+  \caption{Numero dei falsi positivi al variare del troncamento}
+  \label{}
+\end{center}
+\end{figure}
+
+Si riportano ora due grafici raffiguranti il numero di signature univoche rilevate
+al variare del campionamento e del troncamento.
+
+\iffalse
+\begin{figure}[h!]
+\begin{center}                          %centra nel mezzo della pagina
+  \includegraphics[width=\textwidth]{images/DARPA-uniquesignature-s.png}
+  \caption{Numero delle signature univoche al variare del sampling rate}
+  \label{}
+\end{center}
+\end{figure}
+
+\begin{figure}[h!]
+\begin{center}                          %centra nel mezzo della pagina
+  \includegraphics[width=\textwidth]{images/DARPA-uniquesignature-t.png}
+  \caption{Numero delle signature univoche al variare del troncamento}
+  \label{}
+\end{center}
+\end{figure}
+\fi
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%non numera l'ultima pagina sinistra
@@ -1373,9 +1508,12 @@ Ibrahim Ghafir, Vaclav Prenosil, Jakub Svoboda, Mohammad Hammoudeh,
 \bibitem{EXP7} http://www.tcpdump.org/
 \bibitem{EXP8} https://www.elastic.co/guide/en/elasticsearch/reference/current/tune-for-indexing-speed.html
 \bibitem{EXP9} https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-update-settings.html
-\bibitem{EXP10} https://docs.oracle.com/cd/E26217_01/E26796/html/qs-create-vm.html
+\bibitem{EXP10} https://docs.oracle.com/cd/E26217\_01/E26796/html/qs-create-vm.html
 \bibitem{EXP11} https://www.debian.org/releases/jessie/amd64/
 \bibitem{EXP12} Raymond, Eric S. (2003-09-23). "Basics of the Unix Philosophy". The Art of Unix Programming. Addison-Wesley Professional
+\bibitem{EXP13} https://www.elastic.co/guide/en/elasticsearch/guide/current/inverted-index.html
+\bibitem{EXP14} https://redmine.openinfosecfoundation.org/projects/suricata/wiki/Payload\_keywords
+\bibitem{EXP15} Khamphakdee, Nattawat & Benjamas, Nunnapus & Saiyod, Saiyan. (2014). Improving Intrusion Detection System Based on Snort Rules for Network Probe Attack Detection. 2014 2nd International Conference on Information and Communication Technology, ICoICT 2014. 10.1109/ICoICT.2014.6914042.
 \end{thebibliography}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%non numera l'ultima pagina sinistra
 \clearpage{\pagestyle{empty}\cleardoublepage}

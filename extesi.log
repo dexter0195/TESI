@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Arch Linux) (preloaded format=pdflatex 2017.11.30)  25 FEB 2018 10:57
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Arch Linux) (preloaded format=pdflatex 2017.11.30)  26 FEB 2018 20:44
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -187,6 +187,21 @@ Package: amsthm 2015/03/04 v2.20.2
 \thm@headsep=\skip57
 \dth@everypar=\toks29
 ) (./extesi.aux
+
+LaTeX Warning: Label `' multiply defined.
+
+
+LaTeX Warning: Label `' multiply defined.
+
+
+LaTeX Warning: Label `' multiply defined.
+
+
+LaTeX Warning: Label `' multiply defined.
+
+
+LaTeX Warning: Label `' multiply defined.
+
 
 LaTeX Warning: Label `' multiply defined.
 
@@ -523,49 +538,99 @@ Overfull \hbox (29.9002pt too wide) in paragraph at lines 1216--1216
 Capitolo 3.
 [39
 
-] [40] [41
+]
+<images/ICTF-samp-vs-trunc.png, id=176, 872.25874pt x 512.91624pt>
+File: images/ICTF-samp-vs-trunc.png Graphic file (type png)
+<use images/ICTF-samp-vs-trunc.png>
+Package pdftex.def Info: images/ICTF-samp-vs-trunc.png  used on input line 1326. on input line 1326.
+Package pdftex.def Info: Requested size: 390.0pt x 229.33098pt on input line 1326.
+
+
+LaTeX Warning: `!h' float specifier changed to `!ht'.
+
+<images/ICTF--tunc-vs-samp.png, id=177, 852.18375pt x 498.86375pt>
+File: images/ICTF--tunc-vs-samp.png Graphic file (type png)
+<use images/ICTF--tunc-vs-samp.png>
+Package pdftex.def Info: images/ICTF--tunc-vs-samp.png  used on input line 1334. on input line 1334.
+Package pdftex.def Info: Requested size: 390.0pt x 228.30785pt on input line 1334.
+
+LaTeX Warning: `!h' float specifier changed to `!ht'.
+
+[40]
+
+LaTeX Warning: Text page 41 contains only floats.
+
+[41 <./images/ICTF-samp-vs-trunc.png (PNG copy)> <./images/ICTF--tunc-vs-samp.png (PNG copy)>]
+<images/DARPA-sampling-rate.png, id=185, 932.48375pt x 533.995pt>
+File: images/DARPA-sampling-rate.png Graphic file (type png)
+<use images/DARPA-sampling-rate.png>
+Package pdftex.def Info: images/DARPA-sampling-rate.png  used on input line 1364. on input line 1364.
+Package pdftex.def Info: Requested size: 390.0pt x 223.33934pt on input line 1364.
+ [42 <./images/DARPA-sampling-rate.png (PNG copy)>]
+<images/DARPA-troncamento.png, id=189, 868.24374pt x 534.99875pt>
+File: images/DARPA-troncamento.png Graphic file (type png)
+<use images/DARPA-troncamento.png>
+Package pdftex.def Info: images/DARPA-troncamento.png  used on input line 1383. on input line 1383.
+Package pdftex.def Info: Requested size: 390.0pt x 240.31454pt on input line 1383.
+
+./extesi.tex:1399: Missing } inserted.
+<inserted text> 
+                }
+l.1399     {\bf Troncamento (Bytes) &
+                                      {\bf Numero di alert} & {\bf \%} \\ \h...
+I've put in what seems to be necessary to fix
+the current column of the current alignment.
+Try to go on, since this might almost work.
+
+[43 <./images/DARPA-troncamento.png (PNG copy)>]
+<images/DARPA-falsipositivi.png, id=193, 853.1875pt x 517.935pt>
+File: images/DARPA-falsipositivi.png Graphic file (type png)
+<use images/DARPA-falsipositivi.png>
+Package pdftex.def Info: images/DARPA-falsipositivi.png  used on input line 1417. on input line 1417.
+Package pdftex.def Info: Requested size: 390.0pt x 236.75931pt on input line 1417.
+ [44 <./images/DARPA-falsipositivi.png (PNG copy)>] [45
 
 
 
-] [42
+] [46
 
 ]
 Appendice A.
-[43] [44
+[47] [48
 
 ]
 Appendice B.
-[45] [46
+[49] [50
 
 ]
 
-./extesi.tex:1348: Package inputenc Error: Keyboard character used is undefined
+./extesi.tex:1483: Package inputenc Error: Keyboard character used is undefined
 (inputenc)                in inputencoding `latin1'.
 
 See the inputenc package documentation for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.1348 \bibitem{K4} "NIST â€
+l.1483 \bibitem{K4} "NIST â€
                             “ Guide to Intrusion Detection and Prevention Sy...
 You need to provide a definition with \DeclareInputText 
 or \DeclareInputMath before using this key.
 
 
-./extesi.tex:1348: Package inputenc Error: Keyboard character used is undefined
+./extesi.tex:1483: Package inputenc Error: Keyboard character used is undefined
 (inputenc)                in inputencoding `latin1'.
 
 See the inputenc package documentation for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.1348 \bibitem{K4} "NIST â€“
+l.1483 \bibitem{K4} "NIST â€“
                               Guide to Intrusion Detection and Prevention Sy...
 You need to provide a definition with \DeclareInputText 
 or \DeclareInputMath before using this key.
 
-./extesi.tex:1359: Misplaced alignment tab character &.
-l.1359 ...nd IPFIX". IEEE Communications Surveys &
+./extesi.tex:1494: Misplaced alignment tab character &.
+l.1494 ...nd IPFIX". IEEE Communications Surveys &
                                                    Tutorials. IEEE Communica...
 I can't figure out why you would want to use a tab mark
 here. If you just want an ampersand, the remedy is
@@ -574,131 +639,80 @@ up above has ended a previous alignment prematurely,
 you're probably due for more error messages, and you
 might try typing `S' now just to see what is salvageable.
 
-[47]
-Underfull \hbox (badness 10000) in paragraph at lines 1366--1367
+[51]
+Underfull \hbox (badness 10000) in paragraph at lines 1501--1502
 []\OT1/cmr/m/n/12 SCADA STA-TI-STICS MO-NI-TO-RING USING THE Ela-stic
  []
 
 
-Underfull \hbox (badness 4582) in paragraph at lines 1366--1367
+Underfull \hbox (badness 4582) in paragraph at lines 1501--1502
 \OT1/cmr/m/n/12 Stack(Elasticsearch, Log-stash, Ki-ba-na), Ja-mes Ha-mil-ton, Brad
  []
 
 
-Underfull \hbox (badness 1910) in paragraph at lines 1366--1367
+Underfull \hbox (badness 1910) in paragraph at lines 1501--1502
 \OT1/cmr/m/n/12 Scho-field, Ma-nuel Gon-za-lez Ber-ges, Jean-Charles Tour-nier-CERN,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1372--1373
+Underfull \hbox (badness 10000) in paragraph at lines 1507--1508
 []\OT1/cmr/m/n/12 https://mcfp.weebly.com/the-ctu-13-dataset-a-labeled-dataset-with-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1375--1376
+Underfull \hbox (badness 10000) in paragraph at lines 1510--1511
 []\OT1/cmr/m/n/12 https://www.elastic.co/guide/en/elasticsearch/reference/current/tune-
  []
 
-[48]
-Overfull \hbox (9.82224pt too wide) in paragraph at lines 1376--1377
+[52]
+Overfull \hbox (9.82224pt too wide) in paragraph at lines 1511--1512
 []\OT1/cmr/m/n/12 https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-
  []
 
-./extesi.tex:1377: Missing $ inserted.
-<inserted text> 
-                $
-l.1377 ...XP10} https://docs.oracle.com/cd/E26217_
-                                                  01/E26796/html/qs-create-v...
-I've inserted a begin-math/end-math symbol since I think
-you left one out. Proceed, with fingers crossed.
 
-
-./extesi.tex:1378: LaTeX Error: Command \item invalid in math mode.
-
-See the LaTeX manual or LaTeX Companion for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.1378 \bibitem{EXP11}
-                       https://www.debian.org/releases/jessie/amd64/
-Try typing  <return>  to proceed.
-If that doesn't work, type  X <return>  to quit.
-
-
-./extesi.tex:1378: LaTeX Error: Something's wrong--perhaps a missing \item.
-
-See the LaTeX manual or LaTeX Companion for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.1378 \bibitem{EXP11}
-                       https://www.debian.org/releases/jessie/amd64/
-Try typing  <return>  to proceed.
-If that doesn't work, type  X <return>  to quit.
-
-
-./extesi.tex:1378: LaTeX Error: Something's wrong--perhaps a missing \item.
-
-See the LaTeX manual or LaTeX Companion for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.1378 \bibitem{EXP11}
-                       https://www.debian.org/releases/jessie/amd64/
-Try typing  <return>  to proceed.
-If that doesn't work, type  X <return>  to quit.
-
-
-./extesi.tex:1379: LaTeX Error: Command \item invalid in math mode.
-
-See the LaTeX manual or LaTeX Companion for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.1379 \bibitem{EXP12}
-                       Raymond, Eric S. (2003-09-23). "Basics of the Unix Ph...
-Try typing  <return>  to proceed.
-If that doesn't work, type  X <return>  to quit.
-
-./extesi.tex:1379: Missing $ inserted.
-<inserted text> 
-                $
-l.1379 \bibitem{EXP12}
-                       Raymond, Eric S. (2003-09-23). "Basics of the Unix Ph...
-I've inserted a begin-math/end-math symbol since I think
-you left one out. Proceed, with fingers crossed.
-
-./extesi.tex:1379: Missing } inserted.
-<inserted text> 
-                }
-l.1379 \bibitem{EXP12}
-                       Raymond, Eric S. (2003-09-23). "Basics of the Unix Ph...
-I've inserted something that you may have forgotten.
-(See the <inserted text> above.)
-With luck, this will get me unwedged. But if you
-really didn't forget anything, try typing `2' now; then
-my insertion and my current dilemma will both disappear.
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1377--1379
-[]\OT1/cmr/m/n/12 https://docs.oracle.com/cd/E26217$[]1\OML/cmm/m/it/12 =E\OT1/cmr/m/n/12 26796\OML/cmm/m/it/12 =html=qs \OMS/cmsy/m/n/12 ^^@ \OML/cmm/m/it/12 create \OMS/cmsy/m/n/12 ^^@
+Underfull \hbox (badness 10000) in paragraph at lines 1512--1513
+[]\OT1/cmr/m/n/12 https://docs.oracle.com/cd/E26217[]01/E26796/html/qs-create-
  []
 
-./extesi.tex:1379: Extra }, or forgotten \endgroup.
-\par ...m \@noitemerr {\@@par }\fi \else {\@@par }
-                                                  \fi 
-l.1379 \bibitem{EXP12}
-                       Raymond, Eric S. (2003-09-23). "Basics of the Unix Ph...
-I've deleted a group-closing symbol because it seems to be
-spurious, as in `$x}$'. But perhaps the } is legitimate and
-you forgot something else, as in `\hbox{$x}'. In such cases
-the way to recover is to insert both the forgotten and the
-deleted material, e.g., by typing `I$}'.
 
-[49] [50
+Underfull \hbox (badness 10000) in paragraph at lines 1515--1516
+[]\OT1/cmr/m/n/12 https://www.elastic.co/guide/en/elasticsearch/guide/current/inverted-
+ []
 
 
-] [51
+Overfull \hbox (71.98354pt too wide) in paragraph at lines 1516--1517
+[]\OT1/cmr/m/n/12 https://redmine.openinfosecfoundation.org/projects/suricata/wiki/Payload[]keywords 
+ []
+
+./extesi.tex:1517: Misplaced alignment tab character &.
+l.1517 \bibitem{EXP15} Khamphakdee, Nattawat &
+                                               Benjamas, Nunnapus & Saiyod, ...
+I can't figure out why you would want to use a tab mark
+here. If you just want an ampersand, the remedy is
+simple: Just type `I\&' now. But if some right brace
+up above has ended a previous alignment prematurely,
+you're probably due for more error messages, and you
+might try typing `S' now just to see what is salvageable.
+
+./extesi.tex:1517: Misplaced alignment tab character &.
+l.1517 ...phakdee, Nattawat & Benjamas, Nunnapus &
+                                                   Saiyod, Saiyan. (2014). I...
+I can't figure out why you would want to use a tab mark
+here. If you just want an ampersand, the remedy is
+simple: Just type `I\&' now. But if some right brace
+up above has ended a previous alignment prematurely,
+you're probably due for more error messages, and you
+might try typing `S' now just to see what is salvageable.
+
+
+Underfull \hbox (badness 1117) in paragraph at lines 1517--1518
+[]\OT1/cmr/m/n/12 Khamphakdee, Nat-ta-wat  Be-n-ja-mas, Nun-na-pus  Saiyod, Saiyan.
+ []
+
+[53] [54
+
+
+] [55
 
 ] (./extesi.aux)
 
@@ -706,18 +720,18 @@ LaTeX Warning: There were multiply-defined labels.
 
  ) 
 Here is how much of TeX's memory you used:
- 4944 strings out of 492985
- 65171 string characters out of 6138637
- 140695 words of memory out of 5000000
- 8388 multiletter control sequences out of 15000+600000
+ 4972 strings out of 492985
+ 65982 string characters out of 6138637
+ 140710 words of memory out of 5000000
+ 8411 multiletter control sequences out of 15000+600000
  13966 words of font info for 57 fonts, out of 8000000 for 9000
  1143 hyphenation exceptions out of 8191
  41i,10n,43p,792b,409s stack positions out of 5000i,500n,10000p,200000b,80000s
-</usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmbxti10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi12.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmti12.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt12.pfb>
-Output written on extesi.pdf (61 pages, 369497 bytes).
+</usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmbxti10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmti12.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt12.pfb>
+Output written on extesi.pdf (65 pages, 520350 bytes).
 PDF statistics:
- 251 PDF objects out of 1000 (max. 8388607)
- 168 compressed objects within 2 object streams
+ 264 PDF objects out of 1000 (max. 8388607)
+ 173 compressed objects within 2 object streams
  0 named destinations out of 1000 (max. 500000)
- 36 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 61 words of extra memory for PDF output out of 10000 (max. 10000000)
 
