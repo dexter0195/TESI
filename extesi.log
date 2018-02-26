@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Arch Linux) (preloaded format=pdflatex 2017.11.30)  26 FEB 2018 20:44
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Arch Linux) (preloaded format=pdflatex 2017.11.30)  26 FEB 2018 23:45
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -187,6 +187,18 @@ Package: amsthm 2015/03/04 v2.20.2
 \thm@headsep=\skip57
 \dth@everypar=\toks29
 ) (./extesi.aux
+
+LaTeX Warning: Label `' multiply defined.
+
+
+LaTeX Warning: Label `' multiply defined.
+
+
+LaTeX Warning: Label `' multiply defined.
+
+
+LaTeX Warning: Label `' multiply defined.
+
 
 LaTeX Warning: Label `' multiply defined.
 
@@ -542,8 +554,8 @@ Capitolo 3.
 <images/ICTF-samp-vs-trunc.png, id=176, 872.25874pt x 512.91624pt>
 File: images/ICTF-samp-vs-trunc.png Graphic file (type png)
 <use images/ICTF-samp-vs-trunc.png>
-Package pdftex.def Info: images/ICTF-samp-vs-trunc.png  used on input line 1326. on input line 1326.
-Package pdftex.def Info: Requested size: 390.0pt x 229.33098pt on input line 1326.
+Package pdftex.def Info: images/ICTF-samp-vs-trunc.png  used on input line 1327. on input line 1327.
+Package pdftex.def Info: Requested size: 390.0pt x 229.33098pt on input line 1327.
 
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
@@ -551,86 +563,164 @@ LaTeX Warning: `!h' float specifier changed to `!ht'.
 <images/ICTF--tunc-vs-samp.png, id=177, 852.18375pt x 498.86375pt>
 File: images/ICTF--tunc-vs-samp.png Graphic file (type png)
 <use images/ICTF--tunc-vs-samp.png>
-Package pdftex.def Info: images/ICTF--tunc-vs-samp.png  used on input line 1334. on input line 1334.
-Package pdftex.def Info: Requested size: 390.0pt x 228.30785pt on input line 1334.
+Package pdftex.def Info: images/ICTF--tunc-vs-samp.png  used on input line 1335. on input line 1335.
+Package pdftex.def Info: Requested size: 390.0pt x 228.30785pt on input line 1335.
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
 
+<images/ICTF-samp-vs-traffic.png, id=178, 892.33376pt x 534.99875pt>
+File: images/ICTF-samp-vs-traffic.png Graphic file (type png)
+<use images/ICTF-samp-vs-traffic.png>
+Package pdftex.def Info: images/ICTF-samp-vs-traffic.png  used on input line 1351. on input line 1351.
+Package pdftex.def Info: Requested size: 390.0pt x 233.82463pt on input line 1351.
 [40]
 
 LaTeX Warning: Text page 41 contains only floats.
 
 [41 <./images/ICTF-samp-vs-trunc.png (PNG copy)> <./images/ICTF--tunc-vs-samp.png (PNG copy)>]
-<images/DARPA-sampling-rate.png, id=185, 932.48375pt x 533.995pt>
+<images/ICTF-trunc-vs-traffic.png, id=186, 853.1875pt x 531.9875pt>
+File: images/ICTF-trunc-vs-traffic.png Graphic file (type png)
+<use images/ICTF-trunc-vs-traffic.png>
+Package pdftex.def Info: images/ICTF-trunc-vs-traffic.png  used on input line 1359. on input line 1359.
+Package pdftex.def Info: Requested size: 390.0pt x 243.18301pt on input line 1359.
+
+
+LaTeX Warning: `!h' float specifier changed to `!ht'.
+
+<images/ICTF-false-positives-mul.png, id=187, 887.315pt x 532.99126pt>
+File: images/ICTF-false-positives-mul.png Graphic file (type png)
+<use images/ICTF-false-positives-mul.png>
+Package pdftex.def Info: images/ICTF-false-positives-mul.png  used on input line 1381. on input line 1381.
+Package pdftex.def Info: Requested size: 390.0pt x 234.26476pt on input line 1381.
+
+LaTeX Warning: `!h' float specifier changed to `!ht'.
+
+<images/ICTF-top-signatures.png, id=188, 937.5025pt x 547.04375pt>
+File: images/ICTF-top-signatures.png Graphic file (type png)
+<use images/ICTF-top-signatures.png>
+Package pdftex.def Info: images/ICTF-top-signatures.png  used on input line 1389. on input line 1389.
+Package pdftex.def Info: Requested size: 390.0pt x 227.5615pt on input line 1389.
+
+LaTeX Warning: `!h' float specifier changed to `!ht'.
+
+
+Underfull \vbox (badness 2418) has occurred while \output is active []
+
+ [42 <./images/ICTF-samp-vs-traffic.png (PNG copy)>]
+
+./extesi.tex:1401: LaTeX Error: Illegal character in array arg.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.1401   \begin{tabular}{| a | d | b | c |}
+                                           
+You're in trouble here.  Try typing  <return>  to proceed.
+If that doesn't work, type  X <return>  to quit.
+
+
+./extesi.tex:1401: LaTeX Error: Illegal character in array arg.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.1401   \begin{tabular}{| a | d | b | c |}
+                                           
+You're in trouble here.  Try typing  <return>  to proceed.
+If that doesn't work, type  X <return>  to quit.
+
+
+./extesi.tex:1401: LaTeX Error: Illegal character in array arg.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.1401   \begin{tabular}{| a | d | b | c |}
+                                           
+You're in trouble here.  Try typing  <return>  to proceed.
+If that doesn't work, type  X <return>  to quit.
+
+[43 <./images/ICTF-trunc-vs-traffic.png (PNG copy)>]
+
+LaTeX Warning: Text page 44 contains only floats.
+
+[44 <./images/ICTF-false-positives-mul.png (PNG copy)> <./images/ICTF-top-signatures.png (PNG copy)>]
+<images/DARPA-sampling-rate.png, id=198, 932.48375pt x 533.995pt>
 File: images/DARPA-sampling-rate.png Graphic file (type png)
 <use images/DARPA-sampling-rate.png>
-Package pdftex.def Info: images/DARPA-sampling-rate.png  used on input line 1364. on input line 1364.
-Package pdftex.def Info: Requested size: 390.0pt x 223.33934pt on input line 1364.
- [42 <./images/DARPA-sampling-rate.png (PNG copy)>]
-<images/DARPA-troncamento.png, id=189, 868.24374pt x 534.99875pt>
+Package pdftex.def Info: images/DARPA-sampling-rate.png  used on input line 1435. on input line 1435.
+Package pdftex.def Info: Requested size: 390.0pt x 223.33934pt on input line 1435.
+ [45
+
+ <./images/DARPA-sampling-rate.png (PNG copy)>]
+<images/DARPA-troncamento.png, id=203, 868.24374pt x 534.99875pt>
 File: images/DARPA-troncamento.png Graphic file (type png)
 <use images/DARPA-troncamento.png>
-Package pdftex.def Info: images/DARPA-troncamento.png  used on input line 1383. on input line 1383.
-Package pdftex.def Info: Requested size: 390.0pt x 240.31454pt on input line 1383.
+Package pdftex.def Info: images/DARPA-troncamento.png  used on input line 1454. on input line 1454.
+Package pdftex.def Info: Requested size: 390.0pt x 240.31454pt on input line 1454.
 
-./extesi.tex:1399: Missing } inserted.
+./extesi.tex:1470: Missing } inserted.
 <inserted text> 
                 }
-l.1399     {\bf Troncamento (Bytes) &
+l.1470     {\bf Troncamento (Bytes) &
                                       {\bf Numero di alert} & {\bf \%} \\ \h...
 I've put in what seems to be necessary to fix
 the current column of the current alignment.
 Try to go on, since this might almost work.
 
-[43 <./images/DARPA-troncamento.png (PNG copy)>]
-<images/DARPA-falsipositivi.png, id=193, 853.1875pt x 517.935pt>
+[46 <./images/DARPA-troncamento.png (PNG copy)>]
+<images/DARPA-falsipositivi.png, id=207, 853.1875pt x 517.935pt>
 File: images/DARPA-falsipositivi.png Graphic file (type png)
 <use images/DARPA-falsipositivi.png>
-Package pdftex.def Info: images/DARPA-falsipositivi.png  used on input line 1417. on input line 1417.
-Package pdftex.def Info: Requested size: 390.0pt x 236.75931pt on input line 1417.
- [44 <./images/DARPA-falsipositivi.png (PNG copy)>] [45
+Package pdftex.def Info: images/DARPA-falsipositivi.png  used on input line 1488. on input line 1488.
+Package pdftex.def Info: Requested size: 390.0pt x 236.75931pt on input line 1488.
+ [47 <./images/DARPA-falsipositivi.png (PNG copy)>] [48
 
 
+] [49
 
-] [46
+] [50
 
 ]
 Appendice A.
-[47] [48
+[51] [52
 
 ]
 Appendice B.
-[49] [50
+[53] [54
 
 ]
 
-./extesi.tex:1483: Package inputenc Error: Keyboard character used is undefined
+./extesi.tex:1554: Package inputenc Error: Keyboard character used is undefined
 (inputenc)                in inputencoding `latin1'.
 
 See the inputenc package documentation for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.1483 \bibitem{K4} "NIST â€
+l.1554 \bibitem{K4} "NIST â€
                             “ Guide to Intrusion Detection and Prevention Sy...
 You need to provide a definition with \DeclareInputText 
 or \DeclareInputMath before using this key.
 
 
-./extesi.tex:1483: Package inputenc Error: Keyboard character used is undefined
+./extesi.tex:1554: Package inputenc Error: Keyboard character used is undefined
 (inputenc)                in inputencoding `latin1'.
 
 See the inputenc package documentation for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.1483 \bibitem{K4} "NIST â€“
+l.1554 \bibitem{K4} "NIST â€“
                               Guide to Intrusion Detection and Prevention Sy...
 You need to provide a definition with \DeclareInputText 
 or \DeclareInputMath before using this key.
 
-./extesi.tex:1494: Misplaced alignment tab character &.
-l.1494 ...nd IPFIX". IEEE Communications Surveys &
+./extesi.tex:1565: Misplaced alignment tab character &.
+l.1565 ...nd IPFIX". IEEE Communications Surveys &
                                                    Tutorials. IEEE Communica...
 I can't figure out why you would want to use a tab mark
 here. If you just want an ampersand, the remedy is
@@ -639,53 +729,53 @@ up above has ended a previous alignment prematurely,
 you're probably due for more error messages, and you
 might try typing `S' now just to see what is salvageable.
 
-[51]
-Underfull \hbox (badness 10000) in paragraph at lines 1501--1502
+[55]
+Underfull \hbox (badness 10000) in paragraph at lines 1572--1573
 []\OT1/cmr/m/n/12 SCADA STA-TI-STICS MO-NI-TO-RING USING THE Ela-stic
  []
 
 
-Underfull \hbox (badness 4582) in paragraph at lines 1501--1502
+Underfull \hbox (badness 4582) in paragraph at lines 1572--1573
 \OT1/cmr/m/n/12 Stack(Elasticsearch, Log-stash, Ki-ba-na), Ja-mes Ha-mil-ton, Brad
  []
 
 
-Underfull \hbox (badness 1910) in paragraph at lines 1501--1502
+Underfull \hbox (badness 1910) in paragraph at lines 1572--1573
 \OT1/cmr/m/n/12 Scho-field, Ma-nuel Gon-za-lez Ber-ges, Jean-Charles Tour-nier-CERN,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1507--1508
+Underfull \hbox (badness 10000) in paragraph at lines 1578--1579
 []\OT1/cmr/m/n/12 https://mcfp.weebly.com/the-ctu-13-dataset-a-labeled-dataset-with-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1510--1511
+Underfull \hbox (badness 10000) in paragraph at lines 1581--1582
 []\OT1/cmr/m/n/12 https://www.elastic.co/guide/en/elasticsearch/reference/current/tune-
  []
 
-[52]
-Overfull \hbox (9.82224pt too wide) in paragraph at lines 1511--1512
+[56]
+Overfull \hbox (9.82224pt too wide) in paragraph at lines 1582--1583
 []\OT1/cmr/m/n/12 https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1512--1513
+Underfull \hbox (badness 10000) in paragraph at lines 1583--1584
 []\OT1/cmr/m/n/12 https://docs.oracle.com/cd/E26217[]01/E26796/html/qs-create-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1515--1516
+Underfull \hbox (badness 10000) in paragraph at lines 1586--1587
 []\OT1/cmr/m/n/12 https://www.elastic.co/guide/en/elasticsearch/guide/current/inverted-
  []
 
 
-Overfull \hbox (71.98354pt too wide) in paragraph at lines 1516--1517
+Overfull \hbox (71.98354pt too wide) in paragraph at lines 1587--1588
 []\OT1/cmr/m/n/12 https://redmine.openinfosecfoundation.org/projects/suricata/wiki/Payload[]keywords 
  []
 
-./extesi.tex:1517: Misplaced alignment tab character &.
-l.1517 \bibitem{EXP15} Khamphakdee, Nattawat &
+./extesi.tex:1588: Misplaced alignment tab character &.
+l.1588 \bibitem{EXP15} Khamphakdee, Nattawat &
                                                Benjamas, Nunnapus & Saiyod, ...
 I can't figure out why you would want to use a tab mark
 here. If you just want an ampersand, the remedy is
@@ -694,8 +784,8 @@ up above has ended a previous alignment prematurely,
 you're probably due for more error messages, and you
 might try typing `S' now just to see what is salvageable.
 
-./extesi.tex:1517: Misplaced alignment tab character &.
-l.1517 ...phakdee, Nattawat & Benjamas, Nunnapus &
+./extesi.tex:1588: Misplaced alignment tab character &.
+l.1588 ...phakdee, Nattawat & Benjamas, Nunnapus &
                                                    Saiyod, Saiyan. (2014). I...
 I can't figure out why you would want to use a tab mark
 here. If you just want an ampersand, the remedy is
@@ -705,14 +795,14 @@ you're probably due for more error messages, and you
 might try typing `S' now just to see what is salvageable.
 
 
-Underfull \hbox (badness 1117) in paragraph at lines 1517--1518
+Underfull \hbox (badness 1117) in paragraph at lines 1588--1589
 []\OT1/cmr/m/n/12 Khamphakdee, Nat-ta-wat  Be-n-ja-mas, Nun-na-pus  Saiyod, Saiyan.
  []
 
-[53] [54
+[57] [58
 
 
-] [55
+] [59
 
 ] (./extesi.aux)
 
@@ -720,18 +810,18 @@ LaTeX Warning: There were multiply-defined labels.
 
  ) 
 Here is how much of TeX's memory you used:
- 4972 strings out of 492985
- 65982 string characters out of 6138637
+ 4992 strings out of 492985
+ 66670 string characters out of 6138637
  140710 words of memory out of 5000000
- 8411 multiletter control sequences out of 15000+600000
+ 8427 multiletter control sequences out of 15000+600000
  13966 words of font info for 57 fonts, out of 8000000 for 9000
  1143 hyphenation exceptions out of 8191
  41i,10n,43p,792b,409s stack positions out of 5000i,500n,10000p,200000b,80000s
 </usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmbxti10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmti12.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt12.pfb>
-Output written on extesi.pdf (65 pages, 520350 bytes).
+Output written on extesi.pdf (69 pages, 756712 bytes).
 PDF statistics:
- 264 PDF objects out of 1000 (max. 8388607)
- 173 compressed objects within 2 object streams
+ 281 PDF objects out of 1000 (max. 8388607)
+ 182 compressed objects within 2 object streams
  0 named destinations out of 1000 (max. 500000)
- 61 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 81 words of extra memory for PDF output out of 10000 (max. 10000000)
 

@@ -1310,14 +1310,15 @@ con sampling rate uguale a 1 e senza troncamento (nei test indicato con il valor
 \subsection{ICtF2010}
 
 Per il dataset ICtF2010 non \`e stato possibile identificare un rule-set specifico
-contro cui testarne il tasso di rilevamento; si \`e quindi proceduto ad effettuare i
+contro cui testare il tasso di rilevamento; si \`e quindi proceduto ad effettuare i
 test con il rule-set standard di Emerging-Threats.
 
 In questa prima fase si voleva osservare l'impatto che hanno campionamento e troncamento
 e se l'esclusione dell'uno o dell'altro portasse a miglioramenti apprezzabili.
 
 In figura 3.1 mettiamo in relazione il numero degli alert al variare del campionamento
-con molteplici valori di troncamento.
+con molteplici valori di troncamento. Similarmente in figura 3.2 ma invertendo i
+parametri.
 
 
 \begin{figure}[h!]
@@ -1338,10 +1339,80 @@ con molteplici valori di troncamento.
 
 Come \`e possibile notare, a parte i risultati ottenuti con il campionamento 1/1 e il
 troncamento a 128 bytes, la reale differenza tra il numero degli alert viene data dal
-valore del sampling rate. Per cui 128 nel tipo di traffico del dataset ICtF2010
+valore del sampling rate. Per cui un troncamento uguale a 128 bytes, nel tipo di traffico del dataset ICtF2010,
 rappresenta un valore limite per garantire l'efficacia del sistema di rilevamento.
 
-\newpage
+Osserviamo poi in figura 3.3 come i valori di troncamento e campionamento influiscono sul traffico
+che viene inviato al collector per l'analisi.
+
+\begin{figure}[h!]
+\begin{center}                          %centra nel mezzo della pagina
+  \includegraphics[width=\textwidth]{images/ICTF-samp-vs-traffic.png}
+  \caption{Quantit\`a di traffico inoltrata al Collector}
+  \label{}
+\end{center}
+\end{figure}
+
+\begin{figure}[h!]
+\begin{center}                          %centra nel mezzo della pagina
+  \includegraphics[width=\textwidth]{images/ICTF-trunc-vs-traffic.png}
+  \caption{Quantit\`a di traffico inoltrata al Collector}
+  \label{}
+\end{center}
+\end{figure}
+
+Di nuovo \`e possibile notare come la quantit\`a di traffico inoltrata al Collector,
+per il dataset ICtF2010 dipende in primo luogo dal valore del sampling rate.
+Con un sampling rate di 1/100 infatti si riduce la quantit\`a di traffico da inoltrare al
+collector da 500MB per ogni file pcap analizzato, fino a circa 3MB.
+Mentre un il troncamento, che sia a 128, 256 o 512, non produce un miglioramento apprezzabile.
+
+Infine osserviamo che  un campionamento con sampling rate da 100 in su non permette
+di rilevare quasi nessuno degli oltre 5 milioni di attacchi rilevati con
+sampling rate uguale a 4 o ad 1.
+
+Analizziamo a questo punto il contenuto degli alert, ovvero ci soffermeremo ad osservare le signature
+rilevate, quali sono le pi\`u frequenti per un determinato tipo di campionamento e
+se esse siano o meno dei falsi positivi.
+
+\begin{figure}[h!]
+\begin{center}                          %centra nel mezzo della pagina
+  \includegraphics[width=\textwidth]{images/ICTF-false-positives-mul.png}
+  \caption{Numero di falsi positivi}
+  \label{}
+\end{center}
+\end{figure}
+
+\begin{figure}[h!]
+\begin{center}                          %centra nel mezzo della pagina
+  \includegraphics[width=\textwidth]{images/ICTF-top-signatures.png}
+  \caption{Numero di falsi positivi}
+  \label{}
+\end{center}
+\end{figure}
+
+Dalla figura 3.5 vediamo i test con troncamento a 128 e sampling rate 4 sono
+sono quelli che hanno il numero di falsi positivi (in rosso) pi\`u alto di tutti.
+Mentre il troncamento a 256 byte e sampling rate 4 \`e quello che ha una percentuale
+di falsi positivi pi\`u bassa, come mostrato in tabella.
+
+\begin{center}
+  \begin{tabular}{| a | d | b | c |}
+    \hline
+    {\bf Troncamento} & {\bf \# Alert } & {\bf \# Falsi Positivi} & {\bf \% } \\ \hline
+    128 & 11688 & 6472 & 55\% \\ \hline
+    256 & 133649 & 7151 & 5.3\% \\ \hline
+    512 & 11786 & 6459 & 5.4\% \\ \hline
+  \end{tabular}
+\end{center}
+
+Infatti, come \`e possibile vedere nella figura 3.6, il troncamento a 128 byte porta ad un
+incremento notevole del numero degli alert che vengono attivati dalle signatures
+{\it "SURICATA DNS malformed request data"} e {\it "SURICATA HTTP response field missing colon"},
+che sono sintomatici di un troncamento eccessivo, e che porta quindi ad avere headers che non
+rispettano pi\`u le specifiche del protocollo (HTTP, DNS o altri).
+
+\clearpage
 \subsection{DARPA Dataset}
 
 Si \`e osservato il comportamento dell'IDS Suricata in due scenari diversi,

@@ -40,9 +40,9 @@
 \contentsline {section}{\numberline {3.1}Criteri di valutazione}{39}
 \contentsline {section}{\numberline {3.2}Risultati}{40}
 \contentsline {subsection}{\numberline {3.2.1}ICtF2010}{40}
-\contentsline {subsection}{\numberline {3.2.2}DARPA Dataset}{42}
-\contentsline {subsubsection}{Risultati con regole di default}{42}
-\contentsline {chapter}{Conclusioni}{45}
-\contentsline {chapter}{\numberline {A}Prima Appendice}{47}
-\contentsline {chapter}{\numberline {B}Seconda Appendice}{49}
-\contentsline {chapter}{Bibliografia}{51}
+\contentsline {subsection}{\numberline {3.2.2}DARPA Dataset}{45}
+\contentsline {subsubsection}{Risultati con regole di default}{45}
+\contentsline {chapter}{Conclusioni}{49}
+\contentsline {chapter}{\numberline {A}Prima Appendice}{51}
+\contentsline {chapter}{\numberline {B}Seconda Appendice}{53}
+\contentsline {chapter}{Bibliografia}{55}
