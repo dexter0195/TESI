@@ -770,9 +770,9 @@ per il testing degli Intrusion Detection Systems \cite{EXP3}.
 
 I dataset scelti per il testing sono stati:
 \begin{itemize}
+  \item ICtF 2010 {\it (International Capture the Flag, ed. 2010)} \cite{EXP6}
   \item DARPA Intrusion Detection Data Set (1999) \cite{EXP4}
   \item CTU-13 Dataset \cite{EXP5}
-  \item ICtF 2010 {\it (International Capture the Flag, ed. 2010)} \cite{EXP6}
 \end{itemize}
 
 Il {\it DARPA Intrusion Detection Data Set (1999)} \`e un dataset composto da traffico misto,
@@ -794,6 +794,46 @@ testing} dei partecipanti. Esso costituisce per questo motivo un ottimo dataset 
 , a differenza dei precedenti, non \`e stato
 costruito appositamente per studiare determinati comportamenti di un IDS in specifiche
 condizioni.
+
+\subsubsection{Regole di Suricata utilizzate}
+
+Per ogni dataset, ad eccezione di ICtF2010, sono state utilizzati dei ruleset
+specifici per il tipo di attacco presente nel file pcap.
+
+Per il dataset DARPA si sono utilizzate le regole di Nattawat Khamphakdee et Al. \cite{EXP15},
+che \`e possibile trovare in appendice.
+
+Per il dataset CTU invece si \`e dovuta creare una regola fatta su misura andando
+ad analizzare con wireshark il file di capture e cercando un pattern ricorrente
+nei pacchetti inviati dalla botnet verso la macchina vittima.
+
+\begin{figure}
+  \begin{center}                          %centra nel mezzo della pagina
+    \includegraphics[width=90mm]{images/wireshark.png}
+    \caption{Wireshark}\label{1:wireshark}
+    \label{}
+  \end{center}
+\end{figure}
+
+Si \`e individuato, come \`e possibile vedere in figura \ref{1:wireshark} che un
+pattern riccorrente all'interno di tutti i pacchetti provenienti dalla botnet \`e
+la presenza di "cb:f5:ab:86:05" nei primi 5 byte del payload UDP.
+Si \`e allora formalizzata la seguente regola utilizzando la sintassi di
+Suricata \cite{EXP14}:
+
+\begin{verbatim}
+alert udp any any -> $HOME_NET 161 (msg:"DOS CTU-13 Botnet";
+  content:"|cb f5 ab 86 05|"; depth:5; threshold: type threshold,
+  track by_dst, seconds 15, count 5; classtype:bad-unknown;
+  sid:2016016; rev:8; metadata:created_at 2018-02,
+  updated_at 2018-02;)
+\end{verbatim}
+
+Infine per il dataset ICtF2010 non sono state trovate nella letteratura regole specifiche
+, ma trattandosi di una competizione di penetration testing con tecniche recenti e
+soprattutto molto diversificate si \`e scelto di utilizzare le regole di default del sito
+"{\it Emerging Threats}".
+
 
 \section{Metodologie di test}
 
@@ -1342,8 +1382,7 @@ parametri.
 
 Come \`e possibile notare, a parte i risultati ottenuti con il campionamento 1/1 e il
 troncamento a 128 bytes, la reale differenza tra il numero degli alert viene data dal
-valore del sampling rate. Per cui un troncamento uguale a 128 bytes, nel tipo di traffico del dataset ICtF2010,
-rappresenta un valore limite per garantire l'efficacia del sistema di rilevamento.
+valore del sampling rate.
 
 Osserviamo poi nelle figure 3.3 e 3.4 come i valori di troncamento e campionamento influiscono sul traffico
 che viene inviato al collector per l'analisi.
@@ -1364,7 +1403,7 @@ che viene inviato al collector per l'analisi.
 \end{center}
 \end{figure}
 
-Di nuovo \`e possibile notare come la quantit\`a di traffico inoltrata al Collector,
+\`E possibile notare come la quantit\`a di traffico inoltrata al Collector,
 per il dataset ICtF2010 dipende in primo luogo dal valore del sampling rate.
 Con un sampling rate di 1/100 infatti si riduce la quantit\`a di traffico da inoltrare al
 collector da 500MB per ogni file pcap analizzato, fino a circa 3MB.
@@ -1397,7 +1436,9 @@ se esse siano o meno dei falsi positivi.
 Dalla figura 3.5 si vede che i test con troncamento a 128 e sampling rate 4 sono
 sono quelli che hanno il numero di falsi positivi (in rosso) in rapporto
 al numero degli alert totali pi\`u alto di tutti.
-Mentre il troncamento a 256 byte e sampling rate 4 \`e quello che ha una percentuale
+Quindi il troncamento uguale a 128 bytes, nel tipo di traffico del dataset ICtF2010,
+rappresenta un valore limite per garantire l'efficacia del sistema di rilevamento.
+Il troncamento a 256 byte e sampling rate 4, invece,  \`e quello che ha una percentuale
 di falsi positivi pi\`u bassa, come mostrato in tabella \ref{tab:falsep-4}.
 
 \begin{table}
@@ -1419,6 +1460,10 @@ incremento notevole del numero degli alert che vengono attivati dalle signatures
 {\it "SURICATA DNS malformed request data"} e {\it "SURICATA HTTP response field missing colon"},
 che sono sintomatici di un troncamento eccessivo, e che porta quindi ad avere headers che non
 rispettano pi\`u le specifiche del protocollo (HTTP, DNS o altri).
+Tali signature corrispondono a quelle che operano quella che nel primo capitolo
+si era descritta come {\it Stateful Analysis}, e che si era predetto non sarebbe
+stata utilizzabile abbinata ad sFlow. Infatti eliminando le regole per quest'ultima il numero di falsi positivi
+scende a 0.
 
 \begin{figure}[h!]
 \begin{center}                          %centra nel mezzo della pagina
@@ -1473,21 +1518,21 @@ non sono caricate.
 \end{figure}
 \begin{figure}[h!]
 \begin{center}                          %centra nel mezzo della pagina
-  \includegraphics[width=\textwidth]{images/DARPA-troncamento.png}\label{darpa:t}
+  \includegraphics[width=\textwidth]{images/DARPA-troncamento.png}\label{darpa:trunc}
   \caption{Numero di Alert al variare del troncamento}
   \label{}
 \end{center}
 \end{figure}
  Come si \`e osservato nella sezione precedente con il dataset ICtF2010 , le figure \ref{darpa:s}
- e \ref{darpa:t} mostrano che il tasso di rilevamento decresce con l'aumentare del
- sampling rate e invece rimane circa costante al variare del campionamento.
+ e \ref{darpa:trunc}(NUMSBAGLIATO) mostrano che il tasso di rilevamento decresce con l'aumentare del
+ sampling rate e invece rimane circa costante al variare del tronacamento.
 
  Infine nella tabella \ref{darpa:bigtable} vengono messi in relazione il
- numero di alert con il traffico medio inoltrato al Collector e notiamo che per questa analisi quantitativa i
+ numero di alert con il traffico medio inoltrato al Collector; notiamo che per questa analisi quantitativa i
  risultati non ci sorprendono e il numero di alert \`e direttamente proporzionale
  alla quantit\`a di traffico, per ogni valore di troncamento. In particolare i test
  con sampling rate uguale a 100 hanno rivelato che questo tipo di campionamento
- \`e del tutto inefficace nel riconoscere un attacco in corso.
+ \`e del tutto inefficace nel riconoscere gli attacchi presenti nel dataset.
 
  \begin{table}
    \begin{center}
@@ -1530,7 +1575,7 @@ CTU-13. Un dataset, come descritto nel capitolo precedente formato da traffico d
 da botnets. Si \`e scelto di testare, per motivi di scarsit\`a di spazio su disco, soltanto il traffico della
 botnet 4, che contiene un attacco DDoS.
 
-I risultati del tutto simili a quelli dei test con il dataset DARPA per cui riportiamo per
+I risultati sono del tutto simili a quelli dei test con il dataset DARPA per cui riportiamo per
 brevit\`a solo una tabella (\ref{tab:ctu-samp}) con i valori del tasso di rilevamento a variare del sampling rate.
 \begin{table}
 \begin{center}
@@ -1548,10 +1593,10 @@ Quello che \`e interessante di questo dataset \`e la capacit\`a di rilevare che
 un attacco sia in corso. Sappiamo che gli attacchi DDoS per loro natura tendono a
 inviare alla macchina target una grande quantit\`a di traffico in un periodo di tempo pi\`u o meno lungo.
 Questo tipo di attacco quindi si presta molto ad essere rilevato con tecnologie come
-quella di sFlow, poich\`e anche pur essendoci una parte di traffico che passa inosservata per
+quella di sFlow, poich\`e pur essendoci una parte di traffico che passa inosservata per
 via degli effetti del campionamento, ce ne sar\`a un'altra parte che invece verr\`a analizzata
 portando alla rilevazione dell'attacco.
-In figura \ref{ctu:time} riportiamo il numero di alert al variare del campionamento
+In figura \ref{ctu:time} si riporta il numero di alert al variare del campionamento
 in cui si nota proprio il comportamento descritto sopra.
 
 Sia i test com sampling rate 2 che quelli con 4 hanno portato ad una rilevazione efficace
@@ -1583,104 +1628,7 @@ sopra, risultato alquanto insoddisfacente.
 \end{center}
 \end{figure}
 
-\newpage
 \clearpage
-OLD OLD OLD
-Si \`e osservato il comportamento dell'IDS Suricata in due scenari diversi,
-uno in cui sono state utilizzate solo le regole di default e uno in cui si
-sono utilizzate solo le regole appositamente sviluppate per quel dataset \cite{EXP15}.
-
-\subsubsection{Risultati con regole di default}
-
-Nella figura 3.1 \`e possible osservare il numero di alert scattati al variare dei
-parametri sul {\it sampling rate} per qualunque tipo di troncamento. Il numero degli
-alert con sampling rate \footnote{D'ora in avanti abbreviato con "sampling"}: 1 (On-Wire)
-\`e significativamente pi\`u alto di quello degli altri e
-si attesta intorno a 52459 mentre quelli per sampling : 2 e 4 si attestano intorno a
-2800 (circa il 5\%) e 2200(circa il 4\%) rispettivamente. Quello con sampling : 100 si \`e rivelato invece altamente
-inefficace sollevando solo 640 attacchi
-
-\begin{figure}[h!]
-\begin{center}                          %centra nel mezzo della pagina
-  \includegraphics[width=\textwidth]{images/DARPA-sampling-rate.png}
-  \caption{Numero di Alert al variare del sampling rate}
-  \label{}
-\end{center}
-\end{figure}
-\begin{center}
-  \begin{tabular}{| l | c | r |}
-    \hline
-    {\bf Campionamento 1 / N }& {\bf Numero di alert } & {\bf \% }\\ \hline
-    1 (On-Wire) & 52459 & - \\ \hline
-    2 & 2891 & 5,5\% \\ \hline
-    4 & 2233 & 4,2\% \\ \hline
-    100 & 640 & 1,2\% \\ \hline
-  \end{tabular}
-\end{center}
-
-
-\begin{figure}[h!]
-\begin{center}                          %centra nel mezzo della pagina
-  \includegraphics[width=\textwidth]{images/DARPA-troncamento.png}
-  \caption{Numero di Alert al variare del troncamento}
-  \label{}
-\end{center}
-\end{figure}
-Nella figura 3.2 osserviamo lo stesso il numero di alert, al variare del
-troncamento. Qui notiamo un comportamento insolito, ad un troncamento effettuato
-a 128 byte corrisponde un notevole aumento del numero di alert, andando addirittura a
-superare quello On-Wire. Questo ci anticipa che quel particolare tipo di troncamento,
-per le regole di default installate potrebbe essere un punto critico. Negli altri casi
-invece ( 256 e 512 ) vi \`e una differenza del solo 15\%, compatibile con il fatto che
-la dimensione del pacchetto nel caso di 512 permetterebbe di rilevare un maggior numero
-di attacchi.
-\begin{center}
-  \begin{tabular}{| l | c | r |}
-    \hline
-    {\bf Troncamento (Bytes) & {\bf Numero di alert} & {\bf \%} \\ \hline
-    128 & 39194 & 400\% \\ \hline
-    256 & 4473 & 50\% \\ \hline
-    512 & 5735 & 65 \% \\ \hline
-    600 (On-Wire) & 8821 & - \\ \hline
-  \end{tabular}
-\end{center}
-
-Come \`e possibile notare nella figura 3.3 il comportamento anomalo del troncamento
-a 128 byte \`e dovuto al fatto che si generano un altissimo numero di falsi positivi.
-Andando ad indagare si \`e scoperto che questi corrispondono nella maggior parte dei
-casi alle signatures {\it "SURICATA SMTP no server welcome message"} e {\it "SURICATA DNS malformed request data"}
-,ovvero due signature che operano Stateful Analysis e che come si era detto nel capitolo
-precedente non sarebbero state utilizzabili in questo sistema di monitoraggio.
-
-
-\begin{figure}[h!]
-\begin{center}                          %centra nel mezzo della pagina
-  \includegraphics[width=\textwidth]{images/DARPA-falsipositivi.png}
-  \caption{Numero dei falsi positivi al variare del troncamento}
-  \label{}
-\end{center}
-\end{figure}
-
-Si riportano ora due grafici raffiguranti il numero di signature univoche rilevate
-al variare del campionamento e del troncamento.
-
-\iffalse
-\begin{figure}[h!]
-\begin{center}                          %centra nel mezzo della pagina
-  \includegraphics[width=\textwidth]{images/DARPA-uniquesignature-s.png}
-  \caption{Numero delle signature univoche al variare del sampling rate}
-  \label{}
-\end{center}
-\end{figure}
-
-\begin{figure}[h!]
-\begin{center}                          %centra nel mezzo della pagina
-  \includegraphics[width=\textwidth]{images/DARPA-uniquesignature-t.png}
-  \caption{Numero delle signature univoche al variare del troncamento}
-  \label{}
-\end{center}
-\end{figure}
-\fi
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%non numera l'ultima pagina sinistra
@@ -1700,6 +1648,52 @@ CONCLUSIONI}}
 \lhead[\fancyplain{}{\bfseries\thepage}]{\fancyplain{}{\bfseries\rightmark}}
 \appendix                               %imposta le appendici
 \chapter{Prima Appendice}               %crea l'appendice
+Regole utilizzate per il dataset DARPA:
+\begin{verbatim}
+alert tcp $HOME_NET any -> $HOME_NET 80 (msg:"HTTP Scan attempted";
+  flow:to_server; fragoffset:0; fragbits:!D; ack:0; flags:S; window:2048;
+  classtype: network-scan; priority:3; sid:1000003;)
+alert icmp $EXTERNAL_NET any -> $HOME_NET any (msg:"ICMP Scan Echo"; itype:8;
+  icode:0; fragbits:!D; content:"|00 00 00 00 00 00 00 00 00 00|"; depth:10;
+  icmp_id:0; icmp_seq:0; ttl:254; classtype:attempted-recon; priority:3;
+  sid:1000026;)
+alert tcp $EXTERNAL_NET any -> $HOME_NET 79 (msg: "Figer 0 query attempted";
+  content:"0"; flow: to_server,established; fragoffset:0; fragbits:D; flags:A;
+  classtype: attempted-recon; priority:3; sid:1000036;)
+alert tcp $EXTERNAL_NET any -> $HOME_NET 53 (msg: "DNS request name";
+  flow:to_server,established; content:"|00 fc 00 01|"; nocase; depth: 4;
+  metadata:service dns; classtype:   attempted-recon; priority:3;
+  sid:1000034;)
+alert tcp $EXTERNAL_NET any -> $HOME_NET 21 (msg: "FTP Request connection";
+  flow:to_server,established;   content:"quit"; flags:AP; fragbits:D;
+  metadata:service ftp;   classtype:tcp-connection; priority:4;
+  sid:1000039;)
+alert tcp $EXTERNAL_NET any -> $HOME_NET 25  (msg: "SMTP Scan attempted OS";
+  flow:to_server; ack:0;  flags:S; fragoffset:0; window:4660; ttl:254;
+  metadata:service  smtp; classtype:attempted-recon; priority:3;
+  sid:1000040;)
+alert tcp $EXTERNAL_NET any -> $HOME_NET 25  (msg: " SMTP Scan attempted OS ";
+  flow:to_server; ack:0;  flags:AS; fragoffset:0; window:4660; ttl:254;
+  metadata:service  smtp; classtype:attempted-recon; priority:3;
+  sid:1000041;)
+alert tcp $EXTERNAL_NET any -> $HOME_NET 25  (msg: " SMTP Scan attempted OS ";
+  flow:to_server; ack:0;  flags:F; fragoffset:0; window:4660; ttl:254;
+  metadata:service  smtp; classtype:attempted-recon; priority:3;
+  sid:1000042;)
+alert tcp $EXTERNAL_NET any -> $HOME_NET 25  (msg: " SMTP Scan attempted OS ";
+  flow:to_server; ack:0;  flags:AF; fragoffset:0; window:4660; ttl:254;
+  metadata:service  smtp; classtype:attempted-recon; priority:3;
+  sid:1000043;)
+alert tcp $EXTERNAL_NET any -> $HOME_NET 25  (msg: " SMTP Scan attempted OS ";
+ flow:to_server; ack:0;  flags:SF; fragoffset:0; window:4660; ttl:254;
+ metadata:service  smtp; classtype:attempted-recon; priority:3; sid:1000044;)
+alert tcp $EXTERNAL_NET any -> $HOME_NET 25  (msg: " SMTP Scan attempted OS ";
+  flow:to_server; ack:0;  flags:P; fragoffset:0; window:4660; ttl:254;
+  metadata:service  smtp; classtype:attempted-recon; priority:3; sid:1000045;)
+alert tcp $EXTERNAL_NET any -> $HOME_NET 25  (msg: " SMTP Scan attempted OS";
+  flow:to_server; ack:0;  flags:CES; fragoffset:0; window:4660; ttl:254;
+  metadata:service  smtp; classtype:attempted-recon; priority:3; sid:1000046;)
+\end{verbatim}\label{app:regole-DARPA}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%imposta l'intestazione di pagina
 \rhead[\fancyplain{}{\bfseries \thechapter \:Prima Appendice}]
 {\fancyplain{}{\bfseries\thepage}}

@@ -25,24 +25,24 @@
 \contentsline {paragraph}{Generator}{20}
 \contentsline {paragraph}{Collector}{21}
 \contentsline {section}{\numberline {2.2}Datasets}{23}
-\contentsline {section}{\numberline {2.3}Metodologie di test}{24}
-\contentsline {subsection}{\numberline {2.3.1}Terminologia}{24}
-\contentsline {subsection}{\numberline {2.3.2}Struttura delle directory}{25}
-\contentsline {subsection}{\numberline {2.3.3}Il cuore degli esperimenti}{26}
-\contentsline {paragraph}{Problemi}{27}
-\contentsline {section}{\numberline {2.4}Una soluzione di testing alternativa}{28}
-\contentsline {subsection}{\numberline {2.4.1}Pcap2sFlow}{28}
-\contentsline {subsubsection}{Meccanismi di campionamento}{28}
-\contentsline {section}{\numberline {2.5}Metodologia di test 2}{32}
-\contentsline {section}{\numberline {2.6}Analisi dei risultati con Kibana e Elasticsearch}{33}
-\contentsline {subsubsection}{Analisi dei falsi positivi}{37}
-\contentsline {chapter}{\numberline {3}Discussione dei risultati}{39}
-\contentsline {section}{\numberline {3.1}Criteri di valutazione}{39}
-\contentsline {section}{\numberline {3.2}Risultati}{40}
-\contentsline {subsection}{\numberline {3.2.1}ICtF2010}{40}
-\contentsline {subsection}{\numberline {3.2.2}DARPA Dataset}{47}
-\contentsline {subsection}{\numberline {3.2.3}CTU-13 Dataset}{50}
-\contentsline {subsubsection}{Risultati con regole di default}{52}
+\contentsline {subsubsection}{Regole di Suricata utilizzate}{24}
+\contentsline {section}{\numberline {2.3}Metodologie di test}{25}
+\contentsline {subsection}{\numberline {2.3.1}Terminologia}{25}
+\contentsline {subsection}{\numberline {2.3.2}Struttura delle directory}{26}
+\contentsline {subsection}{\numberline {2.3.3}Il cuore degli esperimenti}{27}
+\contentsline {paragraph}{Problemi}{28}
+\contentsline {section}{\numberline {2.4}Una soluzione di testing alternativa}{29}
+\contentsline {subsection}{\numberline {2.4.1}Pcap2sFlow}{29}
+\contentsline {subsubsection}{Meccanismi di campionamento}{30}
+\contentsline {section}{\numberline {2.5}Metodologia di test 2}{33}
+\contentsline {section}{\numberline {2.6}Analisi dei risultati con Kibana e Elasticsearch}{34}
+\contentsline {subsubsection}{Analisi dei falsi positivi}{38}
+\contentsline {chapter}{\numberline {3}Discussione dei risultati}{41}
+\contentsline {section}{\numberline {3.1}Criteri di valutazione}{41}
+\contentsline {section}{\numberline {3.2}Risultati}{42}
+\contentsline {subsection}{\numberline {3.2.1}ICtF2010}{42}
+\contentsline {subsection}{\numberline {3.2.2}DARPA Dataset}{49}
+\contentsline {subsection}{\numberline {3.2.3}CTU-13 Dataset}{52}
 \contentsline {chapter}{Conclusioni}{55}
 \contentsline {chapter}{\numberline {A}Prima Appendice}{57}
 \contentsline {chapter}{\numberline {B}Seconda Appendice}{59}
