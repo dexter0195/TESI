@@ -41,9 +41,10 @@
 \contentsline {section}{\numberline {3.1}Criteri di valutazione}{41}
 \contentsline {section}{\numberline {3.2}Risultati}{42}
 \contentsline {subsection}{\numberline {3.2.1}ICtF2010}{42}
-\contentsline {subsection}{\numberline {3.2.2}DARPA Dataset}{49}
-\contentsline {subsection}{\numberline {3.2.3}CTU-13 Dataset}{52}
-\contentsline {chapter}{Conclusioni}{55}
-\contentsline {chapter}{\numberline {A}Prima Appendice}{57}
-\contentsline {chapter}{\numberline {B}Seconda Appendice}{59}
-\contentsline {chapter}{Bibliografia}{61}
+\contentsline {subsection}{\numberline {3.2.2}DARPA Dataset}{50}
+\contentsline {subsection}{\numberline {3.2.3}CTU-13 Dataset}{53}
+\contentsline {section}{\numberline {3.3}Campionamento adattivo}{55}
+\contentsline {chapter}{Conclusioni}{59}
+\contentsline {chapter}{\numberline {A}Prima Appendice}{61}
+\contentsline {chapter}{\numberline {B}Seconda Appendice}{63}
+\contentsline {chapter}{Bibliografia}{65}

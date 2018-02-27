@@ -199,6 +199,9 @@ INPUT ./images/ICTF-top-signatures.png
 INPUT images/ICTF-time-alerts.png
 INPUT ./images/ICTF-time-alerts.png
 INPUT ./images/ICTF-time-alerts.png
+INPUT images/ICTF-forens-dest.png
+INPUT ./images/ICTF-forens-dest.png
+INPUT ./images/ICTF-forens-dest.png
 INPUT images/DARPA-sampling-rate.png
 INPUT ./images/DARPA-sampling-rate.png
 INPUT ./images/DARPA-sampling-rate.png

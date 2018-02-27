@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Arch Linux) (preloaded format=pdflatex 2017.11.30)  27 FEB 2018 22:26
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Arch Linux) (preloaded format=pdflatex 2017.11.30)  27 FEB 2018 23:41
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -187,6 +187,9 @@ Package: amsthm 2015/03/04 v2.20.2
 \thm@headsep=\skip57
 \dth@everypar=\toks29
 ) (./extesi.aux
+
+LaTeX Warning: Label `' multiply defined.
+
 
 LaTeX Warning: Label `' multiply defined.
 
@@ -670,342 +673,389 @@ File: images/ICTF-time-alerts.png Graphic file (type png)
 <use images/ICTF-time-alerts.png>
 Package pdftex.def Info: images/ICTF-time-alerts.png  used on input line 1471. on input line 1471.
 Package pdftex.def Info: Requested size: 390.0pt x 213.9406pt on input line 1471.
- [47 <./images/ICTF-time-alerts.png (PNG copy)>] [48]
-<images/DARPA-sampling-rate.png, id=213, 918.43124pt x 520.94624pt>
+ [47 <./images/ICTF-time-alerts.png (PNG copy)>]
+<images/ICTF-forens-dest.png, id=210, 947.54pt x 516.93124pt>
+File: images/ICTF-forens-dest.png Graphic file (type png)
+<use images/ICTF-forens-dest.png>
+Package pdftex.def Info: images/ICTF-forens-dest.png  used on input line 1497. on input line 1497.
+Package pdftex.def Info: Requested size: 390.0pt x 212.7635pt on input line 1497.
+ [48 <./images/ICTF-forens-dest.png (PNG copy)>] [49]
+<images/DARPA-sampling-rate.png, id=217, 918.43124pt x 520.94624pt>
 File: images/DARPA-sampling-rate.png Graphic file (type png)
 <use images/DARPA-sampling-rate.png>
-Package pdftex.def Info: images/DARPA-sampling-rate.png  used on input line 1515. on input line 1515.
-Package pdftex.def Info: Requested size: 390.0pt x 221.21242pt on input line 1515.
-<images/DARPA-troncamento.png, id=214, 908.39375pt x 519.9425pt>
+Package pdftex.def Info: images/DARPA-sampling-rate.png  used on input line 1531. on input line 1531.
+Package pdftex.def Info: Requested size: 390.0pt x 221.21242pt on input line 1531.
+<images/DARPA-troncamento.png, id=218, 908.39375pt x 519.9425pt>
 File: images/DARPA-troncamento.png Graphic file (type png)
 <use images/DARPA-troncamento.png>
-Package pdftex.def Info: images/DARPA-troncamento.png  used on input line 1522. on input line 1522.
-Package pdftex.def Info: Requested size: 390.0pt x 223.22977pt on input line 1522.
+Package pdftex.def Info: images/DARPA-troncamento.png  used on input line 1538. on input line 1538.
+Package pdftex.def Info: Requested size: 390.0pt x 223.22977pt on input line 1538.
 
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
 
-[49
+[50
 
  <./images/DARPA-sampling-rate.png (PNG copy)>]
 
-./extesi.tex:1540: LaTeX Error: Illegal character in array arg.
+./extesi.tex:1556: LaTeX Error: Illegal character in array arg.
 
 See the LaTeX manual or LaTeX Companion for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.1540 ...\begin{tabular}{ | a | b | b | c | d | }
+l.1556 ...\begin{tabular}{ | a | b | b | c | d | }
                                                   
 You're in trouble here.  Try typing  <return>  to proceed.
 If that doesn't work, type  X <return>  to quit.
 
 
-./extesi.tex:1540: LaTeX Error: Illegal character in array arg.
+./extesi.tex:1556: LaTeX Error: Illegal character in array arg.
 
 See the LaTeX manual or LaTeX Companion for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.1540 ...\begin{tabular}{ | a | b | b | c | d | }
+l.1556 ...\begin{tabular}{ | a | b | b | c | d | }
                                                   
 You're in trouble here.  Try typing  <return>  to proceed.
 If that doesn't work, type  X <return>  to quit.
 
 
-./extesi.tex:1540: LaTeX Error: Illegal character in array arg.
+./extesi.tex:1556: LaTeX Error: Illegal character in array arg.
 
 See the LaTeX manual or LaTeX Companion for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.1540 ...\begin{tabular}{ | a | b | b | c | d | }
+l.1556 ...\begin{tabular}{ | a | b | b | c | d | }
                                                   
 You're in trouble here.  Try typing  <return>  to proceed.
 If that doesn't work, type  X <return>  to quit.
 
 
-./extesi.tex:1540: LaTeX Error: Illegal character in array arg.
+./extesi.tex:1556: LaTeX Error: Illegal character in array arg.
 
 See the LaTeX manual or LaTeX Companion for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.1540 ...\begin{tabular}{ | a | b | b | c | d | }
+l.1556 ...\begin{tabular}{ | a | b | b | c | d | }
                                                   
 You're in trouble here.  Try typing  <return>  to proceed.
 If that doesn't work, type  X <return>  to quit.
 
-[50 <./images/DARPA-troncamento.png (PNG copy)>]
-<images/DARPA-time.png, id=221, 925.4575pt x 519.9425pt>
+[51 <./images/DARPA-troncamento.png (PNG copy)>]
+<images/DARPA-time.png, id=226, 925.4575pt x 519.9425pt>
 File: images/DARPA-time.png Graphic file (type png)
 <use images/DARPA-time.png>
-Package pdftex.def Info: images/DARPA-time.png  used on input line 1564. on input line 1564.
-Package pdftex.def Info: Requested size: 390.0pt x 219.1122pt on input line 1564.
- [51 <./images/DARPA-time.png>]
+Package pdftex.def Info: images/DARPA-time.png  used on input line 1580. on input line 1580.
+Package pdftex.def Info: Requested size: 390.0pt x 219.1122pt on input line 1580.
+ [52 <./images/DARPA-time.png>]
 
-./extesi.tex:1583: LaTeX Error: Illegal character in array arg.
-
-See the LaTeX manual or LaTeX Companion for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.1583   \begin{tabular}{| a | d | b |}
-                                       
-You're in trouble here.  Try typing  <return>  to proceed.
-If that doesn't work, type  X <return>  to quit.
-
-
-./extesi.tex:1583: LaTeX Error: Illegal character in array arg.
+./extesi.tex:1599: LaTeX Error: Illegal character in array arg.
 
 See the LaTeX manual or LaTeX Companion for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.1583   \begin{tabular}{| a | d | b |}
+l.1599   \begin{tabular}{| a | d | b |}
                                        
 You're in trouble here.  Try typing  <return>  to proceed.
 If that doesn't work, type  X <return>  to quit.
 
 
-./extesi.tex:1583: LaTeX Error: Illegal character in array arg.
+./extesi.tex:1599: LaTeX Error: Illegal character in array arg.
 
 See the LaTeX manual or LaTeX Companion for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.1583   \begin{tabular}{| a | d | b |}
+l.1599   \begin{tabular}{| a | d | b |}
                                        
 You're in trouble here.  Try typing  <return>  to proceed.
 If that doesn't work, type  X <return>  to quit.
 
-[52
+
+./extesi.tex:1599: LaTeX Error: Illegal character in array arg.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.1599   \begin{tabular}{| a | d | b |}
+                                       
+You're in trouble here.  Try typing  <return>  to proceed.
+If that doesn't work, type  X <return>  to quit.
+
+[53
 
 ]
-Overfull \hbox (11.3752pt too wide) in paragraph at lines 1618--1618
+Overfull \hbox (11.3752pt too wide) in paragraph at lines 1634--1634
 []  \OT1/cmtt/m/n/12 alert udp any any -> $HOME_NET 161 (msg:"ET DOS CTU-13 Botnet";[] 
  []
 
 
-Overfull \hbox (11.3752pt too wide) in paragraph at lines 1618--1618
+Overfull \hbox (11.3752pt too wide) in paragraph at lines 1634--1634
 []  \OT1/cmtt/m/n/12 content:"|cb f5 ab 86 05|"; depth:5; threshold: type threshold,[] 
  []
 
-<images/CTU-time.png, id=230, 945.5325pt x 479.7925pt>
+<images/CTU-time.png, id=234, 945.5325pt x 479.7925pt>
 File: images/CTU-time.png Graphic file (type png)
 <use images/CTU-time.png>
-Package pdftex.def Info: images/CTU-time.png  used on input line 1626. on input line 1626.
-Package pdftex.def Info: Requested size: 390.0pt x 197.90219pt on input line 1626.
-[53 <./images/CTU-time.png (PNG copy)>] [54
+Package pdftex.def Info: images/CTU-time.png  used on input line 1642. on input line 1642.
+Package pdftex.def Info: Requested size: 390.0pt x 197.90219pt on input line 1642.
+[54 <./images/CTU-time.png (PNG copy)>]
+Overfull \hbox (54.60022pt too wide) in paragraph at lines 1671--1671
+[]\OT1/cmtt/m/n/12 SFLOWUUID=`ovs-vsctl create sFlow agent=eth0 target=\"10.0.0.50:6343\" \[] 
+ []
 
 
+Overfull \hbox (11.3752pt too wide) in paragraph at lines 1762--1762
+[]    \OT1/cmtt/m/n/12 char blacklist_filename [4096] = "/tmp/pcap2sflow-blacklist";[] 
+ []
 
-] [55
-
-] [56
+[55
 
 ]
-Appendice A.
-
-Overfull \hbox (23.7252pt too wide) in paragraph at lines 1697--1697
-[]\OT1/cmtt/m/n/12 alert tcp $HOME_NET any -> $HOME_NET 80 (msg:"HTTP Scan attempted";[] 
+Overfull \hbox (85.47523pt too wide) in paragraph at lines 1762--1762
+[]        \OT1/cmtt/m/n/12 //reads all the lines and add them to the hashtable of blacklisted ip[] 
  []
 
 
-Overfull \hbox (60.77522pt too wide) in paragraph at lines 1697--1697
-[]  \OT1/cmtt/m/n/12 flow:to_server; fragoffset:0; fragbits:!D; ack:0; flags:S; window:2048;[] 
+Overfull \hbox (66.95023pt too wide) in paragraph at lines 1762--1762
+[]        \OT1/cmtt/m/n/12 s = (struct blacklist_item*)malloc(sizeof(struct blacklist_item));[] 
  []
 
 
-Overfull \hbox (85.47523pt too wide) in paragraph at lines 1697--1697
-[]\OT1/cmtt/m/n/12 alert icmp $EXTERNAL_NET any -> $HOME_NET any (msg:"ICMP Scan Echo"; itype:8;[] 
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+ [56]
+Overfull \hbox (11.3752pt too wide) in paragraph at lines 1762--1762
+[]    \OT1/cmtt/m/n/12 char blacklist_filename [4096] = "/tmp/pcap2sflow-blacklist";[] 
  []
 
 
-Overfull \hbox (79.30023pt too wide) in paragraph at lines 1697--1697
-[]  \OT1/cmtt/m/n/12 icode:0; fragbits:!D; content:"|00 00 00 00 00 00 00 00 00 00|"; depth:10;[] 
+Overfull \hbox (85.47523pt too wide) in paragraph at lines 1762--1762
+[]        \OT1/cmtt/m/n/12 //reads all the lines and add them to the hashtable of blacklisted ip[] 
  []
 
 
-Overfull \hbox (54.60022pt too wide) in paragraph at lines 1697--1697
-[]  \OT1/cmtt/m/n/12 icmp_id:0; icmp_seq:0; ttl:254; classtype:attempted-recon; priority:3;[] 
+Overfull \hbox (66.95023pt too wide) in paragraph at lines 1762--1762
+[]        \OT1/cmtt/m/n/12 s = (struct blacklist_item*)malloc(sizeof(struct blacklist_item));[] 
  []
 
 
-Overfull \hbox (79.30023pt too wide) in paragraph at lines 1697--1697
-[]\OT1/cmtt/m/n/12 alert tcp $EXTERNAL_NET any -> $HOME_NET 79 (msg: "Figer 0 query attempted";[] 
- []
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+ [57] [58] [59
 
 
-Overfull \hbox (91.65024pt too wide) in paragraph at lines 1697--1697
-[]  \OT1/cmtt/m/n/12 content:"0"; flow: to_server,established; fragoffset:0; fragbits:D; flags:A;[] 
- []
-
-
-Overfull \hbox (36.07521pt too wide) in paragraph at lines 1697--1697
-[]\OT1/cmtt/m/n/12 alert tcp $EXTERNAL_NET any -> $HOME_NET 53 (msg: "DNS request name";[] 
- []
-
-
-Overfull \hbox (54.60022pt too wide) in paragraph at lines 1697--1697
-[]  \OT1/cmtt/m/n/12 flow:to_server,established; content:"|00 fc 00 01|"; nocase; depth: 4;[] 
- []
-
-
-Overfull \hbox (11.3752pt too wide) in paragraph at lines 1697--1697
-[]  \OT1/cmtt/m/n/12 metadata:service dns; classtype:   attempted-recon; priority:3;[] 
- []
-
-
-Overfull \hbox (73.12523pt too wide) in paragraph at lines 1697--1697
-[]\OT1/cmtt/m/n/12 alert tcp $EXTERNAL_NET any -> $HOME_NET 21 (msg: "FTP Request connection";[] 
- []
-
-
-Overfull \hbox (36.07521pt too wide) in paragraph at lines 1697--1697
-[]  \OT1/cmtt/m/n/12 flow:to_server,established;   content:"quit"; flags:AP; fragbits:D;[] 
- []
-
-
-Overfull \hbox (79.30023pt too wide) in paragraph at lines 1697--1697
-[]\OT1/cmtt/m/n/12 alert tcp $EXTERNAL_NET any -> $HOME_NET 25  (msg: "SMTP Scan attempted OS";[] 
- []
-
-
-Overfull \hbox (42.25021pt too wide) in paragraph at lines 1697--1697
-[]  \OT1/cmtt/m/n/12 flow:to_server; ack:0;  flags:S; fragoffset:0; window:4660; ttl:254;[] 
- []
-
-[57]
-Overfull \hbox (5.2002pt too wide) in paragraph at lines 1697--1697
-[]  \OT1/cmtt/m/n/12 metadata:service  smtp; classtype:attempted-recon; priority:3;[] 
- []
-
-
-Overfull \hbox (91.65024pt too wide) in paragraph at lines 1697--1697
-[]\OT1/cmtt/m/n/12 alert tcp $EXTERNAL_NET any -> $HOME_NET 25  (msg: " SMTP Scan attempted OS ";[] 
- []
-
-
-Overfull \hbox (48.42522pt too wide) in paragraph at lines 1697--1697
-[]  \OT1/cmtt/m/n/12 flow:to_server; ack:0;  flags:AS; fragoffset:0; window:4660; ttl:254;[] 
- []
-
-
-Overfull \hbox (5.2002pt too wide) in paragraph at lines 1697--1697
-[]  \OT1/cmtt/m/n/12 metadata:service  smtp; classtype:attempted-recon; priority:3;[] 
- []
-
-
-Overfull \hbox (91.65024pt too wide) in paragraph at lines 1697--1697
-[]\OT1/cmtt/m/n/12 alert tcp $EXTERNAL_NET any -> $HOME_NET 25  (msg: " SMTP Scan attempted OS ";[] 
- []
-
-
-Overfull \hbox (42.25021pt too wide) in paragraph at lines 1697--1697
-[]  \OT1/cmtt/m/n/12 flow:to_server; ack:0;  flags:F; fragoffset:0; window:4660; ttl:254;[] 
- []
-
-
-Overfull \hbox (5.2002pt too wide) in paragraph at lines 1697--1697
-[]  \OT1/cmtt/m/n/12 metadata:service  smtp; classtype:attempted-recon; priority:3;[] 
- []
-
-
-Overfull \hbox (91.65024pt too wide) in paragraph at lines 1697--1697
-[]\OT1/cmtt/m/n/12 alert tcp $EXTERNAL_NET any -> $HOME_NET 25  (msg: " SMTP Scan attempted OS ";[] 
- []
-
-
-Overfull \hbox (48.42522pt too wide) in paragraph at lines 1697--1697
-[]  \OT1/cmtt/m/n/12 flow:to_server; ack:0;  flags:AF; fragoffset:0; window:4660; ttl:254;[] 
- []
-
-
-Overfull \hbox (5.2002pt too wide) in paragraph at lines 1697--1697
-[]  \OT1/cmtt/m/n/12 metadata:service  smtp; classtype:attempted-recon; priority:3;[] 
- []
-
-
-Overfull \hbox (91.65024pt too wide) in paragraph at lines 1697--1697
-[]\OT1/cmtt/m/n/12 alert tcp $EXTERNAL_NET any -> $HOME_NET 25  (msg: " SMTP Scan attempted OS ";[] 
- []
-
-
-Overfull \hbox (42.25021pt too wide) in paragraph at lines 1697--1697
-[] \OT1/cmtt/m/n/12 flow:to_server; ack:0;  flags:SF; fragoffset:0; window:4660; ttl:254;[] 
- []
-
-
-Overfull \hbox (85.47523pt too wide) in paragraph at lines 1697--1697
-[] \OT1/cmtt/m/n/12 metadata:service  smtp; classtype:attempted-recon; priority:3; sid:1000044;)[] 
- []
-
-
-Overfull \hbox (91.65024pt too wide) in paragraph at lines 1697--1697
-[]\OT1/cmtt/m/n/12 alert tcp $EXTERNAL_NET any -> $HOME_NET 25  (msg: " SMTP Scan attempted OS ";[] 
- []
-
-
-Overfull \hbox (42.25021pt too wide) in paragraph at lines 1697--1697
-[]  \OT1/cmtt/m/n/12 flow:to_server; ack:0;  flags:P; fragoffset:0; window:4660; ttl:254;[] 
- []
-
-
-Overfull \hbox (91.65024pt too wide) in paragraph at lines 1697--1697
-[]  \OT1/cmtt/m/n/12 metadata:service  smtp; classtype:attempted-recon; priority:3; sid:1000045;)[] 
- []
-
-
-Overfull \hbox (85.47523pt too wide) in paragraph at lines 1697--1697
-[]\OT1/cmtt/m/n/12 alert tcp $EXTERNAL_NET any -> $HOME_NET 25  (msg: " SMTP Scan attempted OS";[] 
- []
-
-
-Overfull \hbox (54.60022pt too wide) in paragraph at lines 1697--1697
-[]  \OT1/cmtt/m/n/12 flow:to_server; ack:0;  flags:CES; fragoffset:0; window:4660; ttl:254;[] 
- []
-
-
-Overfull \hbox (91.65024pt too wide) in paragraph at lines 1697--1697
-[]  \OT1/cmtt/m/n/12 metadata:service  smtp; classtype:attempted-recon; priority:3; sid:1000046;)[] 
- []
-
-[58]
-Appendice B.
-[59
 
 ] [60
 
 ]
+Appendice A.
 
-./extesi.tex:1719: Package inputenc Error: Keyboard character used is undefined
+Overfull \hbox (23.7252pt too wide) in paragraph at lines 1839--1839
+[]\OT1/cmtt/m/n/12 alert tcp $HOME_NET any -> $HOME_NET 80 (msg:"HTTP Scan attempted";[] 
+ []
+
+
+Overfull \hbox (60.77522pt too wide) in paragraph at lines 1839--1839
+[]  \OT1/cmtt/m/n/12 flow:to_server; fragoffset:0; fragbits:!D; ack:0; flags:S; window:2048;[] 
+ []
+
+
+Overfull \hbox (85.47523pt too wide) in paragraph at lines 1839--1839
+[]\OT1/cmtt/m/n/12 alert icmp $EXTERNAL_NET any -> $HOME_NET any (msg:"ICMP Scan Echo"; itype:8;[] 
+ []
+
+
+Overfull \hbox (79.30023pt too wide) in paragraph at lines 1839--1839
+[]  \OT1/cmtt/m/n/12 icode:0; fragbits:!D; content:"|00 00 00 00 00 00 00 00 00 00|"; depth:10;[] 
+ []
+
+
+Overfull \hbox (54.60022pt too wide) in paragraph at lines 1839--1839
+[]  \OT1/cmtt/m/n/12 icmp_id:0; icmp_seq:0; ttl:254; classtype:attempted-recon; priority:3;[] 
+ []
+
+
+Overfull \hbox (79.30023pt too wide) in paragraph at lines 1839--1839
+[]\OT1/cmtt/m/n/12 alert tcp $EXTERNAL_NET any -> $HOME_NET 79 (msg: "Figer 0 query attempted";[] 
+ []
+
+
+Overfull \hbox (91.65024pt too wide) in paragraph at lines 1839--1839
+[]  \OT1/cmtt/m/n/12 content:"0"; flow: to_server,established; fragoffset:0; fragbits:D; flags:A;[] 
+ []
+
+
+Overfull \hbox (36.07521pt too wide) in paragraph at lines 1839--1839
+[]\OT1/cmtt/m/n/12 alert tcp $EXTERNAL_NET any -> $HOME_NET 53 (msg: "DNS request name";[] 
+ []
+
+
+Overfull \hbox (54.60022pt too wide) in paragraph at lines 1839--1839
+[]  \OT1/cmtt/m/n/12 flow:to_server,established; content:"|00 fc 00 01|"; nocase; depth: 4;[] 
+ []
+
+
+Overfull \hbox (11.3752pt too wide) in paragraph at lines 1839--1839
+[]  \OT1/cmtt/m/n/12 metadata:service dns; classtype:   attempted-recon; priority:3;[] 
+ []
+
+
+Overfull \hbox (73.12523pt too wide) in paragraph at lines 1839--1839
+[]\OT1/cmtt/m/n/12 alert tcp $EXTERNAL_NET any -> $HOME_NET 21 (msg: "FTP Request connection";[] 
+ []
+
+
+Overfull \hbox (36.07521pt too wide) in paragraph at lines 1839--1839
+[]  \OT1/cmtt/m/n/12 flow:to_server,established;   content:"quit"; flags:AP; fragbits:D;[] 
+ []
+
+
+Overfull \hbox (79.30023pt too wide) in paragraph at lines 1839--1839
+[]\OT1/cmtt/m/n/12 alert tcp $EXTERNAL_NET any -> $HOME_NET 25  (msg: "SMTP Scan attempted OS";[] 
+ []
+
+
+Overfull \hbox (42.25021pt too wide) in paragraph at lines 1839--1839
+[]  \OT1/cmtt/m/n/12 flow:to_server; ack:0;  flags:S; fragoffset:0; window:4660; ttl:254;[] 
+ []
+
+[61]
+Overfull \hbox (5.2002pt too wide) in paragraph at lines 1839--1839
+[]  \OT1/cmtt/m/n/12 metadata:service  smtp; classtype:attempted-recon; priority:3;[] 
+ []
+
+
+Overfull \hbox (91.65024pt too wide) in paragraph at lines 1839--1839
+[]\OT1/cmtt/m/n/12 alert tcp $EXTERNAL_NET any -> $HOME_NET 25  (msg: " SMTP Scan attempted OS ";[] 
+ []
+
+
+Overfull \hbox (48.42522pt too wide) in paragraph at lines 1839--1839
+[]  \OT1/cmtt/m/n/12 flow:to_server; ack:0;  flags:AS; fragoffset:0; window:4660; ttl:254;[] 
+ []
+
+
+Overfull \hbox (5.2002pt too wide) in paragraph at lines 1839--1839
+[]  \OT1/cmtt/m/n/12 metadata:service  smtp; classtype:attempted-recon; priority:3;[] 
+ []
+
+
+Overfull \hbox (91.65024pt too wide) in paragraph at lines 1839--1839
+[]\OT1/cmtt/m/n/12 alert tcp $EXTERNAL_NET any -> $HOME_NET 25  (msg: " SMTP Scan attempted OS ";[] 
+ []
+
+
+Overfull \hbox (42.25021pt too wide) in paragraph at lines 1839--1839
+[]  \OT1/cmtt/m/n/12 flow:to_server; ack:0;  flags:F; fragoffset:0; window:4660; ttl:254;[] 
+ []
+
+
+Overfull \hbox (5.2002pt too wide) in paragraph at lines 1839--1839
+[]  \OT1/cmtt/m/n/12 metadata:service  smtp; classtype:attempted-recon; priority:3;[] 
+ []
+
+
+Overfull \hbox (91.65024pt too wide) in paragraph at lines 1839--1839
+[]\OT1/cmtt/m/n/12 alert tcp $EXTERNAL_NET any -> $HOME_NET 25  (msg: " SMTP Scan attempted OS ";[] 
+ []
+
+
+Overfull \hbox (48.42522pt too wide) in paragraph at lines 1839--1839
+[]  \OT1/cmtt/m/n/12 flow:to_server; ack:0;  flags:AF; fragoffset:0; window:4660; ttl:254;[] 
+ []
+
+
+Overfull \hbox (5.2002pt too wide) in paragraph at lines 1839--1839
+[]  \OT1/cmtt/m/n/12 metadata:service  smtp; classtype:attempted-recon; priority:3;[] 
+ []
+
+
+Overfull \hbox (91.65024pt too wide) in paragraph at lines 1839--1839
+[]\OT1/cmtt/m/n/12 alert tcp $EXTERNAL_NET any -> $HOME_NET 25  (msg: " SMTP Scan attempted OS ";[] 
+ []
+
+
+Overfull \hbox (42.25021pt too wide) in paragraph at lines 1839--1839
+[] \OT1/cmtt/m/n/12 flow:to_server; ack:0;  flags:SF; fragoffset:0; window:4660; ttl:254;[] 
+ []
+
+
+Overfull \hbox (85.47523pt too wide) in paragraph at lines 1839--1839
+[] \OT1/cmtt/m/n/12 metadata:service  smtp; classtype:attempted-recon; priority:3; sid:1000044;)[] 
+ []
+
+
+Overfull \hbox (91.65024pt too wide) in paragraph at lines 1839--1839
+[]\OT1/cmtt/m/n/12 alert tcp $EXTERNAL_NET any -> $HOME_NET 25  (msg: " SMTP Scan attempted OS ";[] 
+ []
+
+
+Overfull \hbox (42.25021pt too wide) in paragraph at lines 1839--1839
+[]  \OT1/cmtt/m/n/12 flow:to_server; ack:0;  flags:P; fragoffset:0; window:4660; ttl:254;[] 
+ []
+
+
+Overfull \hbox (91.65024pt too wide) in paragraph at lines 1839--1839
+[]  \OT1/cmtt/m/n/12 metadata:service  smtp; classtype:attempted-recon; priority:3; sid:1000045;)[] 
+ []
+
+
+Overfull \hbox (85.47523pt too wide) in paragraph at lines 1839--1839
+[]\OT1/cmtt/m/n/12 alert tcp $EXTERNAL_NET any -> $HOME_NET 25  (msg: " SMTP Scan attempted OS";[] 
+ []
+
+
+Overfull \hbox (54.60022pt too wide) in paragraph at lines 1839--1839
+[]  \OT1/cmtt/m/n/12 flow:to_server; ack:0;  flags:CES; fragoffset:0; window:4660; ttl:254;[] 
+ []
+
+
+Overfull \hbox (91.65024pt too wide) in paragraph at lines 1839--1839
+[]  \OT1/cmtt/m/n/12 metadata:service  smtp; classtype:attempted-recon; priority:3; sid:1000046;)[] 
+ []
+
+[62]
+Appendice B.
+[63
+
+] [64
+
+]
+
+./extesi.tex:1861: Package inputenc Error: Keyboard character used is undefined
 (inputenc)                in inputencoding `latin1'.
 
 See the inputenc package documentation for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.1719 \bibitem{K4} "NIST â€
+l.1861 \bibitem{K4} "NIST â€
                             “ Guide to Intrusion Detection and Prevention Sy...
 You need to provide a definition with \DeclareInputText 
 or \DeclareInputMath before using this key.
 
 
-./extesi.tex:1719: Package inputenc Error: Keyboard character used is undefined
+./extesi.tex:1861: Package inputenc Error: Keyboard character used is undefined
 (inputenc)                in inputencoding `latin1'.
 
 See the inputenc package documentation for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.1719 \bibitem{K4} "NIST â€“
+l.1861 \bibitem{K4} "NIST â€“
                               Guide to Intrusion Detection and Prevention Sy...
 You need to provide a definition with \DeclareInputText 
 or \DeclareInputMath before using this key.
 
-./extesi.tex:1730: Misplaced alignment tab character &.
-l.1730 ...nd IPFIX". IEEE Communications Surveys &
+./extesi.tex:1872: Misplaced alignment tab character &.
+l.1872 ...nd IPFIX". IEEE Communications Surveys &
                                                    Tutorials. IEEE Communica...
 I can't figure out why you would want to use a tab mark
 here. If you just want an ampersand, the remedy is
@@ -1014,53 +1064,53 @@ up above has ended a previous alignment prematurely,
 you're probably due for more error messages, and you
 might try typing `S' now just to see what is salvageable.
 
-[61]
-Underfull \hbox (badness 10000) in paragraph at lines 1737--1738
+[65]
+Underfull \hbox (badness 10000) in paragraph at lines 1879--1880
 []\OT1/cmr/m/n/12 SCADA STA-TI-STICS MO-NI-TO-RING USING THE Ela-stic
  []
 
 
-Underfull \hbox (badness 4582) in paragraph at lines 1737--1738
+Underfull \hbox (badness 4582) in paragraph at lines 1879--1880
 \OT1/cmr/m/n/12 Stack(Elasticsearch, Log-stash, Ki-ba-na), Ja-mes Ha-mil-ton, Brad
  []
 
 
-Underfull \hbox (badness 1910) in paragraph at lines 1737--1738
+Underfull \hbox (badness 1910) in paragraph at lines 1879--1880
 \OT1/cmr/m/n/12 Scho-field, Ma-nuel Gon-za-lez Ber-ges, Jean-Charles Tour-nier-CERN,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1743--1744
+Underfull \hbox (badness 10000) in paragraph at lines 1885--1886
 []\OT1/cmr/m/n/12 https://mcfp.weebly.com/the-ctu-13-dataset-a-labeled-dataset-with-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1746--1747
+Underfull \hbox (badness 10000) in paragraph at lines 1888--1889
 []\OT1/cmr/m/n/12 https://www.elastic.co/guide/en/elasticsearch/reference/current/tune-
  []
 
-[62]
-Overfull \hbox (9.82224pt too wide) in paragraph at lines 1747--1748
+[66]
+Overfull \hbox (9.82224pt too wide) in paragraph at lines 1889--1890
 []\OT1/cmr/m/n/12 https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1748--1749
+Underfull \hbox (badness 10000) in paragraph at lines 1890--1891
 []\OT1/cmr/m/n/12 https://docs.oracle.com/cd/E26217[]01/E26796/html/qs-create-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1751--1752
+Underfull \hbox (badness 10000) in paragraph at lines 1893--1894
 []\OT1/cmr/m/n/12 https://www.elastic.co/guide/en/elasticsearch/guide/current/inverted-
  []
 
 
-Overfull \hbox (71.98354pt too wide) in paragraph at lines 1752--1753
+Overfull \hbox (71.98354pt too wide) in paragraph at lines 1894--1895
 []\OT1/cmr/m/n/12 https://redmine.openinfosecfoundation.org/projects/suricata/wiki/Payload[]keywords 
  []
 
-./extesi.tex:1753: Misplaced alignment tab character &.
-l.1753 \bibitem{EXP15} Khamphakdee, Nattawat &
+./extesi.tex:1895: Misplaced alignment tab character &.
+l.1895 \bibitem{EXP15} Khamphakdee, Nattawat &
                                                Benjamas, Nunnapus & Saiyod, ...
 I can't figure out why you would want to use a tab mark
 here. If you just want an ampersand, the remedy is
@@ -1069,8 +1119,8 @@ up above has ended a previous alignment prematurely,
 you're probably due for more error messages, and you
 might try typing `S' now just to see what is salvageable.
 
-./extesi.tex:1753: Misplaced alignment tab character &.
-l.1753 ...phakdee, Nattawat & Benjamas, Nunnapus &
+./extesi.tex:1895: Misplaced alignment tab character &.
+l.1895 ...phakdee, Nattawat & Benjamas, Nunnapus &
                                                    Saiyod, Saiyan. (2014). I...
 I can't figure out why you would want to use a tab mark
 here. If you just want an ampersand, the remedy is
@@ -1080,19 +1130,19 @@ you're probably due for more error messages, and you
 might try typing `S' now just to see what is salvageable.
 
 
-Underfull \hbox (badness 1117) in paragraph at lines 1753--1754
+Underfull \hbox (badness 1117) in paragraph at lines 1895--1896
 []\OT1/cmr/m/n/12 Khamphakdee, Nat-ta-wat  Be-n-ja-mas, Nun-na-pus  Saiyod, Saiyan.
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1754--1755
+Underfull \hbox (badness 10000) in paragraph at lines 1896--1897
 []\OT1/cmr/m/n/12 https://www.cybrary.it/2015/05/summarizing-the-five-phases-of-
  []
 
-[63] [64
+[67] [68
 
 
-] [65
+] [69
 
 ] (./extesi.aux)
 
@@ -1100,18 +1150,18 @@ LaTeX Warning: There were multiply-defined labels.
 
  ) 
 Here is how much of TeX's memory you used:
- 5018 strings out of 492985
- 67128 string characters out of 6138637
- 140828 words of memory out of 5000000
- 8450 multiletter control sequences out of 15000+600000
+ 5024 strings out of 492985
+ 67288 string characters out of 6138637
+ 140839 words of memory out of 5000000
+ 8455 multiletter control sequences out of 15000+600000
  13966 words of font info for 57 fonts, out of 8000000 for 9000
  1143 hyphenation exceptions out of 8191
  41i,11n,43p,792b,409s stack positions out of 5000i,500n,10000p,200000b,80000s
 </usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmbxti10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmti12.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt12.pfb>
-Output written on extesi.pdf (75 pages, 884027 bytes).
+Output written on extesi.pdf (79 pages, 928832 bytes).
 PDF statistics:
- 305 PDF objects out of 1000 (max. 8388607)
- 196 compressed objects within 2 object streams
+ 320 PDF objects out of 1000 (max. 8388607)
+ 205 compressed objects within 3 object streams
  0 named destinations out of 1000 (max. 500000)
- 96 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 101 words of extra memory for PDF output out of 10000 (max. 10000000)
 

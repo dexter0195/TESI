@@ -1491,8 +1491,24 @@ lo stesso rule-set per sampling rate 4 e On-Wire, un numero maggiore di alert ne
 indica che sicuramente vi saranno dei falsi positivi.
 
 
+\begin{figure}[h!]
+\begin{center}                          %centra nel mezzo della pagina
+  \includegraphics[width=\textwidth]{images/ICTF-forens-dest.png}
+  \caption{Identificazione degli host compromessi}\label{ictf:forens}
+  \label{}
+\end{center}
+\end{figure}
 
-
+Infine in figura \ref{ictf:forens} si osservano il numero di alert rilevati suddivisi per host
+e per parametri di campionamento. Questo tipo di valutazione \`e stata fatta poich\`e essa risulta particolarmente
+utile nelle fasi successive all'attacco, ovvero durante l'analisi forense. Identificare gli
+host che sono stati colpiti \`e di fondamentale importanza al fine di metterli di nuovo
+in sicurezza e controllare che non vi siano state iniettate delle {\it backdoors}.
+Quasi tutti i test sono stati in grado di identificare gli host colpiti, ad eccezione
+dei test con sampling rate 200 che non hanno per nulla rilevato l'attacco a quegli hosts.
+Inoltre l'host con IP 10.14.1.17, come descritto nella documentazione del dataset,
+ospita un CGI Perl ed \`e proprio quello che \`e stato
+colpito maggiormente da attacchi del tipo  {\it "ET SCAN DirBuster Web App Scan in Progress"}.
 
 \clearpage
 
@@ -1629,6 +1645,132 @@ sopra, risultato alquanto insoddisfacente.
 \end{figure}
 
 \clearpage
+
+\section{Campionamento adattivo}
+
+Si va adesso ad illustrare un approccio alternativo al campionamento statico, ovvero
+quello che si \`e definito campionamento adattivo.
+
+Campionare sempre lo stesso numero di pacchetti potrebbe essere in una rete molto estesa
+un carico inutilmente pesante. La proposta prevede di impostare il campionamento ad un
+valore iniziale di sampling rate uguale a 100 e di aumentarlo qual ora vengano attivati
+degli alert da parte dell'IDS.
+In pratica si propone di monitorare il file di log {\it eve.json} e di inoltrare {\it on the fly}
+una richiesta al collector di campionare pi\`u approfonditamente i pacchetti provenienti dalla
+sorgente che ha fatto scattare l'alert.
+Il cambiamento dei parametri pu\`o essere fatto molto agilmente nel caso in cui si
+utilizzi come device per il campionamento il software OpenVSwitch. Basta infatti
+inviare i comandi :
+\begin{verbatim}
+SFLOWUUID=`ovs-vsctl create sFlow agent=eth0 target=\"10.0.0.50:6343\" \
+    header=128 sampling=512 polling=30`
+ovs-vsctl list br
+ovs-vsctl set bridge xenbr0 sflow=$SFLOWUUID
+ovs-vsctl set bridge xenbr1 sflow=$SFLOWUUID
+\end{verbatim}
+
+Definita la fattibilit\`a del campionamento adattivo si passa ora a analizzare il
+comportamento del sistema di monitoraggio con l'introduzione di questo nuovo parametro.
+Si aggiunge quindi al simulatore pcap2sflow la possibilit\`a di caricare una blacklist di indirizzi
+per cui il campionamento deve essere fatto in maniera pi\`u approfondita.
+
+\begin{verbatim}
+void load_blacklist(){
+    char blacklist_filename [4096] = "/tmp/pcap2sflow-blacklist";
+    char buff [256];
+    char * line = NULL;
+    size_t len = 0;
+    ssize_t read;
+
+    FILE *fp;
+
+    fp = fopen(blacklist_filename, "r");
+    int id = 0;
+    if (fp == NULL) {
+        perror("no blacklist_file provided");
+        exit(EXIT_FAILURE);
+    }
+
+    while ((read = getline(&line, &len, fp)) != -1) {
+        //reads all the lines and add them to the hashtable of blacklisted ip
+        if ((line)[read - 1] == '\n') {
+            //strip the newline char
+            (line)[read - 1] = '\0';
+        }
+        if (strcmp(line, "") == 0 ){
+
+        }
+        struct blacklist_item *s;
+        s = (struct blacklist_item*)malloc(sizeof(struct blacklist_item));
+        s->id = id++;
+        strncpy(s->ip, line, 256);
+        HASH_ADD_STR(black_list, ip , s);
+    }
+
+    struct blacklist_item *s = NULL;
+
+    fprintf(stderr, "Blacklisted IPs:\n");
+    for(s=black_list; s != NULL; s=s->hh.next) {
+        fprintf(stderr, "id %d: ip %s\n", s->id, s->ip);
+    }
+
+    fclose(fp);
+
+}void load_blacklist(){
+    char blacklist_filename [4096] = "/tmp/pcap2sflow-blacklist";
+    char buff [256];
+    char * line = NULL;
+    size_t len = 0;
+    ssize_t read;
+
+    FILE *fp;
+
+    fp = fopen(blacklist_filename, "r");
+    int id = 0;
+    if (fp == NULL) {
+        perror("no blacklist_file provided");
+        exit(EXIT_FAILURE);
+    }
+
+    while ((read = getline(&line, &len, fp)) != -1) {
+        //reads all the lines and add them to the hashtable of blacklisted ip
+        if ((line)[read - 1] == '\n') {
+            //strip the newline char
+            (line)[read - 1] = '\0';
+        }
+        if (strcmp(line, "") == 0 ){
+
+        }
+        struct blacklist_item *s;
+        s = (struct blacklist_item*)malloc(sizeof(struct blacklist_item));
+        s->id = id++;
+        strncpy(s->ip, line, 256);
+        HASH_ADD_STR(black_list, ip , s);
+    }
+
+    struct blacklist_item *s = NULL;
+
+    fprintf(stderr, "Blacklisted IPs:\n");
+    for(s=black_list; s != NULL; s=s->hh.next) {
+        fprintf(stderr, "id %d: ip %s\n", s->id, s->ip);
+    }
+
+    fclose(fp);
+
+}
+\end{verbatim}
+
+Si \`e posta particolare attenzione a mantenere le performance del simulatore alte pur
+introducendo l'overhead dovuto al controllo dell'IP address di ogni pacchetto. Si \`e quindi
+implementato il controllo della blacklist tramite una hash table permettendo quindi i
+controlli in O(1).
+
+La blacklist viene costantemente aggiornata dal programma python log-analyzer.py,
+il quale ogni volta che vede un alert di cui non ha l'indirizzo IP sorgente nella
+blacklist aggiorna la blacklist e notifica a pcap2sflow di ricaricarla con una signal.
+Anche nel programma python la blacklist \`e altamente efficiente poich\`e realizzata con
+i {\it set}, i quali in Python sono implementati con hash tables permettendo accesso anch'essi in O(1).
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%non numera l'ultima pagina sinistra
