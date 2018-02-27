@@ -1285,7 +1285,7 @@ il campionamento adattivo.
 
 \section{Criteri di valutazione}
 In ogni contesto di sperimentazione, ovvero al variare di parametri dei test e di
-dataset si sono osservati i comportamenti dei seguenti indicatori:
+dataset, si sono osservati i comportamenti dei seguenti indicatori:
 \begin{itemize}
   \item {\bf Alert} : la quantit\`a totale di alert sollevati da suricata
   \item {\bf Falsi positivi} : la quantit\`a di alert che nel setup On-Wire
@@ -1304,7 +1304,8 @@ dataset si sono osservati i comportamenti dei seguenti indicatori:
 \section{Risultati}
 
 Per ogni test sono state provate tutte le combinazioni tra sampling rate uguale a
-2, 4, 100 e troncamento uguale a 128, 256, 512 bytes.
+2, 4, 100 e troncamento uguale a 128, 256, 512 bytes, ad eccezione di ICtF2010,
+per il quale si sono teste diverse combinazioni di sampling rate 4, 100, 200, 400.
 Poi esse sono state messe in relazione agli stessi test effettuati in modalit\`a On-Wire,
 con sampling rate uguale a 1 e senza troncamento (nei test indicato con il valore 600 per comodit\`a di rappresentazione).
 \subsection{ICtF2010}
@@ -1315,8 +1316,10 @@ test con il rule-set standard di Emerging-Threats.
 
 In questa prima fase si voleva osservare l'impatto che hanno campionamento e troncamento
 e se l'esclusione dell'uno o dell'altro portasse a miglioramenti apprezzabili.
+Si va a valutare in questi test il numero di alert e il loro rapporto con il numero dei
+falsi positivi.
 
-In figura 3.1 mettiamo in relazione il numero degli alert al variare del campionamento
+In figura 3.1 si mettono in relazione il numero degli alert al variare del campionamento
 con molteplici valori di troncamento. Similarmente in figura 3.2 ma invertendo i
 parametri.
 
@@ -1342,7 +1345,7 @@ troncamento a 128 bytes, la reale differenza tra il numero degli alert viene dat
 valore del sampling rate. Per cui un troncamento uguale a 128 bytes, nel tipo di traffico del dataset ICtF2010,
 rappresenta un valore limite per garantire l'efficacia del sistema di rilevamento.
 
-Osserviamo poi in figura 3.3 come i valori di troncamento e campionamento influiscono sul traffico
+Osserviamo poi nelle figure 3.3 e 3.4 come i valori di troncamento e campionamento influiscono sul traffico
 che viene inviato al collector per l'analisi.
 
 \begin{figure}[h!]
@@ -1391,10 +1394,13 @@ se esse siano o meno dei falsi positivi.
 \end{center}
 \end{figure}
 
-Dalla figura 3.5 vediamo i test con troncamento a 128 e sampling rate 4 sono
-sono quelli che hanno il numero di falsi positivi (in rosso) pi\`u alto di tutti.
+Dalla figura 3.5 si vede che i test con troncamento a 128 e sampling rate 4 sono
+sono quelli che hanno il numero di falsi positivi (in rosso) in rapporto
+al numero degli alert totali pi\`u alto di tutti.
 Mentre il troncamento a 256 byte e sampling rate 4 \`e quello che ha una percentuale
-di falsi positivi pi\`u bassa, come mostrato in tabella.
+di falsi positivi pi\`u bassa, come mostrato in tabella \ref{tab:falsep-4}.
+
+\begin{table}
 
 \begin{center}
   \begin{tabular}{| a | d | b | c |}
@@ -1402,9 +1408,11 @@ di falsi positivi pi\`u bassa, come mostrato in tabella.
     {\bf Troncamento} & {\bf \# Alert } & {\bf \# Falsi Positivi} & {\bf \% } \\ \hline
     128 & 11688 & 6472 & 55\% \\ \hline
     256 & 133649 & 7151 & 5.3\% \\ \hline
-    512 & 11786 & 6459 & 5.4\% \\ \hline
+    512 & 11786 & 6459 & 54.8\% \\ \hline
   \end{tabular}
 \end{center}
+    \caption[ICt2010 - Falsi positivi]{Falsi positivi con sampling rate 4}\label{tab:falsep-4}
+\end{table}
 
 Infatti, come \`e possibile vedere nella figura 3.6, il troncamento a 128 byte porta ad un
 incremento notevole del numero degli alert che vengono attivati dalle signatures
@@ -1412,9 +1420,172 @@ incremento notevole del numero degli alert che vengono attivati dalle signatures
 che sono sintomatici di un troncamento eccessivo, e che porta quindi ad avere headers che non
 rispettano pi\`u le specifiche del protocollo (HTTP, DNS o altri).
 
+\begin{figure}[h!]
+\begin{center}                          %centra nel mezzo della pagina
+  \includegraphics[width=\textwidth]{images/ICTF-time-alerts.png}
+  \caption[ICtF2010 - numero di alert nel tempo]{Numero alert nel tempo}\label{ictf:time}
+  \label{}
+\end{center}
+\end{figure}
+
+Fissato il troncamento a 256 bytes mostriamo nella figura \ref{ictf:time} il numero di alert durante tutta la
+competizione con sampling rate 4 e 100. Si osserva qui che i test con sampling rate 4
+ricalcano abbastanza fedelmente l'attivit\`a registrata da Suricata On-Wire (in verde).
+Invece i test con sampling rate 100 sono stati efficienti nel primo periodo ma del
+quasi inutili nel secondo. L'andamento pi\`u ripido nella prima parte della competizione \`e
+compatibile con le prime due fasi del penetration testing, che sono riconocimento del target
+e scansione \cite{EXP16}. A questo periodo infatti corrisponde un grande numero di alert (circa 6M in totale)
+con signature {\it "ET SCAN DirBuster Web App Scan in Progress"}. Questa \`e la fase in cui
+i team si esponevano di pi\`u al fine di rilevare eventuali falle nel sistema. Non appena passata
+questa fase, le tecniche si sono notevolmente affinate, portando il numero di alerts a  mantenersi circa costante.
+
+Inoltre come \`e possibile osservare nel periodo che va dalle 7:00 alle 19:00 il gli alert
+con sampling rate 4 sono in alcuni punti superiori a quelli del setup On-Wire. Questo
+\`e sintomo di un aumento dei falsi positivi in quel periodo di tempo, poich\`e avendo usato
+lo stesso rule-set per sampling rate 4 e On-Wire, un numero maggiore di alert nel primo
+indica che sicuramente vi saranno dei falsi positivi.
+
+
+
+
+
 \clearpage
+
+Avendo mostrato nella sezione precedente l'effetto dei vari tipi di campionamento
+e del loro impatto sui tipi di attacco rilevabili andiamo adesso a fare una analisi
+puramente quantitativa sui due dataset DARPA e CTU-13.
+
+
 \subsection{DARPA Dataset}
 
+Il Dataset Darpa \`e stato testato con le sole regole descritte al capitolo precedente.
+Si effettuer\`a quindi una analisi della percentuale di attacchi rilevati senza considerare i
+falsi positivi. Infatti utilizzando solo le regole specifiche per tale dataset non
+\`e possibile riscontrare dei falsi positivi semplicemente perch\`e le regole che li azionerebbero
+non sono caricate.
+
+\begin{figure}[h!]
+\begin{center}                          %centra nel mezzo della pagina
+  \includegraphics[width=\textwidth]{images/DARPA-sampling-rate.png}
+  \caption{Numero di Alert al variare del sampling rate}\label{darpa:s}
+  \label{}
+\end{center}
+\end{figure}
+\begin{figure}[h!]
+\begin{center}                          %centra nel mezzo della pagina
+  \includegraphics[width=\textwidth]{images/DARPA-troncamento.png}\label{darpa:t}
+  \caption{Numero di Alert al variare del troncamento}
+  \label{}
+\end{center}
+\end{figure}
+ Come si \`e osservato nella sezione precedente con il dataset ICtF2010 , le figure \ref{darpa:s}
+ e \ref{darpa:t} mostrano che il tasso di rilevamento decresce con l'aumentare del
+ sampling rate e invece rimane circa costante al variare del campionamento.
+
+ Infine nella tabella \ref{darpa:bigtable} vengono messi in relazione il
+ numero di alert con il traffico medio inoltrato al Collector e notiamo che per questa analisi quantitativa i
+ risultati non ci sorprendono e il numero di alert \`e direttamente proporzionale
+ alla quantit\`a di traffico, per ogni valore di troncamento. In particolare i test
+ con sampling rate uguale a 100 hanno rivelato che questo tipo di campionamento
+ \`e del tutto inefficace nel riconoscere un attacco in corso.
+
+ \begin{table}
+   \begin{center}
+     \begin{tabular}{ | a | b | b | c | d | }
+       \hline
+       {\bf Sampling Rate } & {\bf \# alert } & {\bf \% Alert} & {\bf Traffico (MB)} & {\bf \% Traffico} \\ \hline
+        1 (On-Wire) & 156 & - & 372 & - \\ \hline
+        2 & 52 & 33.3\% & 124 & 33.3\% \\ \hline
+        4 & 30 & 19\% & 74 & 19\% \\ \hline
+        100 & 1 & 0.64\% & 3 & 0.8\% \\ \hline
+     \end{tabular}
+     \caption{Numero di alert al variare del sampling rate}\label{darpa:bigtable}
+   \end{center}
+ \end{table}
+
+ Infine vediamo nella figura \ref{darpa:time} che tutti i test con sampling rate
+ uguale a 2 e 4 sono stati in grado di vedere l'attacco, con una piccola differenza nell'attacco
+ delle 20:00 in cui il test con sampling rate 2 non lo ha rilevato, probabilmente dovuto
+ al susseguirsi in quel lasso di tempo piccolo di una scelta poco fortunata su quale pacchetto su
+ 2 campionare.
+
+ Questo solleva una ulteriore domanda, ovvero \`e possibile evadere un IDS basato su
+ packet sampling utilizzando tecniche statistiche per mantenere l'attacco sotto una certa
+ soglia? (sviluppi futuri)
+
+\begin{figure}[h!]
+\begin{center}                          %centra nel mezzo della pagina
+  \includegraphics[width=\textwidth]{images/DARPA-time.png}
+  \caption{Numero di Alert al variare del sampling rate nel tempo}\label{darpa:time}
+  \label{}
+\end{center}
+\end{figure}
+
+\clearpage
+
+\subsection{CTU-13 Dataset}
+
+Infine analizziamo il comportamento del sistema di monitoraggio utilizzando il dataset
+CTU-13. Un dataset, come descritto nel capitolo precedente formato da traffico derivante
+da botnets. Si \`e scelto di testare, per motivi di scarsit\`a di spazio su disco, soltanto il traffico della
+botnet 4, che contiene un attacco DDoS.
+
+I risultati del tutto simili a quelli dei test con il dataset DARPA per cui riportiamo per
+brevit\`a solo una tabella (\ref{tab:ctu-samp}) con i valori del tasso di rilevamento a variare del sampling rate.
+\begin{table}
+\begin{center}
+  \begin{tabular}{| a | d | b |}
+    \hline
+    {\bf Sampling rate} & {\bf \# Alert } & {\bf \% } \\ \hline
+    1 (On-Wire) & 92055 & - \\ \hline
+    2 & 3363 & 3.65\% \\ \hline
+    4 & 995 & 0.1\% \\ \hline
+  \end{tabular}
+\end{center}
+    \caption[CTU-13 - Numero di alert]{Numero di alert al variare del sampling rate}\label{tab:ctu-samp}
+\end{table}
+Quello che \`e interessante di questo dataset \`e la capacit\`a di rilevare che
+un attacco sia in corso. Sappiamo che gli attacchi DDoS per loro natura tendono a
+inviare alla macchina target una grande quantit\`a di traffico in un periodo di tempo pi\`u o meno lungo.
+Questo tipo di attacco quindi si presta molto ad essere rilevato con tecnologie come
+quella di sFlow, poich\`e anche pur essendoci una parte di traffico che passa inosservata per
+via degli effetti del campionamento, ce ne sar\`a un'altra parte che invece verr\`a analizzata
+portando alla rilevazione dell'attacco.
+In figura \ref{ctu:time} riportiamo il numero di alert al variare del campionamento
+in cui si nota proprio il comportamento descritto sopra.
+
+Sia i test com sampling rate 2 che quelli con 4 hanno portato ad una rilevazione efficace
+dell'attacco. La grande differenza in numero che \`e possibile osservare tra questi ultimi e
+i test effettuati On-Wire non \`e da ritenersi particolarmente rilevante ai fini della
+valutazione. Infatti nelle regole che sono state scritte per testare questo dataset
+si \`e volutamente omesso un limite superiore agli alert, come invece si fa per questo
+tipo di attacco per evitare un flood di alerts.
+Notiamo invece che non sono presenti alert nei test con sampling rate 100, contrariamente
+da come ci aspettavamo per questo tipo di attacco, pur accorciando il threshold di rilevamento
+all'interno della regola non si \`e riusciti a far scattare l'allarme di un DDoS in corso.
+\begin{verbatim}
+  alert udp any any -> $HOME_NET 161 (msg:"ET DOS CTU-13 Botnet";
+  content:"|cb f5 ab 86 05|"; depth:5; threshold: type threshold,
+  track by_dst, seconds 90, count 3; classtype:bad-unknown;
+  sid:2016016; rev:8; metadata:created_at 2018-02,
+  updated_at 2018-02;)
+\end{verbatim}
+
+Questo significa che pur avendo un {\it burst} di pacchetti malevoli non si sono
+rilevati neanche 3 pacchetti nell'arco di 90 secondi con quella signature descritta
+sopra, risultato alquanto insoddisfacente.
+
+\begin{figure}[h!]
+\begin{center}                          %centra nel mezzo della pagina
+  \includegraphics[width=\textwidth]{images/CTU-time.png}
+  \caption{Numero di Alert al variare del sampling rate nel tempo}\label{ctu:time}
+  \label{}
+\end{center}
+\end{figure}
+
+\newpage
+\clearpage
+OLD OLD OLD
 Si \`e osservato il comportamento dell'IDS Suricata in due scenari diversi,
 uno in cui sono state utilizzate solo le regole di default e uno in cui si
 sono utilizzate solo le regole appositamente sviluppate per quel dataset \cite{EXP15}.
@@ -1585,6 +1756,7 @@ Ibrahim Ghafir, Vaclav Prenosil, Jakub Svoboda, Mohammad Hammoudeh,
 \bibitem{EXP13} https://www.elastic.co/guide/en/elasticsearch/guide/current/inverted-index.html
 \bibitem{EXP14} https://redmine.openinfosecfoundation.org/projects/suricata/wiki/Payload\_keywords
 \bibitem{EXP15} Khamphakdee, Nattawat & Benjamas, Nunnapus & Saiyod, Saiyan. (2014). Improving Intrusion Detection System Based on Snort Rules for Network Probe Attack Detection. 2014 2nd International Conference on Information and Communication Technology, ICoICT 2014. 10.1109/ICoICT.2014.6914042.
+\bibitem{EXP16} https://www.cybrary.it/2015/05/summarizing-the-five-phases-of-penetration-testing/
 \end{thebibliography}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%non numera l'ultima pagina sinistra
 \clearpage{\pagestyle{empty}\cleardoublepage}
