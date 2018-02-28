@@ -39,7 +39,7 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%librerie matematiche
 \usepackage{amssymb}
-\usepackage{amsmath}
+\usepackage{mathtools}
 \usepackage{latexsym}
 \usepackage{amsthm}
 %
@@ -1310,6 +1310,132 @@ Occorre notare che sebbene si creino molti documenti, data la struttura di Elast
 e del suo Inverted Index \cite{EXP13}, questo non occupa molto spazio e se ne guadagna in comodit\`a una volta che
 si proceder\`a col creare le visualizzazioni.
 
+\section{Campionamento adattivo}
+
+Si va adesso ad illustrare un approccio alternativo al campionamento statico, introdotto
+in un secondo momento, ovvero quello che si \`e definito campionamento adattivo.
+
+Campionare sempre lo stesso numero di pacchetti potrebbe essere in una rete molto estesa
+un carico inutilmente pesante. La proposta prevede di impostare il campionamento ad un
+valore iniziale di sampling rate uguale a 100 e di aumentarlo qual ora vengano attivati
+degli alert da parte dell'IDS.
+In pratica si propone di monitorare il file di log {\it eve.json} e di inoltrare {\it on the fly}
+una richiesta al collector di campionare pi\`u approfonditamente i pacchetti provenienti dalla
+sorgente che ha fatto scattare l'alert.
+Il cambiamento dei parametri pu\`o essere fatto molto agilmente nel caso in cui si
+utilizzi come device per il campionamento il software OpenVSwitch. Basta infatti
+inviare i comandi :
+\begin{verbatim}
+SFLOWUUID=`ovs-vsctl create sFlow agent=eth0 target=\"10.0.0.50:6343\" \
+    header=128 sampling=512 polling=30`
+ovs-vsctl list br
+ovs-vsctl set bridge xenbr0 sflow=$SFLOWUUID
+ovs-vsctl set bridge xenbr1 sflow=$SFLOWUUID
+\end{verbatim}
+
+Definita la fattibilit\`a del campionamento adattivo si passa ora a analizzare il
+comportamento del sistema di monitoraggio con l'introduzione di questo nuovo parametro.
+Si aggiunge quindi al simulatore pcap2sflow la possibilit\`a di caricare una blacklist di indirizzi
+per cui il campionamento deve essere fatto in maniera pi\`u approfondita.
+
+\begin{verbatim}
+void load_blacklist(){
+    char blacklist_filename [4096] = "/tmp/pcap2sflow-blacklist";
+    char buff [256];
+    char * line = NULL;
+    size_t len = 0;
+    ssize_t read;
+
+    FILE *fp;
+
+    fp = fopen(blacklist_filename, "r");
+    int id = 0;
+    if (fp == NULL) {
+        perror("no blacklist_file provided");
+        exit(EXIT_FAILURE);
+    }
+
+    while ((read = getline(&line, &len, fp)) != -1) {
+        //reads all the lines and add them to the hashtable of blacklisted ip
+        if ((line)[read - 1] == '\n') {
+            //strip the newline char
+            (line)[read - 1] = '\0';
+        }
+        if (strcmp(line, "") == 0 ){
+
+        }
+        struct blacklist_item *s;
+        s = (struct blacklist_item*)malloc(sizeof(struct blacklist_item));
+        s->id = id++;
+        strncpy(s->ip, line, 256);
+        HASH_ADD_STR(black_list, ip , s);
+    }
+
+    struct blacklist_item *s = NULL;
+
+    fprintf(stderr, "Blacklisted IPs:\n");
+    for(s=black_list; s != NULL; s=s->hh.next) {
+        fprintf(stderr, "id %d: ip %s\n", s->id, s->ip);
+    }
+
+    fclose(fp);
+
+}void load_blacklist(){
+    char blacklist_filename [4096] = "/tmp/pcap2sflow-blacklist";
+    char buff [256];
+    char * line = NULL;
+    size_t len = 0;
+    ssize_t read;
+
+    FILE *fp;
+
+    fp = fopen(blacklist_filename, "r");
+    int id = 0;
+    if (fp == NULL) {
+        perror("no blacklist_file provided");
+        exit(EXIT_FAILURE);
+    }
+
+    while ((read = getline(&line, &len, fp)) != -1) {
+        //reads all the lines and add them to the hashtable of blacklisted ip
+        if ((line)[read - 1] == '\n') {
+            //strip the newline char
+            (line)[read - 1] = '\0';
+        }
+        if (strcmp(line, "") == 0 ){
+
+        }
+        struct blacklist_item *s;
+        s = (struct blacklist_item*)malloc(sizeof(struct blacklist_item));
+        s->id = id++;
+        strncpy(s->ip, line, 256);
+        HASH_ADD_STR(black_list, ip , s);
+    }
+
+    struct blacklist_item *s = NULL;
+
+    fprintf(stderr, "Blacklisted IPs:\n");
+    for(s=black_list; s != NULL; s=s->hh.next) {
+        fprintf(stderr, "id %d: ip %s\n", s->id, s->ip);
+    }
+
+    fclose(fp);
+
+}
+\end{verbatim}
+
+Si \`e posta particolare attenzione a mantenere le performance del simulatore alte pur
+introducendo l'overhead dovuto al controllo dell'IP address di ogni pacchetto. Si \`e quindi
+implementato il controllo della blacklist tramite una hash table permettendo quindi i
+controlli in O(1).
+
+La blacklist viene costantemente aggiornata dal programma python log-analyzer.py,
+il quale ogni volta che vede un alert di cui non ha l'indirizzo IP sorgente nella
+blacklist aggiorna la blacklist e notifica a pcap2sflow di ricaricarla con una signal.
+Anche nel programma python la blacklist \`e altamente efficiente poich\`e realizzata con
+i {\it set}, i quali in Python sono implementati con hash tables permettendo accesso anch'essi in O(1).
+Emulare il comportamento di {\verb tail -f } in Linux si \`e usata una mini-libreria
+per Python2 ({\it pytail}\cite{EXP17}) che \`e stata portata in Python3 aggiungendo un piccolo bugfix.
 
 \chapter{Discussione dei risultati}                %crea il capitolo
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%imposta l'intestazione di pagina
@@ -1529,18 +1655,18 @@ non sono caricate.
 \begin{center}                          %centra nel mezzo della pagina
   \includegraphics[width=\textwidth]{images/DARPA-sampling-rate.png}
   \caption{Numero di Alert al variare del sampling rate}\label{darpa:s}
-  \label{}
 \end{center}
 \end{figure}
+
 \begin{figure}[h!]
 \begin{center}                          %centra nel mezzo della pagina
-  \includegraphics[width=\textwidth]{images/DARPA-troncamento.png}\label{darpa:trunc}
-  \caption{Numero di Alert al variare del troncamento}
-  \label{}
+  \includegraphics[width=\textwidth]{images/DARPA-troncamento.png}
+  \caption{Numero di Alert al variare del troncamento}\label{darpa:trunc}
 \end{center}
 \end{figure}
+
  Come si \`e osservato nella sezione precedente con il dataset ICtF2010 , le figure \ref{darpa:s}
- e \ref{darpa:trunc}(NUMSBAGLIATO) mostrano che il tasso di rilevamento decresce con l'aumentare del
+ e \ref{darpa:trunc} mostrano che il tasso di rilevamento decresce con l'aumentare del
  sampling rate e invece rimane circa costante al variare del tronacamento.
 
  Infine nella tabella \ref{darpa:bigtable} vengono messi in relazione il
@@ -1646,131 +1772,101 @@ sopra, risultato alquanto insoddisfacente.
 
 \clearpage
 
-\section{Campionamento adattivo}
 
-Si va adesso ad illustrare un approccio alternativo al campionamento statico, ovvero
-quello che si \`e definito campionamento adattivo.
+Dati i risultati precedenti, ovvero avendo identificato come parametri ottimali
+un sampling rate compreso tra 4 e 100 e un troncamento di 256 Byte si sono svolti
+i test in accordo con tali risultati.
 
-Campionare sempre lo stesso numero di pacchetti potrebbe essere in una rete molto estesa
-un carico inutilmente pesante. La proposta prevede di impostare il campionamento ad un
-valore iniziale di sampling rate uguale a 100 e di aumentarlo qual ora vengano attivati
-degli alert da parte dell'IDS.
-In pratica si propone di monitorare il file di log {\it eve.json} e di inoltrare {\it on the fly}
-una richiesta al collector di campionare pi\`u approfonditamente i pacchetti provenienti dalla
-sorgente che ha fatto scattare l'alert.
-Il cambiamento dei parametri pu\`o essere fatto molto agilmente nel caso in cui si
-utilizzi come device per il campionamento il software OpenVSwitch. Basta infatti
-inviare i comandi :
-\begin{verbatim}
-SFLOWUUID=`ovs-vsctl create sFlow agent=eth0 target=\"10.0.0.50:6343\" \
-    header=128 sampling=512 polling=30`
-ovs-vsctl list br
-ovs-vsctl set bridge xenbr0 sflow=$SFLOWUUID
-ovs-vsctl set bridge xenbr1 sflow=$SFLOWUUID
-\end{verbatim}
+In figura \ref{ictf:adapt} si mostrano il numero di alert con campionamento adattivo (in verde)
+e quelli On-Wire (in blu). Come \`e possibile vedere anche dalla tabella \ref{ictf:adapt-table}
+il campionamento adattivo ha portato molti benefici al sistema di monitoraggio studiato con
+incrementi nel numero di attacchi rilevati di circa +1000\%. Allo stesso modo per\`o
+come da figura \ref{ictf:adapt-traff} il traffico medio inoltrato al collector per l'analisi
+ha subito un notevole aumento passando da circa 100MB a 175MB\footnote{con sampling rate : 4} per ogni file pcap analizzato.
+Per cui, sebbene vi sia un notevole aumento di efficienza questo comporta il doppio
+del costo in termini di traffico inoltrato sulla rete e in termini di load per il
+Collector.
 
-Definita la fattibilit\`a del campionamento adattivo si passa ora a analizzare il
-comportamento del sistema di monitoraggio con l'introduzione di questo nuovo parametro.
-Si aggiunge quindi al simulatore pcap2sflow la possibilit\`a di caricare una blacklist di indirizzi
-per cui il campionamento deve essere fatto in maniera pi\`u approfondita.
+\begin{figure}[h!]
+\begin{center}                          %centra nel mezzo della pagina
+  \includegraphics[width=80mm]{images/ICTF-adapt-on-samp.png}
+  \caption{Numero di Alert al variare del sampling con campionamento adattivo}\label{ictf:adapt}
+\end{center}
+\end{figure}
 
-\begin{verbatim}
-void load_blacklist(){
-    char blacklist_filename [4096] = "/tmp/pcap2sflow-blacklist";
-    char buff [256];
-    char * line = NULL;
-    size_t len = 0;
-    ssize_t read;
+\begin{figure}[h!]
+\begin{center}                          %centra nel mezzo della pagina
+  \includegraphics[width=80mm]{images/ICTF-adapt-on-traff.png}
+  \caption{Media del traffico con campionamento adattivo}\label{ictf:adapt-traff}
+\end{center}
+\end{figure}
 
-    FILE *fp;
 
-    fp = fopen(blacklist_filename, "r");
-    int id = 0;
-    if (fp == NULL) {
-        perror("no blacklist_file provided");
-        exit(EXIT_FAILURE);
-    }
+\begingroup
+\begin{table}
+  \fontsize{9pt}{10pt}\selectfont
+\begin{center}
+  \begin{tabular}{| a | d | b | c | e |}
+    \hline
+    {\bf Samp. Rate} & {\bf \# Alert } & {\bf \# Alert camp. adatt. } & {\bf \% Alert tot} & {\bf \% Miglioramento} \\ \hline
+    1 & 7,160,481 & - & - & -\\ \hline
+    4 & 4,983 & 87,875 & 1.22\% & +1,000.4\%   \\ \hline
+    100 & 65 & 185 & 0.0002\% & +284\% \\ \hline
+  \end{tabular}
+\end{center}
+  \caption{Campionamento adattivo}\label{ictf:adapt-table}
+\end{table}
+\endgroup
 
-    while ((read = getline(&line, &len, fp)) != -1) {
-        //reads all the lines and add them to the hashtable of blacklisted ip
-        if ((line)[read - 1] == '\n') {
-            //strip the newline char
-            (line)[read - 1] = '\0';
-        }
-        if (strcmp(line, "") == 0 ){
+\section{Implicazioni matematiche di sFlow + Suricata IDS}
 
-        }
-        struct blacklist_item *s;
-        s = (struct blacklist_item*)malloc(sizeof(struct blacklist_item));
-        s->id = id++;
-        strncpy(s->ip, line, 256);
-        HASH_ADD_STR(black_list, ip , s);
-    }
+Il rilevamento di un attacco utilizzando sFlow dipende dalla probabilit\`a
+di scegliere come pacchetto da campionare proprio il pacchetto contenente
+l'attacco tra tutti quelli passanti nella rete.
 
-    struct blacklist_item *s = NULL;
+Considerando il comportamento di sFlow, ovvero quello di suddividere il traffico
+in windows di dimensione {\it s} e di campionare un pacchetto ogni {\it s} possiamo
+approssimare la rilevazione del pacchetto usando una distribuzione binomiale.
 
-    fprintf(stderr, "Blacklisted IPs:\n");
-    for(s=black_list; s != NULL; s=s->hh.next) {
-        fprintf(stderr, "id %d: ip %s\n", s->id, s->ip);
-    }
+Non conoscendo tuttavia il contenuto della window si utilizza il criterio di Laplace
+e si suppone che la window analizzata sia composta da met\`a pacchetti malevoli e
+met\`a pacchetti leciti.
 
-    fclose(fp);
+Possiamo dire che, dato che sFlow sceglie in maniera random il pacchetto da campionare
+all'interno della window essi siano tutti equiprobabili. Inoltre poich\`e gli Agent
+opera in maniera indipendente dagli altri le scelte di campionamento, le combinazioni di
+di tutte le possibili scelte fatte da tutti gli Agent nella rete possono ritenersi
+equiprobabili. Da cui il rilevamento pu\`o essere assimilato da {\it n} estrazioni con reinbussulamento di una biglia da un urna
+di composizione sconosciuta contenente {\it s} palline.
 
-}void load_blacklist(){
-    char blacklist_filename [4096] = "/tmp/pcap2sflow-blacklist";
-    char buff [256];
-    char * line = NULL;
-    size_t len = 0;
-    ssize_t read;
+La probabilit\`a di rilevamento dell'attacco \`e :
 
-    FILE *fp;
+\begin{equation}
+  P(S{_n})= \binom{s}{n} p (1 - p)
+\end{equation}
 
-    fp = fopen(blacklist_filename, "r");
-    int id = 0;
-    if (fp == NULL) {
-        perror("no blacklist_file provided");
-        exit(EXIT_FAILURE);
-    }
+con $p=\frac{1}{2}$ e $n=$ numero di Agent attraversati dal pacchetto malevolo.
 
-    while ((read = getline(&line, &len, fp)) != -1) {
-        //reads all the lines and add them to the hashtable of blacklisted ip
-        if ((line)[read - 1] == '\n') {
-            //strip the newline char
-            (line)[read - 1] = '\0';
-        }
-        if (strcmp(line, "") == 0 ){
+Si evincono due particolari importanti, in primo luogo l'aumento del numero di agent,
+cos\`i come la diminuzione del sampling rate porta ad un maggior tasso di rilevamento, come si era
+evinto dai test portati avanti fino ad ora. E che le signature che utilizzano
+threshold, come quelle per gli attacchi DDoS nel dataset CTU-13, possono essere attivate
+per via di una sfortunata serie di scelte di campionamento per ogni Agent. Potrebbe capitare infatti
+che tutti i Agent campionino lo stesso pacchetto, facendo scattare l'allarme di un
+DDoS quando invece questo non era in atto. Occorre prestare attenzione quindi al threshold presente
+nelle regole di suricata e adattarlo in maniera che ci\`o non possa accadere.
+Occorre quindi rispettare sempre la seguente equazione:
+\begin{equation}
+    threshold\ di\ rilevamento < t
+\end{equation}
+con $t=$ massimo livello dello spanning tree della rete \footnote{assumendo che sFlow sia abilitato in ogni componente
+di rete}.
 
-        }
-        struct blacklist_item *s;
-        s = (struct blacklist_item*)malloc(sizeof(struct blacklist_item));
-        s->id = id++;
-        strncpy(s->ip, line, 256);
-        HASH_ADD_STR(black_list, ip , s);
-    }
+Ovviamente come si pu\`o intuire questo diventa pi\`u probabile nel caso in cui il sampling
+rate sia basso
 
-    struct blacklist_item *s = NULL;
-
-    fprintf(stderr, "Blacklisted IPs:\n");
-    for(s=black_list; s != NULL; s=s->hh.next) {
-        fprintf(stderr, "id %d: ip %s\n", s->id, s->ip);
-    }
-
-    fclose(fp);
-
-}
-\end{verbatim}
-
-Si \`e posta particolare attenzione a mantenere le performance del simulatore alte pur
-introducendo l'overhead dovuto al controllo dell'IP address di ogni pacchetto. Si \`e quindi
-implementato il controllo della blacklist tramite una hash table permettendo quindi i
-controlli in O(1).
-
-La blacklist viene costantemente aggiornata dal programma python log-analyzer.py,
-il quale ogni volta che vede un alert di cui non ha l'indirizzo IP sorgente nella
-blacklist aggiorna la blacklist e notifica a pcap2sflow di ricaricarla con una signal.
-Anche nel programma python la blacklist \`e altamente efficiente poich\`e realizzata con
-i {\it set}, i quali in Python sono implementati con hash tables permettendo accesso anch'essi in O(1).
-
+Lo studio di questi aspetti, ovvero di come l'IDS sFlow + Suricata si comporti nel caso
+di pi\`u Agent viene lasciato come possibile sviluppo futuro.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%non numera l'ultima pagina sinistra
@@ -1782,6 +1878,26 @@ i {\it set}, i quali in Python sono implementati con hash tables permettendo acc
 CONCLUSIONI}]{\fancyplain{}{\bfseries\thepage}}
 \lhead[\fancyplain{}{\bfseries\thepage}]{\fancyplain{}{\bfseries
 CONCLUSIONI}}
+
+Sebbene i risultati possano sembrare davvero poco soddisfacenti \`e da tenere conto
+che essi si sono svolti in condizioni di notevole stress per l'IDS, ovvero come nel
+caso del dataset ICtF2010 la maggior parte del traffico, soprattutto quello nella prima parte della
+competizione, era composto da traffico malevolo, cosa assai improbabile in una rete normale.
+Inoltre nel caso del dataset CTU-13 il bitrate, come descritto nel {\verb README }
+del dataset, era impostato a 40 Kbps davvero improbabile per un attacco DDos, che solitamente
+si aggira (almeno al periodo di stesura di questo elaborato) a circa 200 Gbps. Per cui
+possiamo dire che i risultati non sono in contraddizione con l'esperienza, infatti
+se si \`e stati in grado di rilevare un DDos campionando 1 pacchetto ogni 4 con un
+bitrate di 40 Kbps con un bitrate di 200 Gbps serve campionare appena un pacchetto ogni
+2,000,000 che \`e ben al di sopra di un setup standard di sFlow, solitamente 1000.
+
+Inoltre non si \`e preso in considerazione in questo elaborato l'opportunit\`a di avere
+pi\`u Agents. Infatti, se il pacchetto malevolo dovesse passare per pi\`u di un Agent
+la probabilit\`a di essere campionato e intercettato indubbiamente crescerebbe di molto.
+La probabilit\`a di rilevare un pacchetto malevolo usando sFlow infatti \`e una
+distribuzione binomiale
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%aggiunge la voce Conclusioni
                                         %   nell'indice
 \addcontentsline{toc}{chapter}{Conclusioni}
@@ -1858,41 +1974,41 @@ Ibrahim Ghafir, Vaclav Prenosil, Jakub Svoboda, Mohammad Hammoudeh,
  2016 4th International Conference on Future Internet of Things and Cloud Workshops
 \bibitem{K3} Traffic Monitoring with Packet-Based Sampling for Defense against Security Threats, Joseph Reves ans Sonia Panchen
 \bibitem{K4} "NIST – Guide to Intrusion Detection and Prevention Systems (IDPS)" (PDF). February 2007.
-\bibitem{K5} https://ossec.github.io/
-\bibitem{K6} https://github.com/OISF/suricata
-\bibitem{K7} https://www.snort.org/
-\bibitem{K8} https://www.bro.org
-\bibitem{K9} https://www.ntop.org/products/packet-capture/pf\_ring/
+\bibitem{K5} OSSEC, https://ossec.github.io/ , \today
+\bibitem{K6} Suricata, https://github.com/OISF/suricata, \today
+\bibitem{K7} Snort, https://www.snort.org/ , \today
+\bibitem{K8} Bro, https://www.bro.org ,\today
+\bibitem{K9} PF\_RING, https://www.ntop.org/products/packet-capture/pf\_ring/ \today
 \bibitem{S1} sFlow, I Can Feel Your Traffic, Elisa Jasinska, Amsterdam Internet Exchange
-
 
 \bibitem{B1} Reti di Calcolatori, Larry Peterson, Bruce Davie, Apogeo, 2012
 
 \bibitem{S1} Hofstede, Rick; Celeda, Pavel; Trammell, Brian; Drago, Idilio; Sadre, Ramin; Sperotto, Anna; Pras, Aiko. "Flow Monitoring Explained: From Packet Capture to Data Analysis with NetFlow and IPFIX". IEEE Communications Surveys & Tutorials. IEEE Communications Society
-\bibitem{S2} http://blog.sflow.com/2009/05/scalability-and-accuracy-of-packet.html
+\bibitem{S2} Scalability and accuracy of packet sampling, http://blog.sflow.com/2009/05/scalability-and-accuracy-of-packet.html , \today
 \bibitem{S3} Flow-based intrusion detection: Techniquesand challenges, Muhammad Fahad Umer, Muhammad Sher, Yaxin Bi. Computers \& Security 70 (2017) 238-254
 \bibitem{S4} Intrusion detection system: A comprehensive review, Hung-JenLiao, Chun-HungRichard Lin,Ying-ChihLin, Kuang-YuanTung
 
-\bibitem{E1} https://www.elastic.co/
-\bibitem{E2} https://db-engines.com/en/ranking/search+engine
+\bibitem{E1} Elasticsearch, https://www.elastic.co/ , \today
+\bibitem{E2} DB-engines, https://db-engines.com/en/ranking/search+engine , \today
 \bibitem{E4} SCADA STATISTICS MONITORING USING THE Elastic Stack(Elasticsearch, Logstash, Kibana), James Hamilton, Brad Schofield, Manuel Gonzalez Berges, Jean-Charles TournierCERN, Geneva, Switzerland
 
-\bibitem{EXP1} https://www.virtualbox.org/
-\bibitem{EXP2} https://rules.emergingthreats.net/
+\bibitem{EXP1} Virtualbox, https://www.virtualbox.org/ , \today
+\bibitem{EXP2} Emergin Threats, https://rules.emergingthreats.net/ , \today
 \bibitem{EXP3} Quantitative Analysis of Intrusion Detection Systems: Snort and Suricata, Joshua S. White , Thomas T. Fitzsimmons , Jeanna N. Matthews
-\bibitem{EXP4} https://www.ll.mit.edu/ideval/data/1999data.html
-\bibitem{EXP5} https://mcfp.weebly.com/the-ctu-13-dataset-a-labeled-dataset-with-botnet-normal-and-background-traffic.html
-\bibitem{EXP6} https://ictf.cs.ucsb.edu/pages/the-2010-ictf.html
-\bibitem{EXP7} http://www.tcpdump.org/
-\bibitem{EXP8} https://www.elastic.co/guide/en/elasticsearch/reference/current/tune-for-indexing-speed.html
-\bibitem{EXP9} https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-update-settings.html
-\bibitem{EXP10} https://docs.oracle.com/cd/E26217\_01/E26796/html/qs-create-vm.html
-\bibitem{EXP11} https://www.debian.org/releases/jessie/amd64/
+\bibitem{EXP4} DARPA Dataset, https://www.ll.mit.edu/ideval/data/1999data.html , \today
+\bibitem{EXP5} CTU-13 Dataset, https://mcfp.weebly.com/the-ctu-13-dataset-a-labeled-dataset-with-botnet-normal-and-background-traffic.html , \today
+\bibitem{EXP6} ICtF2010, https://ictf.cs.ucsb.edu/pages/the-2010-ictf.html, \today
+\bibitem{EXP7} Tcpdump, libpcap, http://www.tcpdump.org/ , \today
+\bibitem{EXP8} Tune indexing Elasticsearch, \\ https://www.elastic.co/guide/en/elasticsearch/reference/current/tune-for-indexing-speed.html , \today
+\bibitem{EXP9} Tune indexing Elasticsearch 2, \\ https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-update-settings.html , \today
+\bibitem{EXP10} Virtualbox crea vm, \\ https://docs.oracle.com/cd/E26217\_01/E26796/html/qs-create-vm.html , \today
+\bibitem{EXP11} Install Debian, https://www.debian.org/releases/jessie/amd64/ ,  \today
 \bibitem{EXP12} Raymond, Eric S. (2003-09-23). "Basics of the Unix Philosophy". The Art of Unix Programming. Addison-Wesley Professional
-\bibitem{EXP13} https://www.elastic.co/guide/en/elasticsearch/guide/current/inverted-index.html
-\bibitem{EXP14} https://redmine.openinfosecfoundation.org/projects/suricata/wiki/Payload\_keywords
+\bibitem{EXP13} Elasticsearch inverted index, \\ https://www.elastic.co/guide/en/elasticsearch/guide/current/inverted-index.html , \today
+\bibitem{EXP14} Suricata rules syntax, \\ https://redmine.openinfosecfoundation.org/projects/suricata/wiki/\\Payload\_keywords, \today
 \bibitem{EXP15} Khamphakdee, Nattawat & Benjamas, Nunnapus & Saiyod, Saiyan. (2014). Improving Intrusion Detection System Based on Snort Rules for Network Probe Attack Detection. 2014 2nd International Conference on Information and Communication Technology, ICoICT 2014. 10.1109/ICoICT.2014.6914042.
-\bibitem{EXP16} https://www.cybrary.it/2015/05/summarizing-the-five-phases-of-penetration-testing/
+\bibitem{EXP16} 5 fasi del pentesting, https://www.cybrary.it/2015/05/summarizing-the-five-phases-of-penetration-testing/ , \today
+\bibitem{EXP17} Pytail, https://github.com/david-caro/PyTail , \today
 \end{thebibliography}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%non numera l'ultima pagina sinistra
 \clearpage{\pagestyle{empty}\cleardoublepage}
