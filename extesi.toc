@@ -36,16 +36,20 @@
 \contentsline {subsubsection}{Meccanismi di campionamento}{30}
 \contentsline {section}{\numberline {2.5}Metodologia di test 2}{33}
 \contentsline {section}{\numberline {2.6}Analisi dei risultati con Kibana e Elasticsearch}{34}
-\contentsline {subsubsection}{Analisi dei falsi positivi}{38}
-\contentsline {section}{\numberline {2.7}Campionamento adattivo}{39}
-\contentsline {chapter}{\numberline {3}Discussione dei risultati}{45}
-\contentsline {section}{\numberline {3.1}Criteri di valutazione}{45}
-\contentsline {section}{\numberline {3.2}Risultati}{46}
-\contentsline {subsection}{\numberline {3.2.1}ICtF2010}{46}
-\contentsline {subsection}{\numberline {3.2.2}DARPA Dataset}{54}
-\contentsline {subsection}{\numberline {3.2.3}CTU-13 Dataset}{57}
-\contentsline {section}{\numberline {3.3}Implicazioni matematiche di sFlow + Suricata IDS}{60}
-\contentsline {chapter}{Conclusioni}{63}
-\contentsline {chapter}{\numberline {A}Prima Appendice}{65}
+\contentsline {subsubsection}{Analisi dei falsi positivi}{36}
+\contentsline {section}{\numberline {2.7}Campionamento adattivo}{37}
+\contentsline {subsubsection}{Modifiche a pcap2sflow}{38}
+\contentsline {subsubsection}{log-watcher.py}{38}
+\contentsline {subsection}{\numberline {2.7.1}Architettura di test III}{39}
+\contentsline {chapter}{\numberline {3}Discussione dei risultati}{41}
+\contentsline {section}{\numberline {3.1}Criteri di valutazione}{42}
+\contentsline {section}{\numberline {3.2}Risultati}{42}
+\contentsline {subsection}{\numberline {3.2.1}ICtF2010}{43}
+\contentsline {subsection}{\numberline {3.2.2}DARPA Dataset}{50}
+\contentsline {subsection}{\numberline {3.2.3}CTU-13 Dataset}{53}
+\contentsline {subsection}{\numberline {3.2.4}Campionamento adattivo}{55}
+\contentsline {section}{\numberline {3.3}Implicazioni matematiche di sFlow + Suricata IDS}{56}
+\contentsline {chapter}{Conclusioni}{60}
+\contentsline {chapter}{\numberline {A}Prima Appendice}{61}
 \contentsline {chapter}{\numberline {B}Seconda Appendice}{67}
 \contentsline {chapter}{Bibliografia}{69}

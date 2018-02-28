@@ -10,20 +10,21 @@
 \contentsline {figure}{\numberline {2.2}{\ignorespaces Architettura I}}{23}
 \contentsline {figure}{\numberline {2.3}{\ignorespaces Wireshark}}{25}
 \contentsline {figure}{\numberline {2.4}{\ignorespaces Architettura II}}{34}
+\contentsline {figure}{\numberline {2.5}{\ignorespaces Architettura III}}{39}
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {3.1}{\ignorespaces Numero di Alert al variare del sampling rate}}{47}
-\contentsline {figure}{\numberline {3.2}{\ignorespaces Numero di Alert al variare del troncamento}}{47}
-\contentsline {figure}{\numberline {3.3}{\ignorespaces Quantit\`a di traffico inoltrata al Collector}}{48}
-\contentsline {figure}{\numberline {3.4}{\ignorespaces Quantit\`a di traffico inoltrata al Collector}}{49}
-\contentsline {figure}{\numberline {3.5}{\ignorespaces Numero di falsi positivi}}{50}
-\contentsline {figure}{\numberline {3.6}{\ignorespaces Numero di falsi positivi}}{50}
-\contentsline {figure}{\numberline {3.7}{\ignorespaces ICtF2010 - numero di alert nel tempo}}{51}
-\contentsline {figure}{\numberline {3.8}{\ignorespaces Identificazione degli host compromessi}}{52}
-\contentsline {figure}{\numberline {3.9}{\ignorespaces Numero di Alert al variare del sampling rate}}{54}
-\contentsline {figure}{\numberline {3.10}{\ignorespaces Numero di Alert al variare del troncamento}}{55}
-\contentsline {figure}{\numberline {3.11}{\ignorespaces Numero di Alert al variare del sampling rate nel tempo}}{56}
-\contentsline {figure}{\numberline {3.12}{\ignorespaces Numero di Alert al variare del sampling rate nel tempo}}{58}
-\contentsline {figure}{\numberline {3.13}{\ignorespaces Numero di Alert al variare del sampling con campionamento adattivo}}{59}
-\contentsline {figure}{\numberline {3.14}{\ignorespaces Media del traffico con campionamento adattivo}}{60}
+\contentsline {figure}{\numberline {3.1}{\ignorespaces Numero di Alert al variare del sampling rate}}{43}
+\contentsline {figure}{\numberline {3.2}{\ignorespaces Numero di Alert al variare del troncamento}}{44}
+\contentsline {figure}{\numberline {3.3}{\ignorespaces Quantit\`a di traffico inoltrata al Collector}}{44}
+\contentsline {figure}{\numberline {3.4}{\ignorespaces Quantit\`a di traffico inoltrata al Collector}}{45}
+\contentsline {figure}{\numberline {3.5}{\ignorespaces Numero di falsi positivi}}{46}
+\contentsline {figure}{\numberline {3.6}{\ignorespaces Numero di falsi positivi}}{46}
+\contentsline {figure}{\numberline {3.7}{\ignorespaces ICtF2010 - numero di alert nel tempo}}{48}
+\contentsline {figure}{\numberline {3.8}{\ignorespaces Identificazione degli host compromessi}}{49}
+\contentsline {figure}{\numberline {3.9}{\ignorespaces Numero di Alert al variare del sampling rate}}{50}
+\contentsline {figure}{\numberline {3.10}{\ignorespaces Numero di Alert al variare del troncamento}}{51}
+\contentsline {figure}{\numberline {3.11}{\ignorespaces Numero di Alert al variare del sampling rate nel tempo}}{52}
+\contentsline {figure}{\numberline {3.12}{\ignorespaces Numero di Alert al variare del sampling rate nel tempo}}{54}
+\contentsline {figure}{\numberline {3.13}{\ignorespaces Numero di Alert al variare del sampling con campionamento adattivo}}{55}
+\contentsline {figure}{\numberline {3.14}{\ignorespaces Media del traffico con campionamento adattivo}}{56}
 \addvspace {10\p@ }
 \addvspace {10\p@ }

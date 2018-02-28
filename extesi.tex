@@ -795,7 +795,7 @@ testing} dei partecipanti. Esso costituisce per questo motivo un ottimo dataset 
 costruito appositamente per studiare determinati comportamenti di un IDS in specifiche
 condizioni.
 
-\subsubsection{Regole di Suricata utilizzate}
+\subsubsection{Regole di Suricata utilizzate}\label{sec:regole}
 
 Per ogni dataset, ad eccezione di ICtF2010, sono state utilizzati dei ruleset
 specifici per il tipo di attacco presente nel file pcap.
@@ -861,7 +861,7 @@ i dati parziali derivanti da sFlow.
 Inoltre si vuole verificare l'incisivit\`a dei parametri di sampling rate e troncamento e
 se essi siano indipendenti l'uno dall'altro.
 
-\subsection{Struttura delle directory}
+\subsection{Struttura delle directory}\label{sec:struttura-dir}
 
 Con l'obiettivo di tenere organizzati i risultati dei numerosi test effettuati si
 \`e scelto di seguire una rigorosa struttura delle directory e dei file.
@@ -1128,9 +1128,9 @@ in figura 2.2 con quella della figura 2.3, in cui si pu\`o notare che il softwar
 pcap2sflow ha sostituito sia hostsflow che sflowtools, impersonando quindi sia
 l'Agent che il Collector.
 
-\begin{figure}
+\begin{figure}[h!]
   \begin{center}                          %centra nel mezzo della pagina
-    \includegraphics[width=90mm]{images/arch-2.png}
+    \includegraphics[width=80mm]{images/arch-2.png}
     \caption{Architettura II}
     \label{}
   \end{center}
@@ -1179,8 +1179,775 @@ seguente:
 
 Ognuno di questi alert rappresenta all'interno del database Elasticsearch un
 documento.
-Per ogni dataset \`e stato definito lo schema dell'index di Elasticsearch, come
-nell'esempio seguente sul dataset di ICtF2010:
+Per ogni dataset \`e stato definito lo schema dell'index di Elasticsearch, che \`e
+possibile trovare in appendice.
+
+Una volta creato l'index si \`e passati alla popolazione del database con
+il programma Python elasticsearch\_feeder.py.
+Vista la grande quantit\`a di log \footnote{Si sono raggiunti 12 GB di log solo per il
+testing del dataset ICtF2010}, si \`e ottimizzato l'inserimento utilizzando la
+funzione di Elasticsearch {\it bulk index}, la quale permette l'inserimento in blocco
+di una grossa quantit\`a di documenti minimizzando il tempo di indexing. Inoltre
+per ottimizzare ulteriormente l'inserimento si \`e temporaneamente disabilitato il refresh degli index \cite{EXP8} \cite{EXP9}
+\footnote{I seguenti comandi sono stati impartiti dalla console di Kibana}:
+
+\newpage
+
+\begin{verbatim}
+PUT /ictf2010/_settings
+{
+    "index" : {
+        "refresh_interval" : "-1"
+    }
+}
+\end{verbatim}
+
+Alla fine di ogni bulk index il valore \`e stato ripristinato ed \`e stato forzato
+il merging dei segmenti:
+\begin{verbatim}
+PUT /ictf2010/_settings
+{
+    "index" : {
+        "refresh_interval" : "10s"
+    }
+}
+
+POST /twitter/_forcemerge?max_num_segments=5
+\end{verbatim}
+
+\subsubsection{Analisi dei falsi positivi}
+
+Di fondamentale importanza nell'analisi prestazionale di un IDS \`e il conteggio
+dei falsi positivi, ovvero di quegli alert sollevati dall'IDS a partire da un traffico
+che era invece benevolo.
+
+La valutazione dei falsi positivi \`e stata effettuata mediante un altro programma
+Python, scritto appositamente sempre utilizzando le API di Elasticsearch.
+Non \`e stato possibile infatti conteggiare i falsi positivi gi\`a dall'interno di
+Kibana a partire dai dati gi\`a presenti poich\`e Elasticsearch non permette, a
+differenza dei database relazionali, di effettuare delle subqueries.
+
+Il programma Python, che va sotto il nome di false\_positives.py, confronta le signature
+rilevate con i vari parametri di sampling rate e troncamento testati con le signature
+del setup On-Wire. Il numero di falsi positivi per ogni signature ricavati dalla sottrazione dei
+due valori \`e stata aggiunta in un ulteriore index, appositamente creato per il conteggio
+dei falsi positivi.
+
+false\_positives.py effettua una query con aggregazione sul valore "signature.keyword" nei
+documenti con sampling rate = 1 e truncate = 600 (presi come riferimento per il setup On-Wire)
+ne salva i valori e poi per ogni combinazione
+di parametri effettua una seconda query con aggregazione sullo stesso valore; infine la differenza
+tra i due valori ottenuta viene usata per creare tanti documenti quanti sono i falsi positivi.
+Occorre notare che sebbene si creino molti documenti, data la struttura di Elasticsearch
+e del suo Inverted Index \cite{EXP13}, questo non occupa molto spazio e se ne guadagna in comodit\`a una volta che
+si proceder\`a col creare le visualizzazioni.
+
+\section{Campionamento adattivo}
+
+Si va adesso ad illustrare un approccio alternativo al campionamento statico, introdotto
+in un secondo momento, ovvero quello che si \`e definito campionamento adattivo.
+
+Campionare sempre lo stesso numero di pacchetti potrebbe essere in una rete molto estesa
+un carico inutilmente pesante. La proposta prevede di impostare il campionamento ad un
+valore iniziale di sampling rate uguale a 100 (o anche a 4) e di aumentarlo qual ora vengano attivati
+degli alert da parte dell'IDS.
+In pratica si propone di monitorare il file di log {\it eve.json} e all'arrivo di nuovi alert
+di inoltrare {\it "on the fly"}
+una richiesta al collector di campionare pi\`u approfonditamente i pacchetti provenienti dalla
+sorgente che ha fatto scattare l'alert.
+
+Il cambiamento dei parametri pu\`o essere fatto agevolmente, ad esempio nel caso in cui si
+utilizzi come device di campionamento (Agent) il software OpenVSwitch, basta infatti
+inviare i comandi :
+\begin{verbatim}
+SFLOWUUID=`ovs-vsctl create sFlow agent=eth0 \
+  target=\"10.0.0.50:6343\" header=128 sampling=512 polling=30`
+ovs-vsctl list br
+ovs-vsctl set bridge xenbr0 sflow=$SFLOWUUID
+ovs-vsctl set bridge xenbr1 sflow=$SFLOWUUID
+\end{verbatim}
+
+\subsubsection{Modifiche a pcap2sflow}
+
+
+Definita la fattibilit\`a nella vita reale del campionamento adattivo si passa ora a descrivere
+il l'implementazione di tale procedura nel simulatore sviluppato.
+
+Si aggiunge quindi al programma pcap2sflow la possibilit\`a di caricare una blacklist di indirizzi
+per cui il campionamento deve essere fatto in maniera pi\`u approfondita e la
+possibilit\`a di ricevere una SIGNAL per essere avvisato di ricaricare tale blacklist.
+
+\begin{verbatim}
+void reload_blacklist(int signo); //signal handler ripulisce la
+                  blacklist e chiama load_blacklist()
+void load_blacklist(); //ricarica la blacklist e costruisce la \
+                  tabella hash con gli indirizzi IP in blacklist
+\end{verbatim}
+
+Si \`e posta particolare attenzione a mantenere alte le performance del simulatore pur
+introducendo l'overhead dovuto al controllo dell'IP address di ogni pacchetto. Si \`e quindi
+implementato il controllo della blacklist tramite una hash table permettendo quindi i
+controlli in O(1).
+
+Inoltre poich\`e che il dataset ICtF2010 \`e stato registrato con {\it Data Link Layer (DLL)} Raw
+, per leggere gli ip address, si \`e aggiunto al programma la capacit\`a di prendere in input diversi DLL, con l'opzione
+da riga di comando {\verb -r }.
+
+\subsubsection{log-watcher.py}
+
+La blacklist viene costantemente aggiornata dal programma Python log-watcher.py,
+il quale ogni volta che vede un alert di cui non ha l'indirizzo IP sorgente nella
+blacklist lo aggiunge e notifica a pcap2sflow di ricaricarla con una signal.
+Anche nel programma python la blacklist \`e altamente efficiente poich\`e realizzata con
+i {\it set}, i quali in Python sono implementati con hash tables permettendo accesso anch'essi in O(1).
+
+\begin{verbatim}
+def get_blacklist()
+'''legge la blacklist dal file e la carica in memoria'''
+
+def updateblacklist(item)
+'''aggiunge un elemento alla blacklist, aggiorna il file e manda
+    una signal a pcap2sflow '''
+
+def watch(log_path)
+'''osserva il file all'indirizzo log_path e ad ogni nuovo alert
+    chiama updateblacklist'''
+\end{verbatim}
+
+Per emulare il comportamento di {\verb tail  -f } in Linux si \`e usata una mini-libreria
+per Python2 ({\it pytail}\cite{EXP17}) di cui \`e stato fatto il porting in
+Python3.
+
+\subsection{Architettura di test III}
+
+\begin{figure}[t]
+\begin{center}                          %centra nel mezzo della pagina
+  \includegraphics[width=90mm]{images/arch-3.png}
+  \caption{Architettura III}
+  \label{img:arch3}
+\end{center}
+\end{figure}
+
+Il setup per testare la tecnica del campionamento adattivo comprende l'utilizzo
+del simulatore (pcap2sflow), del log-watcher e di Suricata ovviamente.
+
+Come fatto per i test precedenti, sempre per mezzo di script sono stati avviati i
+programmi pcap2sflow e log-watcher, e successivamente Suricata, infine si sono salvati
+i risultati dei test nelle directories seguendo la struttura descritta nella sezione \ref{sec:struttura-dir}.
+
+Questa volta per\`o il passaggio dei dati in formato pcap a suricata \`e stato
+svolto senza utilizzare l'interfaccia socket di Suricata perh\`e si necessitava di
+cambiare {\it "on the fly"} i parametri di campionamento. Si \`e utilizzata allora
+la classica PIPE di Linux.
+
+L'architettura del test pu\`o essere quindi formalizzata tramite l'immagine \ref{img:arch3}.
+
+
+
+
+\chapter{Discussione dei risultati}                %crea il capitolo
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%imposta l'intestazione di pagina
+\lhead[\fancyplain{}{\bfseries\thepage}]{\fancyplain{}{\bfseries\rightmark}}
+
+In questo capitolo si vanno ad elencare i criteri di valutazione dei risultati
+ottenuti dai test e se ne discuteranno i contenuti degli stessi.
+Infine si proporr\`a una valutazione matematica del campionamento di sFlow e di come
+esso influisce sulle prestazioni dell'IDS Suricata.
+
+Innanzitutto si riporta che la scelta di inserire i log all'interno di Elasticsearch
+per la consultazione ha portato notevoli vantaggio in termini di velocit\`a di accesso
+ai dati, spazio occupato su disco degli stessi e facilit\`a nella realizzazione dei grafici.
+Si \`e infatti riusciti a "comprimere" i log da 15 GB ad appena 2 GB e i tempi di accesso
+sono stati ridotti da diversi secondi a 1-2 secondi, rispetto ad una prima implementazione in cui si
+era usata la libreria Python mathplotlib. Inoltre data l'interfaccia avanzata di Kibana
+la creazione di grafici e aggregazioni \`e stata particolarmente agevole.
+Tali miglioramenti sono stati resi possibili proprio dall'implementazione di Elasticsearch
+e del suo Inverted Index. Infatti all'interno dei log sono presenti molti valori
+ in comune tra diversi alert, quindi raggruppandoli con l'Inverted Index si
+\`e ovviamente risparmiato molto spazio e si sono ridotti i tempi di accesso notevolmente.
+
+\section{Criteri di valutazione}
+In ogni contesto di sperimentazione, ovvero al variare dei parametri di test e dei
+dataset, si \`e osservato il comportamento dei seguenti indicatori:
+\begin{itemize}
+  \item {\bf Alert} : la quantit\`a totale di alert sollevati da suricata \footnote{a volte chiamato tasso di rilevamento.}
+  \item {\bf Falsi positivi} : la quantit\`a di alert che nel setup On-Wire
+  non \`e stata rilevata, e che per questo motivo costituisce sicuramente un falso positivo
+  \item {\bf Signature} : la tipologia di signature rilevata e la loro quantit\`a
+  \item {\bf Traffico}: la quantit\`a in Bytes di traffico inviata per l'analisi
+  a Suricata
+  \item{\bf Capacit\`a a posteriori di identificare la sorgente e la destinazione di un
+  attacco} : Questo indicatore risulta particolarmente utile nel campo dell'analisi forense,
+  ovvero consente di identificare una volta scoperto l'attacco quali sono stati gli
+  host coinvolti e da dove provenivano gli attaccanti
+  \item {\bf Tempo di reazione} : la differenza di tempo per la rilevazione di
+  un attacco in corso
+\end{itemize}
+
+\section{Risultati}
+
+Per ogni test sono state provate tutte le combinazioni tra sampling rate uguale a
+2, 4, 100 e troncamento uguale a 128, 256, 512 bytes, ad eccezione di ICtF2010,
+per il quale si sono teste diverse combinazioni di sampling rate 4, 100, 200, 400.
+Poi esse sono state messe in relazione agli stessi test effettuati in modalit\`a On-Wire,
+ovvero con sampling rate uguale a 1 e senza troncamento (nei test indicato con il valore 600 per comodit\`a di rappresentazione).
+\subsection{ICtF2010}
+
+Come descritto nella sezione \ref{sec:regole} si sono utilizzate per il test solo le
+regole di Emerging Threats.
+
+In questa prima fase si voleva osservare l'impatto che hanno campionamento e troncamento
+e se l'esclusione dell'uno o dell'altro parametro portasse a miglioramenti apprezzabili.
+Si va a valutare quindi il numero di alert e il loro rapporto con il numero dei
+falsi positivi.
+
+In figura 3.1 si mettono in relazione il numero degli alert al variare del campionamento
+con molteplici valori di troncamento. Similarmente in figura 3.2 ma invertendo i
+parametri.
+
+
+\begin{figure}[h!]
+\begin{center}                          %centra nel mezzo della pagina
+  \includegraphics[width=\textwidth]{images/ICTF-samp-vs-trunc.png}
+  \caption{Numero di Alert al variare del sampling rate}
+  \label{}
+\end{center}
+\end{figure}
+
+\begin{figure}[h!]
+\begin{center}                          %centra nel mezzo della pagina
+  \includegraphics[width=\textwidth]{images/ICTF--tunc-vs-samp.png}
+  \caption{Numero di Alert al variare del troncamento}
+  \label{}
+\end{center}
+\end{figure}
+
+Come \`e possibile notare, a parte i risultati ottenuti con il campionamento 1/1 e il
+troncamento a 128 bytes, la reale differenza tra il numero degli alert viene data dal
+valore del sampling rate.
+
+Si osserva poi nelle figure \ref{fig:ictf:traff-s} e \ref{fig:ictf:traff-t} come i valori di troncamento e campionamento influiscono sul traffico
+che viene inviato al collector per l'analisi.
+
+\begin{figure}[h!]
+\begin{center}                          %centra nel mezzo della pagina
+  \includegraphics[width=\textwidth]{images/ICTF-samp-vs-traffic.png}
+  \caption{Quantit\`a di traffico inoltrata al Collector}
+  \label{fig:ictf:traff-s}
+\end{center}
+\end{figure}
+
+\begin{figure}[h!]
+\begin{center}                          %centra nel mezzo della pagina
+  \includegraphics[width=\textwidth]{images/ICTF-trunc-vs-traffic.png}
+  \caption{Quantit\`a di traffico inoltrata al Collector}
+  \label{fig:ictf:traff-t}
+\end{center}
+\end{figure}
+
+\`E possibile notare come la quantit\`a di traffico inoltrata al Collector,
+per il dataset ICtF2010 dipende in primo luogo dal valore del sampling rate.
+Con un sampling rate di 1/100 infatti si riduce la quantit\`a di traffico da inoltrare al
+collector da 500MB per ogni file pcap analizzato, fino a circa 3MB.
+Mentre un il troncamento, che sia a 128, 256 o 512, non produce un miglioramento apprezzabile.
+
+Infine osserviamo che per quanto riguarda il numero di alert,
+ un campionamento con sampling rate da 100 in su non permette
+di rilevare quasi nessuno degli oltre 5 M di attacchi rilevati con
+sampling rate uguale a 4 o ad 1.
+
+Analizziamo a questo punto il contenuto degli alert, ovvero ci soffermeremo ad osservare le signature
+rilevate, quali sono le pi\`u frequenti per un determinato tipo di campionamento e
+se esse siano o meno dei falsi positivi.
+
+\begin{figure}[h!]
+\begin{center}                          %centra nel mezzo della pagina
+  \includegraphics[width=\textwidth]{images/ICTF-false-positives-mul.png}
+  \caption{Numero di falsi positivi}
+  \label{fig:ictf:falsep}
+\end{center}
+\end{figure}
+
+\begin{figure}[h!]
+\begin{center}                          %centra nel mezzo della pagina
+  \includegraphics[width=\textwidth]{images/ICTF-top-signatures.png}
+  \caption{Numero di falsi positivi}
+  \label{}
+\end{center}
+\end{figure}
+
+Dalla figura \ref{fig:ictf:falsep} si vede che i test con troncamento a 128 e sampling rate 4 sono
+sono quelli che hanno il numero di falsi positivi (in rosso) in rapporto
+al numero degli alert totali pi\`u alto di tutti.
+Quindi il troncamento uguale a 128 bytes, nel tipo di traffico del dataset ICtF2010,
+rappresenta un valore limite per garantire l'efficacia del sistema di rilevamento.
+Il troncamento a 256 byte e sampling rate 4, invece,  \`e quello che ha una percentuale
+di falsi positivi pi\`u bassa, come mostrato in tabella \ref{tab:falsep-4}.
+
+\begin{table}
+
+\begin{center}
+  \begin{tabular}{| a | d | b | c |}
+    \hline
+    {\bf Troncamento} & {\bf \# Alert } & {\bf \# Falsi Positivi} & {\bf \% } \\ \hline
+    128 & 11688 & 6472 & 55\% \\ \hline
+    256 & 133649 & 7151 & 5.3\% \\ \hline
+    512 & 11786 & 6459 & 54.8\% \\ \hline
+  \end{tabular}
+\end{center}
+    \caption[ICt2010 - Falsi positivi]{Falsi positivi con sampling rate 4}\label{tab:falsep-4}
+\end{table}
+
+Infatti, come \`e possibile vedere nella figura 3.6, il troncamento a 128 byte porta ad un
+incremento notevole del numero degli alert che vengono attivati dalle signatures
+{\it "SURICATA DNS malformed request data"} e {\it "SURICATA HTTP response field missing colon"},
+che sono sintomatici di un troncamento eccessivo, e che porta quindi ad avere headers che non
+rispettano pi\`u le specifiche del protocollo (HTTP, DNS o altri).
+Tali signature corrispondono a quelle che operano la {\it Stateful Analysis}, descritta nel capitolo 1
+, e che si era predetto non sarebbe
+stata utilizzabile abbinata ad sFlow. Infatti eliminando le regole per quest'ultima il numero di falsi positivi
+scende a 0.
+
+\begin{figure}[h!]
+\begin{center}                          %centra nel mezzo della pagina
+  \includegraphics[width=\textwidth]{images/ICTF-time-alerts.png}
+  \caption[ICtF2010 - numero di alert nel tempo]{Numero alert nel tempo}\label{ictf:time}
+  \label{}
+\end{center}
+\end{figure}
+
+Fissato il troncamento a 256 bytes mostriamo nella figura \ref{ictf:time} il numero di alert nel tempo di tutta la
+competizione con sampling rate 4 e 100. Si osserva qui che i test con sampling rate 4 (in blu)
+ricalcano abbastanza fedelmente l'attivit\`a registrata da Suricata On-Wire (in verde).
+Invece i test con sampling rate 100 (in rosso) sono stati efficienti nel primo periodo ma del
+quasi inutili nel secondo. L'andamento pi\`u ripido nella prima parte della competizione \`e
+compatibile con le prime due fasi del penetration testing, che sono: riconocimento del target
+e scansione \cite{EXP16}. A questo periodo infatti corrisponde un grande numero di alert (circa 6M in totale)
+con signature {\it "ET SCAN DirBuster Web App Scan in Progress"}. Questa \`e la fase in cui
+i team si esponevano di pi\`u al fine di rilevare eventuali falle nel sistema. Non appena passata
+questa fase, le tecniche si sono notevolmente affinate, portando il numero di alerts ad abbassarsi e mantenersi circa costante.
+
+Inoltre come \`e possibile osservare nel periodo che va dalle 7:00 alle 19:00 il gli alert
+con sampling rate 4 sono in alcuni punti superiori a quelli del setup On-Wire. Questo
+\`e sintomo di un aumento dei falsi positivi in quel periodo di tempo, poich\`e, come descritto prima, avendo usato
+lo stesso rule-set per sampling rate 4 e On-Wire, un numero maggiore di alert nel primo
+indica che sicuramente vi saranno dei falsi positivi.
+
+
+\begin{figure}[h!]
+\begin{center}                          %centra nel mezzo della pagina
+  \includegraphics[width=\textwidth]{images/ICTF-forens-dest.png}
+  \caption{Identificazione degli host compromessi}\label{ictf:forens}
+  \label{}
+\end{center}
+\end{figure}
+
+Infine in figura \ref{ictf:forens} si osservano il numero di alert rilevati suddivisi per host di destinazone
+e per parametri di campionamento. Questo tipo di valutazione \`e stata fatta poich\`e essa risulta particolarmente
+utile nelle fasi successive all'attacco, ovvero durante l'analisi forense. Identificare gli
+host che sono stati colpiti \`e di fondamentale importanza al fine di metterli di nuovo
+in sicurezza e controllare che non vi siano state iniettate delle {\it backdoors}.
+Quasi tutti i test sono stati in grado di identificare gli host colpiti, ad eccezione
+dei test con sampling rate 200 che non hanno per nulla rilevato l'attacco a quegli hosts.
+Inoltre l'host con IP 10.14.1.17, come descritto nella documentazione del dataset,
+ospita un CGI Perl ed \`e proprio quello che \`e stato
+colpito maggiormente da attacchi del tipo  {\it "ET SCAN DirBuster Web App Scan in Progress"}.
+
+\clearpage
+
+Avendo mostrato nella sezione precedente l'effetto dei vari tipi di campionamento
+e del loro impatto sui tipi di attacco rilevabili andiamo adesso a fare una analisi
+puramente quantitativa sui due dataset DARPA e CTU-13.
+
+
+\subsection{DARPA Dataset}
+
+Il Dataset Darpa \`e stato testato con le sole regole descritte al capitolo precedente.
+Si effettuer\`a quindi una analisi della percentuale di attacchi rilevati senza considerare i
+falsi positivi. Infatti utilizzando solo le regole specifiche per tale dataset non
+\`e possibile riscontrare dei falsi positivi semplicemente perch\`e le regole che li azionerebbero
+non sono caricate.
+
+\begin{figure}[h!]
+\begin{center}                          %centra nel mezzo della pagina
+  \includegraphics[width=\textwidth]{images/DARPA-sampling-rate.png}
+  \caption{Numero di Alert al variare del sampling rate}\label{darpa:s}
+\end{center}
+\end{figure}
+
+\begin{figure}[h!]
+\begin{center}                          %centra nel mezzo della pagina
+  \includegraphics[width=\textwidth]{images/DARPA-troncamento.png}
+  \caption{Numero di Alert al variare del troncamento}\label{darpa:trunc}
+\end{center}
+\end{figure}
+
+ Come si \`e osservato nella sezione precedente con il dataset ICtF2010 , le figure \ref{darpa:s}
+ e \ref{darpa:trunc} mostrano che il tasso di rilevamento decresce con l'aumentare del
+ sampling rate e invece rimane circa costante al variare del tronacamento.
+
+ Infine nella tabella \ref{darpa:bigtable} vengono messi in relazione il
+ numero di alert con il traffico medio inoltrato al Collector; notiamo che per questa analisi quantitativa i
+ risultati non ci sorprendono e il numero di alert \`e direttamente proporzionale
+ alla quantit\`a di traffico, per ogni valore di troncamento. In particolare i test
+ con sampling rate uguale a 100 hanno rivelato che questo tipo di campionamento
+ \`e del tutto inefficace nel riconoscere gli attacchi presenti nel dataset.
+
+ \begin{table}
+   \begin{center}
+     \begin{tabular}{ | a | b | b | c | d | }
+       \hline
+       {\bf Sampling Rate } & {\bf \# alert } & {\bf \% Alert} & {\bf Traffico (MB)} & {\bf \% Traffico} \\ \hline
+        1 (On-Wire) & 156 & - & 372 & - \\ \hline
+        2 & 52 & 33.3\% & 124 & 33.3\% \\ \hline
+        4 & 30 & 19\% & 74 & 19\% \\ \hline
+        100 & 1 & 0.64\% & 3 & 0.8\% \\ \hline
+     \end{tabular}
+     \caption{Numero di alert al variare del sampling rate}\label{darpa:bigtable}
+   \end{center}
+ \end{table}
+
+ Infine vediamo nella figura \ref{darpa:time} che tutti i test con sampling rate
+ uguale a 2 e 4 sono stati in grado di vedere l'attacco, con una piccola differenza nell'attacco
+ delle 20:00 in cui il test con sampling rate 2 non lo ha rilevato, probabilmente dovuto
+ al susseguirsi in quel lasso di tempo piccolo di una scelta poco fortunata su quale pacchetto su
+ 2 campionare.
+
+
+\begin{figure}[h!]
+\begin{center}                          %centra nel mezzo della pagina
+  \includegraphics[width=\textwidth]{images/DARPA-time.png}
+  \caption{Numero di Alert al variare del sampling rate nel tempo}\label{darpa:time}
+  \label{}
+\end{center}
+\end{figure}
+
+\clearpage
+
+\subsection{CTU-13 Dataset}
+
+Infine analizziamo il comportamento del sistema di monitoraggio utilizzando il dataset
+CTU-13. Un dataset, come descritto nel capitolo precedente formato da traffico derivante
+da botnets. Si \`e scelto di testare, per motivi di scarsit\`a di spazio su disco, soltanto il traffico della
+botnet 4, che contiene un attacco DDoS, per capire come si comporta il sistema con questa
+tipologia di traffico.
+
+I risultati sono del tutto simili a quelli dei test con il dataset DARPA di cui riportiamo per
+brevit\`a solo una tabella (\ref{tab:ctu-samp}) con i valori del tasso di rilevamento a variare del sampling rate.
+\begin{table}
+\begin{center}
+  \begin{tabular}{| a | d | b |}
+    \hline
+    {\bf Sampling rate} & {\bf \# Alert } & {\bf \% } \\ \hline
+    1 (On-Wire) & 92055 & - \\ \hline
+    2 & 3363 & 3.65\% \\ \hline
+    4 & 995 & 0.1\% \\ \hline
+  \end{tabular}
+\end{center}
+    \caption[CTU-13 - Numero di alert]{Numero di alert al variare del sampling rate}\label{tab:ctu-samp}
+\end{table}
+Quello che \`e interessante di questo dataset \`e la capacit\`a di rilevare che
+un attacco sia in corso. Sappiamo che gli attacchi DDoS per loro natura tendono a
+inviare alla macchina target una grande quantit\`a di traffico in un periodo di tempo pi\`u o meno lungo.
+Questo tipo di attacco quindi si presta molto ad essere rilevato con tecnologie come
+quella di sFlow, poich\`e pur essendoci una parte di traffico che passa inosservata per
+via degli effetti del campionamento, per via della frequenza del traffico malevolo, ce ne sar\`a un'altra parte che invece verr\`a analizzata
+portando alla rilevazione dell'attacco.
+In figura \ref{ctu:time} si riporta il numero di alert al variare del campionamento
+in cui si nota proprio il comportamento descritto sopra.
+
+Sia i test com sampling rate 2 che quelli con 4 hanno portato ad una rilevazione efficace
+dell'attacco. La grande differenza in numero che \`e possibile osservare tra questi ultimi e
+i test effettuati On-Wire non \`e da ritenersi particolarmente rilevante ai fini della
+valutazione. Infatti nelle regole che sono state scritte per testare questo dataset
+si \`e volutamente omesso un limite superiore agli alert, come invece si fa per questo
+tipo di attacco per evitare un {\it flood} di alerts.
+Notiamo invece che non sono presenti alert nei test con sampling rate 100, contrariamente
+da come ci aspettavamo per questo tipo di attacco, pur accorciando il threshold di rilevamento
+all'interno della regola non si \`e riusciti a far scattare l'allarme di un DDoS in corso.
+\begin{verbatim}
+  alert udp any any -> $HOME_NET 161 (msg:"ET DOS CTU-13 Botnet";
+  content:"|cb f5 ab 86 05|"; depth:5; threshold: type threshold,
+  track by_dst, seconds 90, count 3; classtype:bad-unknown;
+  sid:2016016; rev:8; metadata:created_at 2018-02,
+  updated_at 2018-02;)
+\end{verbatim}
+
+Questo significa che pur avendo un {\it burst} di pacchetti malevoli non si sono
+rilevati neanche 3 pacchetti nell'arco di 90 secondi con quella signature descritta
+sopra, risultato alquanto insoddisfacente.
+
+\begin{figure}[h!]
+\begin{center}                          %centra nel mezzo della pagina
+  \includegraphics[width=\textwidth]{images/CTU-time.png}
+  \caption{Numero di Alert al variare del sampling rate nel tempo}\label{ctu:time}
+  \label{}
+\end{center}
+\end{figure}
+
+\clearpage
+
+\subsection{Campionamento adattivo}
+
+
+Dati i risultati precedenti, ovvero avendo identificato come parametri ottimali
+un sampling rate compreso tra 4 e 100 e un troncamento di 256 Byte si sono svolti
+i test sul dataset ICtF2010 con campionamento adattivo in accordo con tali risultati.
+
+In figura \ref{ictf:adapt} si mostrano il numero di alert con campionamento adattivo (in verde)
+e quelli On-Wire (in blu). Come \`e possibile vedere anche dalla tabella \ref{ictf:adapt-table}
+il campionamento adattivo ha portato molti benefici al sistema di monitoraggio studiato con
+incrementi nel numero di attacchi rilevati di circa +1000\%. Allo stesso modo per\`o
+come da figura \ref{ictf:adapt-traff} il traffico medio inoltrato al collector per l'analisi
+ha subito un notevole aumento passando da circa 100MB a 175MB\footnote{con sampling rate : 4} per ogni file pcap analizzato.
+Per cui, sebbene vi sia un notevole aumento di efficienza questo comporta il doppio
+del costo in termini di traffico inoltrato sulla rete e in termini di load per il
+Collector.
+
+\begin{figure}[h!]
+\begin{center}                          %centra nel mezzo della pagina
+  \includegraphics[width=80mm]{images/ICTF-adapt-on-samp.png}
+  \caption{Numero di Alert al variare del sampling con campionamento adattivo}\label{ictf:adapt}
+\end{center}
+\end{figure}
+
+\begin{figure}[h!]
+\begin{center}                          %centra nel mezzo della pagina
+  \includegraphics[width=80mm]{images/ICTF-adapt-on-traff.png}
+  \caption{Media del traffico con campionamento adattivo}\label{ictf:adapt-traff}
+\end{center}
+\end{figure}
+
+
+\begingroup
+\begin{table}
+  \fontsize{9pt}{10pt}\selectfont
+\begin{center}
+  \begin{tabular}{| a | d | b | c | e |}
+    \hline
+    {\bf Samp. Rate} & {\bf \# Alert } & {\bf \# Alert camp. adatt. } & {\bf \% Alert tot} & {\bf \% Miglioramento} \\ \hline
+    1 & 7,160,481 & - & - & -\\ \hline
+    4 & 4,983 & 87,875 & 1.22\% & +1,000.4\%   \\ \hline
+    100 & 65 & 185 & 0.0002\% & +284\% \\ \hline
+  \end{tabular}
+\end{center}
+  \caption{Campionamento adattivo}\label{ictf:adapt-table}
+\end{table}
+\endgroup
+
+\section{Implicazioni matematiche di sFlow + Suricata IDS}
+
+Il rilevamento di un attacco utilizzando sFlow dipende dalla probabilit\`a
+di scegliere come pacchetto da campionare proprio il pacchetto contenente
+l'attacco tra tutti quelli passanti nella rete.
+
+Considerando il comportamento di sFlow, ovvero quello di suddividere il traffico
+in windows di dimensione {\it s} e di campionare un pacchetto ogni {\it s} possiamo
+approssimare la rilevazione del pacchetto usando una distribuzione binomiale.
+
+Non conoscendo tuttavia il contenuto della window si utilizza il criterio di Laplace
+e si suppone che la window analizzata sia composta da met\`a pacchetti malevoli e
+met\`a pacchetti leciti.
+
+Possiamo inoltre dire che, dato che sFlow sceglie in maniera random il pacchetto da campionare
+all'interno della window essi siano tutti equiprobabili. Inoltre poich\`e l' Agent
+opera in maniera indipendente dagli altri le scelte di campionamento, le combinazioni di
+di tutte le possibili scelte fatte da tutti gli Agent nella rete possono ritenersi
+equiprobabili. Da cui il rilevamento pu\`o essere assimilato da {\it n} estrazioni con reinbussulamento di una biglia da un urna
+di composizione sconosciuta contenente {\it s} palline.
+
+La probabilit\`a di rilevamento dell'attacco \`e :
+
+\begin{equation}
+  P(S{_n})= \binom{s}{n} p (1 - p)
+\end{equation}
+
+con $p=\frac{1}{2}$ e $n=$ numero di Agent attraversati dal pacchetto malevolo.
+
+Si evincono due particolari importanti, in primo luogo l'aumento del numero di agent,
+cos\`i come la diminuzione del sampling rate porta ad un maggior tasso di rilevamento, come si era
+evinto dai test. E che le signature che utilizzano
+threshold, come quelle per gli attacchi DDoS nel dataset CTU-13, possono essere attivate ingiustamente
+per via di una sfortunata serie di scelte di campionamento per ogni Agent. Potrebbe capitare infatti
+che tutti i Agent campionino lo stesso pacchetto, facendo scattare l'allarme di un
+DDoS quando invece questo non era in atto. Ovviamente come si pu\`o intuire questo diventa pi\`u probabile nel caso in cui il sampling
+rate sia basso.
+Occorre prestare attenzione quindi al threshold presente
+nelle regole di Suricata e adattarlo in maniera che ci\`o non possa accadere.
+E in definitiva bisogna rispettare sempre la seguente equazione:
+\begin{equation}
+    threshold\ di\ rilevamento < t
+\end{equation}
+con $t=$ massimo livello dello spanning tree della rete \footnote{assumendo che sFlow sia abilitato in ogni componente
+di rete}.
+
+
+Lo studio di questi aspetti, ovvero di come l'IDS sFlow + Suricata si comporti nel caso
+di pi\`u Agent viene lasciato come possibile sviluppo futuro.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%non numera l'ultima pagina sinistra
+\clearpage{\pagestyle{empty}\cleardoublepage}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%per fare le conclusioni
+\chapter*{Conclusioni}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%imposta l'intestazione di pagina
+\rhead[\fancyplain{}{\bfseries
+CONCLUSIONI}]{\fancyplain{}{\bfseries\thepage}}
+\lhead[\fancyplain{}{\bfseries\thepage}]{\fancyplain{}{\bfseries
+CONCLUSIONI}}
+
+La valutazione del sistema di rilevamento degli attacchi basato sulla tecnologia
+sFlow abbinata all'IDS Suricata ha portato allo sviluppo di numerosi tool, che
+vanno a costituire una stuite di sperimentazione completa e che garantisce la riproducibilit\`a degli
+esperimenti effettuati. Tutto il codice sar\`a rilasciato con licenza GPL v3
+e sar\`a disponibile sul sito GitHub.com.
+
+Dai numerosi test effettuati possiamo concludere che il tasso di rilevamento degli attacchi
+sia direttamente proporzionale al sampling rate utilizzato. In particolare, soltanto
+i test con sampling rate molto bassi (2 o 4) si sono rivelati totalmente efficaci.
+Si sono ottenuti invece dei risultati parziali per quanto riguarda sampling rate 100
+e nessun risultato o quasi per i sampling rate pi\`u alti.
+
+Sebbene i risultati possano sembrare davvero poco soddisfacenti \`e da tenere conto
+che essi si sono svolti in condizioni di notevole stress per l'IDS, ovvero come nel
+caso del dataset ICtF2010 la maggior parte del traffico, soprattutto quello nella prima parte della
+competizione, era composto da traffico malevolo, cosa assai improbabile in una rete normale.
+Inoltre nel caso del dataset CTU-13 il bitrate, come descritto nel {\verb README }
+del dataset, era impostato a 40 Kbps davvero improbabile per un attacco DDos, che solitamente
+si aggira (almeno al periodo di stesura di questo elaborato) a circa 200 Gbps. Per cui
+possiamo dire che i risultati non sono in contraddizione con l'esperienza dei tantissimi
+che utilizzano sFlow come tecnica di rilevazione di DDoS, infatti
+se si \`e stati in grado di rilevare un DDoS campionando 1 pacchetto ogni 4 con un
+bitrate di 40 Kbps con un bitrate di 200 Gbps serve campionare, in proporzione, appena un pacchetto ogni
+2,000,000 che \`e ben al di sopra di un setup standard di sFlow, solitamente con sampling rate 1000.
+
+Le stesse considerazioni vanno fatte sul campionamento adattivo, la percentuale di miglioramento
+con questo metodo \`e vertiginosamente aumentata portando con se tuttavia un notevole aumento
+del traffico inoltrato per l'analisi al Collector. Tuttavia questo aumento pu\`o avvenire
+soltanto nella possibilit\`a insolita in cui un determinato IP possa, una volta generati tutti
+quegli alert, essere ancora ammesso nella rete dal Firewall. Combinando insieme le
+funzionalit\`a di Suricata come IDS e {\it Intrusion Prevention System} (IPS) si pensa
+che questo non possa accadere poich\`e l'IP verrebbe {\it bannato}, negandogli l'accesso alla rete
+e impedendo che un suo ulteriore traffico sia inoltrato al Collector.
+
+Occorre per\`o notare che un campionamento adattivo potrebbe essere un'arma a doppio taglio per
+gli attacchi DDoS, infatti, se durante un attacco DDoS gli IP della Botnet fossero tutti blacklistati,
+allora al collector arriverebbe tutto il traffico del DDoS moltiplicato per il numero di Agents nella rete.
+
+Infine si \`e dimostrato matematicamente che il tasso di rilevamento \`e una
+distribuzione binomiale e dipende dai parametri di campionamento e dal numero di Agents nella
+rete.
+Alla luce di questo si lascia come possibile sviluppo futuro lo studio di questo
+sistema di rilevamento utilizzando pi\`u Agents.
+
+Per concludere, visto quanto detto finora e quanto \`e possibile osservare nella figura \ref{darpa:time},
+si solleva un ulteriore domanda: \`E possibile conoscendo il traffico nella rete in un dato momento, e magari
+i parametri di campionamento (anche solo per {\it best practice}), creare un
+attacco che usa metodi statistici per evadere un IDS di questo tipo, basato campionamento?
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%aggiunge la voce Conclusioni
+                                        %   nell'indice
+\addcontentsline{toc}{chapter}{Conclusioni}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%imposta l'intestazione di pagina
+\renewcommand{\chaptermark}[1]{\markright{\thechapter \ #1}{}}
+\lhead[\fancyplain{}{\bfseries\thepage}]{\fancyplain{}{\bfseries\rightmark}}
+\appendix                               %imposta le appendici
+\chapter{Prima Appendice}               %crea l'appendice
+Regole utilizzate per il dataset DARPA:
+\begin{verbatim}
+alert tcp $HOME_NET any -> $HOME_NET 80 (msg:"HTTP Scan attempted";
+  flow:to_server; fragoffset:0; fragbits:!D; ack:0; flags:S; window:2048;
+  classtype: network-scan; priority:3; sid:1000003;)
+alert icmp $EXTERNAL_NET any -> $HOME_NET any (msg:"ICMP Scan Echo"; itype:8;
+  icode:0; fragbits:!D; content:"|00 00 00 00 00 00 00 00 00 00|"; depth:10;
+  icmp_id:0; icmp_seq:0; ttl:254; classtype:attempted-recon; priority:3;
+  sid:1000026;)
+alert tcp $EXTERNAL_NET any -> $HOME_NET 79 (msg: "Figer 0 query attempted";
+  content:"0"; flow: to_server,established; fragoffset:0; fragbits:D; flags:A;
+  classtype: attempted-recon; priority:3; sid:1000036;)
+alert tcp $EXTERNAL_NET any -> $HOME_NET 53 (msg: "DNS request name";
+  flow:to_server,established; content:"|00 fc 00 01|"; nocase; depth: 4;
+  metadata:service dns; classtype:   attempted-recon; priority:3;
+  sid:1000034;)
+alert tcp $EXTERNAL_NET any -> $HOME_NET 21 (msg: "FTP Request connection";
+  flow:to_server,established;   content:"quit"; flags:AP; fragbits:D;
+  metadata:service ftp;   classtype:tcp-connection; priority:4;
+  sid:1000039;)
+alert tcp $EXTERNAL_NET any -> $HOME_NET 25  (msg: "SMTP Scan attempted OS";
+  flow:to_server; ack:0;  flags:S; fragoffset:0; window:4660; ttl:254;
+  metadata:service  smtp; classtype:attempted-recon; priority:3;
+  sid:1000040;)
+alert tcp $EXTERNAL_NET any -> $HOME_NET 25  (msg: " SMTP Scan attempted OS ";
+  flow:to_server; ack:0;  flags:AS; fragoffset:0; window:4660; ttl:254;
+  metadata:service  smtp; classtype:attempted-recon; priority:3;
+  sid:1000041;)
+alert tcp $EXTERNAL_NET any -> $HOME_NET 25  (msg: " SMTP Scan attempted OS ";
+  flow:to_server; ack:0;  flags:F; fragoffset:0; window:4660; ttl:254;
+  metadata:service  smtp; classtype:attempted-recon; priority:3;
+  sid:1000042;)
+alert tcp $EXTERNAL_NET any -> $HOME_NET 25  (msg: " SMTP Scan attempted OS ";
+  flow:to_server; ack:0;  flags:AF; fragoffset:0; window:4660; ttl:254;
+  metadata:service  smtp; classtype:attempted-recon; priority:3;
+  sid:1000043;)
+alert tcp $EXTERNAL_NET any -> $HOME_NET 25  (msg: " SMTP Scan attempted OS ";
+ flow:to_server; ack:0;  flags:SF; fragoffset:0; window:4660; ttl:254;
+ metadata:service  smtp; classtype:attempted-recon; priority:3; sid:1000044;)
+alert tcp $EXTERNAL_NET any -> $HOME_NET 25  (msg: " SMTP Scan attempted OS ";
+  flow:to_server; ack:0;  flags:P; fragoffset:0; window:4660; ttl:254;
+  metadata:service  smtp; classtype:attempted-recon; priority:3; sid:1000045;)
+alert tcp $EXTERNAL_NET any -> $HOME_NET 25  (msg: " SMTP Scan attempted OS";
+  flow:to_server; ack:0;  flags:CES; fragoffset:0; window:4660; ttl:254;
+  metadata:service  smtp; classtype:attempted-recon; priority:3; sid:1000046;)
+\end{verbatim}\label{app:regole-DARPA}
+
+pcap2sflow.c
+\begin{verbatim}
+void load_blacklist(){
+    char blacklist_filename [4096] = "/tmp/pcap2sflow-blacklist";
+    char buff [256];
+    char * line = NULL;
+    size_t len = 0;
+    ssize_t read;
+
+    FILE *fp;
+
+    fp = fopen(blacklist_filename, "r");
+    int id = 0;
+    if (fp == NULL) {
+        perror("no blacklist_file provided");
+        exit(EXIT_FAILURE);
+    }
+
+    while ((read = getline(&line, &len, fp)) != -1) {
+        //reads all the lines and add them to the hashtable of blacklisted ip
+        if ((line)[read - 1] == '\n') {
+            //strip the newline char
+            (line)[read - 1] = '\0';
+        }
+        if (strcmp(line, "") == 0 ){
+
+        }
+        struct blacklist_item *s;
+        s = (struct blacklist_item*)malloc(sizeof(struct blacklist_item));
+        s->id = id++;
+        strncpy(s->ip, line, 256);
+        HASH_ADD_STR(black_list, ip , s);
+    }
+
+    struct blacklist_item *s = NULL;
+
+    fprintf(stderr, "Blacklisted IPs:\n");
+    for(s=black_list; s != NULL; s=s->hh.next) {
+        fprintf(stderr, "id %d: ip %s\n", s->id, s->ip);
+    }
+
+    fclose(fp);
+
+}
+\end{verbatim}
+
+
+Elasticsearch schema:
 \begin{verbatim}
   {
     "ictf2010": {
@@ -1253,705 +2020,6 @@ nell'esempio seguente sul dataset di ICtF2010:
           "provided_name": "ictf2010",
           "number_of_replicas": "1", } } } }
 \end{verbatim}
-
-Una volta creato l'index si \`e passati alla popolazione del database con
-il programma Python elasticsearch\_feeder.py
-Vista la grande quantit\`a di log \footnote{Si sono raggiunti 12 GB di log solo per il
-testing del dataset ICtF2010}, si \`e ottimizzato l'inserimento utilizzando la
-funzione di Elasticsearch {\it bulk index}.
-
-Si \`e allora disabilitato temporaneamente il refresh degli index \cite{EXP8} \cite{EXP9}
-\begin{verbatim}
-PUT /ictf2010/_settings
-{
-    "index" : {
-        "refresh_interval" : "-1"
-    }
-}
-\end{verbatim}
-
-E alla fine di ogni bulk index il valore \`e stato ripristinato ed \`e stato forzato
-il merging dei segmenti:
-\begin{verbatim}
-PUT /ictf2010/_settings
-{
-    "index" : {
-        "refresh_interval" : "10s"
-    }
-}
-
-POST /twitter/_forcemerge?max_num_segments=5
-\end{verbatim}
-
-\subsubsection{Analisi dei falsi positivi}
-
-Di fondamentale importanza nell'analisi prestazionale di un IDS \`e il conteggio
-dei falsi positivi, ovvero di quegli alert sollevati dall'IDS a partire da un traffico
-che era invece benevolo.
-
-La valutazione dei falsi positivi \`e stata effettuata mediante un altro programma
-Python, scritto appositamente sempre utilizzando le API di Elasticsearch.
-Non \`e stato possibile infatti conteggiare i falsi positivi gi\`a dall'interno di
-Kibana a partire dai dati gi\`a presenti poich\`e Elasticsearch non permette, a
-differenza dei database relazionali, di effettuare delle subqueries.
-
-Il programma Python, che va sotto il nome di false\_positives.py, confronta le signature
-rilevate con i vari parametri di sampling rate e troncamento testati con le signature
-del setup On-Wire. Il numero di falsi positivi per ogni signature ricavati dalla sottrazione dei
-due valori \`e stata aggiunta in un ulteriore index, appositamente creato per il conteggio
-dei falsi positivi.
-
-false\_positives.py effettua una query con aggregazione sul valore "signature.keyword" nei
-documenti con sampling rate = 1 e truncate = 600 (presi come riferimento per il setup On-Wire)
-ne salva i valori e poi per ogni combinazione
-di parametri effettua una seconda query con aggregazione sullo stesso valore; infine la differenza
-tra i due valori ottenuta viene usata per creare tanti documenti quanti sono i falsi positivi.
-Occorre notare che sebbene si creino molti documenti, data la struttura di Elasticsearch
-e del suo Inverted Index \cite{EXP13}, questo non occupa molto spazio e se ne guadagna in comodit\`a una volta che
-si proceder\`a col creare le visualizzazioni.
-
-\section{Campionamento adattivo}
-
-Si va adesso ad illustrare un approccio alternativo al campionamento statico, introdotto
-in un secondo momento, ovvero quello che si \`e definito campionamento adattivo.
-
-Campionare sempre lo stesso numero di pacchetti potrebbe essere in una rete molto estesa
-un carico inutilmente pesante. La proposta prevede di impostare il campionamento ad un
-valore iniziale di sampling rate uguale a 100 e di aumentarlo qual ora vengano attivati
-degli alert da parte dell'IDS.
-In pratica si propone di monitorare il file di log {\it eve.json} e di inoltrare {\it on the fly}
-una richiesta al collector di campionare pi\`u approfonditamente i pacchetti provenienti dalla
-sorgente che ha fatto scattare l'alert.
-Il cambiamento dei parametri pu\`o essere fatto molto agilmente nel caso in cui si
-utilizzi come device per il campionamento il software OpenVSwitch. Basta infatti
-inviare i comandi :
-\begin{verbatim}
-SFLOWUUID=`ovs-vsctl create sFlow agent=eth0 target=\"10.0.0.50:6343\" \
-    header=128 sampling=512 polling=30`
-ovs-vsctl list br
-ovs-vsctl set bridge xenbr0 sflow=$SFLOWUUID
-ovs-vsctl set bridge xenbr1 sflow=$SFLOWUUID
-\end{verbatim}
-
-Definita la fattibilit\`a del campionamento adattivo si passa ora a analizzare il
-comportamento del sistema di monitoraggio con l'introduzione di questo nuovo parametro.
-Si aggiunge quindi al simulatore pcap2sflow la possibilit\`a di caricare una blacklist di indirizzi
-per cui il campionamento deve essere fatto in maniera pi\`u approfondita.
-
-\begin{verbatim}
-void load_blacklist(){
-    char blacklist_filename [4096] = "/tmp/pcap2sflow-blacklist";
-    char buff [256];
-    char * line = NULL;
-    size_t len = 0;
-    ssize_t read;
-
-    FILE *fp;
-
-    fp = fopen(blacklist_filename, "r");
-    int id = 0;
-    if (fp == NULL) {
-        perror("no blacklist_file provided");
-        exit(EXIT_FAILURE);
-    }
-
-    while ((read = getline(&line, &len, fp)) != -1) {
-        //reads all the lines and add them to the hashtable of blacklisted ip
-        if ((line)[read - 1] == '\n') {
-            //strip the newline char
-            (line)[read - 1] = '\0';
-        }
-        if (strcmp(line, "") == 0 ){
-
-        }
-        struct blacklist_item *s;
-        s = (struct blacklist_item*)malloc(sizeof(struct blacklist_item));
-        s->id = id++;
-        strncpy(s->ip, line, 256);
-        HASH_ADD_STR(black_list, ip , s);
-    }
-
-    struct blacklist_item *s = NULL;
-
-    fprintf(stderr, "Blacklisted IPs:\n");
-    for(s=black_list; s != NULL; s=s->hh.next) {
-        fprintf(stderr, "id %d: ip %s\n", s->id, s->ip);
-    }
-
-    fclose(fp);
-
-}void load_blacklist(){
-    char blacklist_filename [4096] = "/tmp/pcap2sflow-blacklist";
-    char buff [256];
-    char * line = NULL;
-    size_t len = 0;
-    ssize_t read;
-
-    FILE *fp;
-
-    fp = fopen(blacklist_filename, "r");
-    int id = 0;
-    if (fp == NULL) {
-        perror("no blacklist_file provided");
-        exit(EXIT_FAILURE);
-    }
-
-    while ((read = getline(&line, &len, fp)) != -1) {
-        //reads all the lines and add them to the hashtable of blacklisted ip
-        if ((line)[read - 1] == '\n') {
-            //strip the newline char
-            (line)[read - 1] = '\0';
-        }
-        if (strcmp(line, "") == 0 ){
-
-        }
-        struct blacklist_item *s;
-        s = (struct blacklist_item*)malloc(sizeof(struct blacklist_item));
-        s->id = id++;
-        strncpy(s->ip, line, 256);
-        HASH_ADD_STR(black_list, ip , s);
-    }
-
-    struct blacklist_item *s = NULL;
-
-    fprintf(stderr, "Blacklisted IPs:\n");
-    for(s=black_list; s != NULL; s=s->hh.next) {
-        fprintf(stderr, "id %d: ip %s\n", s->id, s->ip);
-    }
-
-    fclose(fp);
-
-}
-\end{verbatim}
-
-Si \`e posta particolare attenzione a mantenere le performance del simulatore alte pur
-introducendo l'overhead dovuto al controllo dell'IP address di ogni pacchetto. Si \`e quindi
-implementato il controllo della blacklist tramite una hash table permettendo quindi i
-controlli in O(1).
-
-La blacklist viene costantemente aggiornata dal programma python log-analyzer.py,
-il quale ogni volta che vede un alert di cui non ha l'indirizzo IP sorgente nella
-blacklist aggiorna la blacklist e notifica a pcap2sflow di ricaricarla con una signal.
-Anche nel programma python la blacklist \`e altamente efficiente poich\`e realizzata con
-i {\it set}, i quali in Python sono implementati con hash tables permettendo accesso anch'essi in O(1).
-Emulare il comportamento di {\verb tail -f } in Linux si \`e usata una mini-libreria
-per Python2 ({\it pytail}\cite{EXP17}) che \`e stata portata in Python3 aggiungendo un piccolo bugfix.
-
-\chapter{Discussione dei risultati}                %crea il capitolo
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%imposta l'intestazione di pagina
-\lhead[\fancyplain{}{\bfseries\thepage}]{\fancyplain{}{\bfseries\rightmark}}
-
-In questo capitolo si vanno ad elencare i criteri di valutazione dei risultati
-ottenuti dai test e se ne discuteranno i contenuti degli stessi.
-
-Infine si proporr\`a un approccio alternativo al campionamento statico, ovvero
-il campionamento adattivo.
-
-(ACCENNI SU INVERTED INDEX)
-
-\section{Criteri di valutazione}
-In ogni contesto di sperimentazione, ovvero al variare di parametri dei test e di
-dataset, si sono osservati i comportamenti dei seguenti indicatori:
-\begin{itemize}
-  \item {\bf Alert} : la quantit\`a totale di alert sollevati da suricata
-  \item {\bf Falsi positivi} : la quantit\`a di alert che nel setup On-Wire
-  non \`e stata rilevata, e che per questo motivo costituisce sicuramente un false positivo
-  \item {\bf Signature} : la tipologia di signature rilevata e la loro quantit\`a
-  \item {\bf Traffico}: la quantit\`a in Bytes di traffico inviata per l'analisi
-  a Suricata
-  \item{\bf Capacit\`a a posteriori di identificare la sorgente e la destinazione di un
-  attacco} : Questo indicatore risulta particolarmente utile nel campo dell'analisi forense,
-  ovvero consente di identificare una volta scoperto l'attacco quali sono stati gli
-  host coinvolti e da dove provenivano gli attaccanti
-  \item {\bf Tempo di reazione} : la differenza di tempo per la rilevazione di
-  un attacco in corso
-\end{itemize}
-
-\section{Risultati}
-
-Per ogni test sono state provate tutte le combinazioni tra sampling rate uguale a
-2, 4, 100 e troncamento uguale a 128, 256, 512 bytes, ad eccezione di ICtF2010,
-per il quale si sono teste diverse combinazioni di sampling rate 4, 100, 200, 400.
-Poi esse sono state messe in relazione agli stessi test effettuati in modalit\`a On-Wire,
-con sampling rate uguale a 1 e senza troncamento (nei test indicato con il valore 600 per comodit\`a di rappresentazione).
-\subsection{ICtF2010}
-
-Per il dataset ICtF2010 non \`e stato possibile identificare un rule-set specifico
-contro cui testare il tasso di rilevamento; si \`e quindi proceduto ad effettuare i
-test con il rule-set standard di Emerging-Threats.
-
-In questa prima fase si voleva osservare l'impatto che hanno campionamento e troncamento
-e se l'esclusione dell'uno o dell'altro portasse a miglioramenti apprezzabili.
-Si va a valutare in questi test il numero di alert e il loro rapporto con il numero dei
-falsi positivi.
-
-In figura 3.1 si mettono in relazione il numero degli alert al variare del campionamento
-con molteplici valori di troncamento. Similarmente in figura 3.2 ma invertendo i
-parametri.
-
-
-\begin{figure}[h!]
-\begin{center}                          %centra nel mezzo della pagina
-  \includegraphics[width=\textwidth]{images/ICTF-samp-vs-trunc.png}
-  \caption{Numero di Alert al variare del sampling rate}
-  \label{}
-\end{center}
-\end{figure}
-
-\begin{figure}[h!]
-\begin{center}                          %centra nel mezzo della pagina
-  \includegraphics[width=\textwidth]{images/ICTF--tunc-vs-samp.png}
-  \caption{Numero di Alert al variare del troncamento}
-  \label{}
-\end{center}
-\end{figure}
-
-Come \`e possibile notare, a parte i risultati ottenuti con il campionamento 1/1 e il
-troncamento a 128 bytes, la reale differenza tra il numero degli alert viene data dal
-valore del sampling rate.
-
-Osserviamo poi nelle figure 3.3 e 3.4 come i valori di troncamento e campionamento influiscono sul traffico
-che viene inviato al collector per l'analisi.
-
-\begin{figure}[h!]
-\begin{center}                          %centra nel mezzo della pagina
-  \includegraphics[width=\textwidth]{images/ICTF-samp-vs-traffic.png}
-  \caption{Quantit\`a di traffico inoltrata al Collector}
-  \label{}
-\end{center}
-\end{figure}
-
-\begin{figure}[h!]
-\begin{center}                          %centra nel mezzo della pagina
-  \includegraphics[width=\textwidth]{images/ICTF-trunc-vs-traffic.png}
-  \caption{Quantit\`a di traffico inoltrata al Collector}
-  \label{}
-\end{center}
-\end{figure}
-
-\`E possibile notare come la quantit\`a di traffico inoltrata al Collector,
-per il dataset ICtF2010 dipende in primo luogo dal valore del sampling rate.
-Con un sampling rate di 1/100 infatti si riduce la quantit\`a di traffico da inoltrare al
-collector da 500MB per ogni file pcap analizzato, fino a circa 3MB.
-Mentre un il troncamento, che sia a 128, 256 o 512, non produce un miglioramento apprezzabile.
-
-Infine osserviamo che  un campionamento con sampling rate da 100 in su non permette
-di rilevare quasi nessuno degli oltre 5 milioni di attacchi rilevati con
-sampling rate uguale a 4 o ad 1.
-
-Analizziamo a questo punto il contenuto degli alert, ovvero ci soffermeremo ad osservare le signature
-rilevate, quali sono le pi\`u frequenti per un determinato tipo di campionamento e
-se esse siano o meno dei falsi positivi.
-
-\begin{figure}[h!]
-\begin{center}                          %centra nel mezzo della pagina
-  \includegraphics[width=\textwidth]{images/ICTF-false-positives-mul.png}
-  \caption{Numero di falsi positivi}
-  \label{}
-\end{center}
-\end{figure}
-
-\begin{figure}[h!]
-\begin{center}                          %centra nel mezzo della pagina
-  \includegraphics[width=\textwidth]{images/ICTF-top-signatures.png}
-  \caption{Numero di falsi positivi}
-  \label{}
-\end{center}
-\end{figure}
-
-Dalla figura 3.5 si vede che i test con troncamento a 128 e sampling rate 4 sono
-sono quelli che hanno il numero di falsi positivi (in rosso) in rapporto
-al numero degli alert totali pi\`u alto di tutti.
-Quindi il troncamento uguale a 128 bytes, nel tipo di traffico del dataset ICtF2010,
-rappresenta un valore limite per garantire l'efficacia del sistema di rilevamento.
-Il troncamento a 256 byte e sampling rate 4, invece,  \`e quello che ha una percentuale
-di falsi positivi pi\`u bassa, come mostrato in tabella \ref{tab:falsep-4}.
-
-\begin{table}
-
-\begin{center}
-  \begin{tabular}{| a | d | b | c |}
-    \hline
-    {\bf Troncamento} & {\bf \# Alert } & {\bf \# Falsi Positivi} & {\bf \% } \\ \hline
-    128 & 11688 & 6472 & 55\% \\ \hline
-    256 & 133649 & 7151 & 5.3\% \\ \hline
-    512 & 11786 & 6459 & 54.8\% \\ \hline
-  \end{tabular}
-\end{center}
-    \caption[ICt2010 - Falsi positivi]{Falsi positivi con sampling rate 4}\label{tab:falsep-4}
-\end{table}
-
-Infatti, come \`e possibile vedere nella figura 3.6, il troncamento a 128 byte porta ad un
-incremento notevole del numero degli alert che vengono attivati dalle signatures
-{\it "SURICATA DNS malformed request data"} e {\it "SURICATA HTTP response field missing colon"},
-che sono sintomatici di un troncamento eccessivo, e che porta quindi ad avere headers che non
-rispettano pi\`u le specifiche del protocollo (HTTP, DNS o altri).
-Tali signature corrispondono a quelle che operano quella che nel primo capitolo
-si era descritta come {\it Stateful Analysis}, e che si era predetto non sarebbe
-stata utilizzabile abbinata ad sFlow. Infatti eliminando le regole per quest'ultima il numero di falsi positivi
-scende a 0.
-
-\begin{figure}[h!]
-\begin{center}                          %centra nel mezzo della pagina
-  \includegraphics[width=\textwidth]{images/ICTF-time-alerts.png}
-  \caption[ICtF2010 - numero di alert nel tempo]{Numero alert nel tempo}\label{ictf:time}
-  \label{}
-\end{center}
-\end{figure}
-
-Fissato il troncamento a 256 bytes mostriamo nella figura \ref{ictf:time} il numero di alert durante tutta la
-competizione con sampling rate 4 e 100. Si osserva qui che i test con sampling rate 4
-ricalcano abbastanza fedelmente l'attivit\`a registrata da Suricata On-Wire (in verde).
-Invece i test con sampling rate 100 sono stati efficienti nel primo periodo ma del
-quasi inutili nel secondo. L'andamento pi\`u ripido nella prima parte della competizione \`e
-compatibile con le prime due fasi del penetration testing, che sono riconocimento del target
-e scansione \cite{EXP16}. A questo periodo infatti corrisponde un grande numero di alert (circa 6M in totale)
-con signature {\it "ET SCAN DirBuster Web App Scan in Progress"}. Questa \`e la fase in cui
-i team si esponevano di pi\`u al fine di rilevare eventuali falle nel sistema. Non appena passata
-questa fase, le tecniche si sono notevolmente affinate, portando il numero di alerts a  mantenersi circa costante.
-
-Inoltre come \`e possibile osservare nel periodo che va dalle 7:00 alle 19:00 il gli alert
-con sampling rate 4 sono in alcuni punti superiori a quelli del setup On-Wire. Questo
-\`e sintomo di un aumento dei falsi positivi in quel periodo di tempo, poich\`e avendo usato
-lo stesso rule-set per sampling rate 4 e On-Wire, un numero maggiore di alert nel primo
-indica che sicuramente vi saranno dei falsi positivi.
-
-
-\begin{figure}[h!]
-\begin{center}                          %centra nel mezzo della pagina
-  \includegraphics[width=\textwidth]{images/ICTF-forens-dest.png}
-  \caption{Identificazione degli host compromessi}\label{ictf:forens}
-  \label{}
-\end{center}
-\end{figure}
-
-Infine in figura \ref{ictf:forens} si osservano il numero di alert rilevati suddivisi per host
-e per parametri di campionamento. Questo tipo di valutazione \`e stata fatta poich\`e essa risulta particolarmente
-utile nelle fasi successive all'attacco, ovvero durante l'analisi forense. Identificare gli
-host che sono stati colpiti \`e di fondamentale importanza al fine di metterli di nuovo
-in sicurezza e controllare che non vi siano state iniettate delle {\it backdoors}.
-Quasi tutti i test sono stati in grado di identificare gli host colpiti, ad eccezione
-dei test con sampling rate 200 che non hanno per nulla rilevato l'attacco a quegli hosts.
-Inoltre l'host con IP 10.14.1.17, come descritto nella documentazione del dataset,
-ospita un CGI Perl ed \`e proprio quello che \`e stato
-colpito maggiormente da attacchi del tipo  {\it "ET SCAN DirBuster Web App Scan in Progress"}.
-
-\clearpage
-
-Avendo mostrato nella sezione precedente l'effetto dei vari tipi di campionamento
-e del loro impatto sui tipi di attacco rilevabili andiamo adesso a fare una analisi
-puramente quantitativa sui due dataset DARPA e CTU-13.
-
-
-\subsection{DARPA Dataset}
-
-Il Dataset Darpa \`e stato testato con le sole regole descritte al capitolo precedente.
-Si effettuer\`a quindi una analisi della percentuale di attacchi rilevati senza considerare i
-falsi positivi. Infatti utilizzando solo le regole specifiche per tale dataset non
-\`e possibile riscontrare dei falsi positivi semplicemente perch\`e le regole che li azionerebbero
-non sono caricate.
-
-\begin{figure}[h!]
-\begin{center}                          %centra nel mezzo della pagina
-  \includegraphics[width=\textwidth]{images/DARPA-sampling-rate.png}
-  \caption{Numero di Alert al variare del sampling rate}\label{darpa:s}
-\end{center}
-\end{figure}
-
-\begin{figure}[h!]
-\begin{center}                          %centra nel mezzo della pagina
-  \includegraphics[width=\textwidth]{images/DARPA-troncamento.png}
-  \caption{Numero di Alert al variare del troncamento}\label{darpa:trunc}
-\end{center}
-\end{figure}
-
- Come si \`e osservato nella sezione precedente con il dataset ICtF2010 , le figure \ref{darpa:s}
- e \ref{darpa:trunc} mostrano che il tasso di rilevamento decresce con l'aumentare del
- sampling rate e invece rimane circa costante al variare del tronacamento.
-
- Infine nella tabella \ref{darpa:bigtable} vengono messi in relazione il
- numero di alert con il traffico medio inoltrato al Collector; notiamo che per questa analisi quantitativa i
- risultati non ci sorprendono e il numero di alert \`e direttamente proporzionale
- alla quantit\`a di traffico, per ogni valore di troncamento. In particolare i test
- con sampling rate uguale a 100 hanno rivelato che questo tipo di campionamento
- \`e del tutto inefficace nel riconoscere gli attacchi presenti nel dataset.
-
- \begin{table}
-   \begin{center}
-     \begin{tabular}{ | a | b | b | c | d | }
-       \hline
-       {\bf Sampling Rate } & {\bf \# alert } & {\bf \% Alert} & {\bf Traffico (MB)} & {\bf \% Traffico} \\ \hline
-        1 (On-Wire) & 156 & - & 372 & - \\ \hline
-        2 & 52 & 33.3\% & 124 & 33.3\% \\ \hline
-        4 & 30 & 19\% & 74 & 19\% \\ \hline
-        100 & 1 & 0.64\% & 3 & 0.8\% \\ \hline
-     \end{tabular}
-     \caption{Numero di alert al variare del sampling rate}\label{darpa:bigtable}
-   \end{center}
- \end{table}
-
- Infine vediamo nella figura \ref{darpa:time} che tutti i test con sampling rate
- uguale a 2 e 4 sono stati in grado di vedere l'attacco, con una piccola differenza nell'attacco
- delle 20:00 in cui il test con sampling rate 2 non lo ha rilevato, probabilmente dovuto
- al susseguirsi in quel lasso di tempo piccolo di una scelta poco fortunata su quale pacchetto su
- 2 campionare.
-
- Questo solleva una ulteriore domanda, ovvero \`e possibile evadere un IDS basato su
- packet sampling utilizzando tecniche statistiche per mantenere l'attacco sotto una certa
- soglia? (sviluppi futuri)
-
-\begin{figure}[h!]
-\begin{center}                          %centra nel mezzo della pagina
-  \includegraphics[width=\textwidth]{images/DARPA-time.png}
-  \caption{Numero di Alert al variare del sampling rate nel tempo}\label{darpa:time}
-  \label{}
-\end{center}
-\end{figure}
-
-\clearpage
-
-\subsection{CTU-13 Dataset}
-
-Infine analizziamo il comportamento del sistema di monitoraggio utilizzando il dataset
-CTU-13. Un dataset, come descritto nel capitolo precedente formato da traffico derivante
-da botnets. Si \`e scelto di testare, per motivi di scarsit\`a di spazio su disco, soltanto il traffico della
-botnet 4, che contiene un attacco DDoS.
-
-I risultati sono del tutto simili a quelli dei test con il dataset DARPA per cui riportiamo per
-brevit\`a solo una tabella (\ref{tab:ctu-samp}) con i valori del tasso di rilevamento a variare del sampling rate.
-\begin{table}
-\begin{center}
-  \begin{tabular}{| a | d | b |}
-    \hline
-    {\bf Sampling rate} & {\bf \# Alert } & {\bf \% } \\ \hline
-    1 (On-Wire) & 92055 & - \\ \hline
-    2 & 3363 & 3.65\% \\ \hline
-    4 & 995 & 0.1\% \\ \hline
-  \end{tabular}
-\end{center}
-    \caption[CTU-13 - Numero di alert]{Numero di alert al variare del sampling rate}\label{tab:ctu-samp}
-\end{table}
-Quello che \`e interessante di questo dataset \`e la capacit\`a di rilevare che
-un attacco sia in corso. Sappiamo che gli attacchi DDoS per loro natura tendono a
-inviare alla macchina target una grande quantit\`a di traffico in un periodo di tempo pi\`u o meno lungo.
-Questo tipo di attacco quindi si presta molto ad essere rilevato con tecnologie come
-quella di sFlow, poich\`e pur essendoci una parte di traffico che passa inosservata per
-via degli effetti del campionamento, ce ne sar\`a un'altra parte che invece verr\`a analizzata
-portando alla rilevazione dell'attacco.
-In figura \ref{ctu:time} si riporta il numero di alert al variare del campionamento
-in cui si nota proprio il comportamento descritto sopra.
-
-Sia i test com sampling rate 2 che quelli con 4 hanno portato ad una rilevazione efficace
-dell'attacco. La grande differenza in numero che \`e possibile osservare tra questi ultimi e
-i test effettuati On-Wire non \`e da ritenersi particolarmente rilevante ai fini della
-valutazione. Infatti nelle regole che sono state scritte per testare questo dataset
-si \`e volutamente omesso un limite superiore agli alert, come invece si fa per questo
-tipo di attacco per evitare un flood di alerts.
-Notiamo invece che non sono presenti alert nei test con sampling rate 100, contrariamente
-da come ci aspettavamo per questo tipo di attacco, pur accorciando il threshold di rilevamento
-all'interno della regola non si \`e riusciti a far scattare l'allarme di un DDoS in corso.
-\begin{verbatim}
-  alert udp any any -> $HOME_NET 161 (msg:"ET DOS CTU-13 Botnet";
-  content:"|cb f5 ab 86 05|"; depth:5; threshold: type threshold,
-  track by_dst, seconds 90, count 3; classtype:bad-unknown;
-  sid:2016016; rev:8; metadata:created_at 2018-02,
-  updated_at 2018-02;)
-\end{verbatim}
-
-Questo significa che pur avendo un {\it burst} di pacchetti malevoli non si sono
-rilevati neanche 3 pacchetti nell'arco di 90 secondi con quella signature descritta
-sopra, risultato alquanto insoddisfacente.
-
-\begin{figure}[h!]
-\begin{center}                          %centra nel mezzo della pagina
-  \includegraphics[width=\textwidth]{images/CTU-time.png}
-  \caption{Numero di Alert al variare del sampling rate nel tempo}\label{ctu:time}
-  \label{}
-\end{center}
-\end{figure}
-
-\clearpage
-
-
-Dati i risultati precedenti, ovvero avendo identificato come parametri ottimali
-un sampling rate compreso tra 4 e 100 e un troncamento di 256 Byte si sono svolti
-i test in accordo con tali risultati.
-
-In figura \ref{ictf:adapt} si mostrano il numero di alert con campionamento adattivo (in verde)
-e quelli On-Wire (in blu). Come \`e possibile vedere anche dalla tabella \ref{ictf:adapt-table}
-il campionamento adattivo ha portato molti benefici al sistema di monitoraggio studiato con
-incrementi nel numero di attacchi rilevati di circa +1000\%. Allo stesso modo per\`o
-come da figura \ref{ictf:adapt-traff} il traffico medio inoltrato al collector per l'analisi
-ha subito un notevole aumento passando da circa 100MB a 175MB\footnote{con sampling rate : 4} per ogni file pcap analizzato.
-Per cui, sebbene vi sia un notevole aumento di efficienza questo comporta il doppio
-del costo in termini di traffico inoltrato sulla rete e in termini di load per il
-Collector.
-
-\begin{figure}[h!]
-\begin{center}                          %centra nel mezzo della pagina
-  \includegraphics[width=80mm]{images/ICTF-adapt-on-samp.png}
-  \caption{Numero di Alert al variare del sampling con campionamento adattivo}\label{ictf:adapt}
-\end{center}
-\end{figure}
-
-\begin{figure}[h!]
-\begin{center}                          %centra nel mezzo della pagina
-  \includegraphics[width=80mm]{images/ICTF-adapt-on-traff.png}
-  \caption{Media del traffico con campionamento adattivo}\label{ictf:adapt-traff}
-\end{center}
-\end{figure}
-
-
-\begingroup
-\begin{table}
-  \fontsize{9pt}{10pt}\selectfont
-\begin{center}
-  \begin{tabular}{| a | d | b | c | e |}
-    \hline
-    {\bf Samp. Rate} & {\bf \# Alert } & {\bf \# Alert camp. adatt. } & {\bf \% Alert tot} & {\bf \% Miglioramento} \\ \hline
-    1 & 7,160,481 & - & - & -\\ \hline
-    4 & 4,983 & 87,875 & 1.22\% & +1,000.4\%   \\ \hline
-    100 & 65 & 185 & 0.0002\% & +284\% \\ \hline
-  \end{tabular}
-\end{center}
-  \caption{Campionamento adattivo}\label{ictf:adapt-table}
-\end{table}
-\endgroup
-
-\section{Implicazioni matematiche di sFlow + Suricata IDS}
-
-Il rilevamento di un attacco utilizzando sFlow dipende dalla probabilit\`a
-di scegliere come pacchetto da campionare proprio il pacchetto contenente
-l'attacco tra tutti quelli passanti nella rete.
-
-Considerando il comportamento di sFlow, ovvero quello di suddividere il traffico
-in windows di dimensione {\it s} e di campionare un pacchetto ogni {\it s} possiamo
-approssimare la rilevazione del pacchetto usando una distribuzione binomiale.
-
-Non conoscendo tuttavia il contenuto della window si utilizza il criterio di Laplace
-e si suppone che la window analizzata sia composta da met\`a pacchetti malevoli e
-met\`a pacchetti leciti.
-
-Possiamo dire che, dato che sFlow sceglie in maniera random il pacchetto da campionare
-all'interno della window essi siano tutti equiprobabili. Inoltre poich\`e gli Agent
-opera in maniera indipendente dagli altri le scelte di campionamento, le combinazioni di
-di tutte le possibili scelte fatte da tutti gli Agent nella rete possono ritenersi
-equiprobabili. Da cui il rilevamento pu\`o essere assimilato da {\it n} estrazioni con reinbussulamento di una biglia da un urna
-di composizione sconosciuta contenente {\it s} palline.
-
-La probabilit\`a di rilevamento dell'attacco \`e :
-
-\begin{equation}
-  P(S{_n})= \binom{s}{n} p (1 - p)
-\end{equation}
-
-con $p=\frac{1}{2}$ e $n=$ numero di Agent attraversati dal pacchetto malevolo.
-
-Si evincono due particolari importanti, in primo luogo l'aumento del numero di agent,
-cos\`i come la diminuzione del sampling rate porta ad un maggior tasso di rilevamento, come si era
-evinto dai test portati avanti fino ad ora. E che le signature che utilizzano
-threshold, come quelle per gli attacchi DDoS nel dataset CTU-13, possono essere attivate
-per via di una sfortunata serie di scelte di campionamento per ogni Agent. Potrebbe capitare infatti
-che tutti i Agent campionino lo stesso pacchetto, facendo scattare l'allarme di un
-DDoS quando invece questo non era in atto. Occorre prestare attenzione quindi al threshold presente
-nelle regole di suricata e adattarlo in maniera che ci\`o non possa accadere.
-Occorre quindi rispettare sempre la seguente equazione:
-\begin{equation}
-    threshold\ di\ rilevamento < t
-\end{equation}
-con $t=$ massimo livello dello spanning tree della rete \footnote{assumendo che sFlow sia abilitato in ogni componente
-di rete}.
-
-Ovviamente come si pu\`o intuire questo diventa pi\`u probabile nel caso in cui il sampling
-rate sia basso
-
-Lo studio di questi aspetti, ovvero di come l'IDS sFlow + Suricata si comporti nel caso
-di pi\`u Agent viene lasciato come possibile sviluppo futuro.
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%non numera l'ultima pagina sinistra
-\clearpage{\pagestyle{empty}\cleardoublepage}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%per fare le conclusioni
-\chapter*{Conclusioni}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%imposta l'intestazione di pagina
-\rhead[\fancyplain{}{\bfseries
-CONCLUSIONI}]{\fancyplain{}{\bfseries\thepage}}
-\lhead[\fancyplain{}{\bfseries\thepage}]{\fancyplain{}{\bfseries
-CONCLUSIONI}}
-
-Sebbene i risultati possano sembrare davvero poco soddisfacenti \`e da tenere conto
-che essi si sono svolti in condizioni di notevole stress per l'IDS, ovvero come nel
-caso del dataset ICtF2010 la maggior parte del traffico, soprattutto quello nella prima parte della
-competizione, era composto da traffico malevolo, cosa assai improbabile in una rete normale.
-Inoltre nel caso del dataset CTU-13 il bitrate, come descritto nel {\verb README }
-del dataset, era impostato a 40 Kbps davvero improbabile per un attacco DDos, che solitamente
-si aggira (almeno al periodo di stesura di questo elaborato) a circa 200 Gbps. Per cui
-possiamo dire che i risultati non sono in contraddizione con l'esperienza, infatti
-se si \`e stati in grado di rilevare un DDos campionando 1 pacchetto ogni 4 con un
-bitrate di 40 Kbps con un bitrate di 200 Gbps serve campionare appena un pacchetto ogni
-2,000,000 che \`e ben al di sopra di un setup standard di sFlow, solitamente 1000.
-
-Inoltre non si \`e preso in considerazione in questo elaborato l'opportunit\`a di avere
-pi\`u Agents. Infatti, se il pacchetto malevolo dovesse passare per pi\`u di un Agent
-la probabilit\`a di essere campionato e intercettato indubbiamente crescerebbe di molto.
-La probabilit\`a di rilevare un pacchetto malevolo usando sFlow infatti \`e una
-distribuzione binomiale
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%aggiunge la voce Conclusioni
-                                        %   nell'indice
-\addcontentsline{toc}{chapter}{Conclusioni}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%imposta l'intestazione di pagina
-\renewcommand{\chaptermark}[1]{\markright{\thechapter \ #1}{}}
-\lhead[\fancyplain{}{\bfseries\thepage}]{\fancyplain{}{\bfseries\rightmark}}
-\appendix                               %imposta le appendici
-\chapter{Prima Appendice}               %crea l'appendice
-Regole utilizzate per il dataset DARPA:
-\begin{verbatim}
-alert tcp $HOME_NET any -> $HOME_NET 80 (msg:"HTTP Scan attempted";
-  flow:to_server; fragoffset:0; fragbits:!D; ack:0; flags:S; window:2048;
-  classtype: network-scan; priority:3; sid:1000003;)
-alert icmp $EXTERNAL_NET any -> $HOME_NET any (msg:"ICMP Scan Echo"; itype:8;
-  icode:0; fragbits:!D; content:"|00 00 00 00 00 00 00 00 00 00|"; depth:10;
-  icmp_id:0; icmp_seq:0; ttl:254; classtype:attempted-recon; priority:3;
-  sid:1000026;)
-alert tcp $EXTERNAL_NET any -> $HOME_NET 79 (msg: "Figer 0 query attempted";
-  content:"0"; flow: to_server,established; fragoffset:0; fragbits:D; flags:A;
-  classtype: attempted-recon; priority:3; sid:1000036;)
-alert tcp $EXTERNAL_NET any -> $HOME_NET 53 (msg: "DNS request name";
-  flow:to_server,established; content:"|00 fc 00 01|"; nocase; depth: 4;
-  metadata:service dns; classtype:   attempted-recon; priority:3;
-  sid:1000034;)
-alert tcp $EXTERNAL_NET any -> $HOME_NET 21 (msg: "FTP Request connection";
-  flow:to_server,established;   content:"quit"; flags:AP; fragbits:D;
-  metadata:service ftp;   classtype:tcp-connection; priority:4;
-  sid:1000039;)
-alert tcp $EXTERNAL_NET any -> $HOME_NET 25  (msg: "SMTP Scan attempted OS";
-  flow:to_server; ack:0;  flags:S; fragoffset:0; window:4660; ttl:254;
-  metadata:service  smtp; classtype:attempted-recon; priority:3;
-  sid:1000040;)
-alert tcp $EXTERNAL_NET any -> $HOME_NET 25  (msg: " SMTP Scan attempted OS ";
-  flow:to_server; ack:0;  flags:AS; fragoffset:0; window:4660; ttl:254;
-  metadata:service  smtp; classtype:attempted-recon; priority:3;
-  sid:1000041;)
-alert tcp $EXTERNAL_NET any -> $HOME_NET 25  (msg: " SMTP Scan attempted OS ";
-  flow:to_server; ack:0;  flags:F; fragoffset:0; window:4660; ttl:254;
-  metadata:service  smtp; classtype:attempted-recon; priority:3;
-  sid:1000042;)
-alert tcp $EXTERNAL_NET any -> $HOME_NET 25  (msg: " SMTP Scan attempted OS ";
-  flow:to_server; ack:0;  flags:AF; fragoffset:0; window:4660; ttl:254;
-  metadata:service  smtp; classtype:attempted-recon; priority:3;
-  sid:1000043;)
-alert tcp $EXTERNAL_NET any -> $HOME_NET 25  (msg: " SMTP Scan attempted OS ";
- flow:to_server; ack:0;  flags:SF; fragoffset:0; window:4660; ttl:254;
- metadata:service  smtp; classtype:attempted-recon; priority:3; sid:1000044;)
-alert tcp $EXTERNAL_NET any -> $HOME_NET 25  (msg: " SMTP Scan attempted OS ";
-  flow:to_server; ack:0;  flags:P; fragoffset:0; window:4660; ttl:254;
-  metadata:service  smtp; classtype:attempted-recon; priority:3; sid:1000045;)
-alert tcp $EXTERNAL_NET any -> $HOME_NET 25  (msg: " SMTP Scan attempted OS";
-  flow:to_server; ack:0;  flags:CES; fragoffset:0; window:4660; ttl:254;
-  metadata:service  smtp; classtype:attempted-recon; priority:3; sid:1000046;)
-\end{verbatim}\label{app:regole-DARPA}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%imposta l'intestazione di pagina
 \rhead[\fancyplain{}{\bfseries \thechapter \:Prima Appendice}]
 {\fancyplain{}{\bfseries\thepage}}
